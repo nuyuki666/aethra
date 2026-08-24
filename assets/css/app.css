@@ -1278,3 +1278,45 @@ select.input optgroup {
 
 /* Таблицы админки: не сжимаемся в кашу, лучше скролл */
 .tbl { min-width: 680px; }
+
+/* --------------------------------------------------------------------------
+   Segmented control — выбор тарифа ключа
+   -------------------------------------------------------------------------- */
+.seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-2);
+}
+.seg__btn {
+  display: grid;
+  gap: 2px;
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--w-04);
+  text-align: left;
+  font-weight: 600;
+  font-size: var(--fs-sm);
+  transition: border-color var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out);
+}
+.seg__btn small {
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+.seg__btn:hover { border-color: var(--w-18); background: var(--w-06); }
+.seg__btn.is-on {
+  border-color: rgba(138, 171, 255, 0.5);
+  background: var(--accent-soft);
+}
+.seg__btn.is-on small { color: var(--a-400); }
+@media (max-width: 560px) {
+  .seg { grid-template-columns: 1fr; }
+}
+
+/* Страницы входа/профиля: прячем контент, пока проверяется сессия — нет мигания */
+body[data-auth-page] main { visibility: hidden; }
+body[data-auth-page].auth-ready main { visibility: visible; }

@@ -373,7 +373,7 @@
               <dl class="kv">
                 <div class="kv__row"><dt>Текущий HWID</dt><dd>—</dd></div>
                 <div class="kv__row"><dt>Сбросов доступно</dt><dd>0 / 0</dd></div>
-                <div class="kv__row" style="border-bottom:0"><dt>Последний вход</dt><dd>26.07.2026 09:31</dd></div>
+                <div class="kv__row" style="border-bottom:0"><dt>Последний вход</dt><dd data-kv="last">—</dd></div>
               </dl>
               <div style="display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-5)">
                 <button class="btn btn--ghost btn--sm" type="button" data-copy="25">
@@ -381,6 +381,20 @@
                 </button>
                 <button class="btn btn--danger btn--sm" type="button" aria-disabled="true">Сбросить HWID</button>
               </div>
+            </article>
+
+            <article class="card">
+              <div class="panel-head">
+                <h3>Деавторизация</h3>
+                <span class="eyebrow">Это устройство</span>
+              </div>
+              <p class="text-muted" style="font-size:var(--fs-sm)">
+                Выйти из аккаунта и стереть «Запомнить меня» на этом устройстве.
+                Автоматический вход при следующем посещении отключится — понадобится пароль.
+              </p>
+              <button class="btn btn--danger" type="button" data-deauth style="margin-top:var(--sp-5)">
+                <svg class="i"><use href="#i-logout"></use></svg> Деавторизоваться
+              </button>
             </article>
           </div>
         </section>

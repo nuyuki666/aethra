@@ -174,13 +174,13 @@
             </div>
 
             <form class="form-row" data-keys-generate>
-              <div class="field">
-                <label class="field__label" for="keyPlan">Тариф</label>
-                <select class="input" id="keyPlan">
-                  <option value="week">Неделя · 7 дней</option>
-                  <option value="month" selected>Месяц · 30 дней</option>
-                  <option value="life">Навсегда · бессрочно</option>
-                </select>
+              <div class="field" style="flex:1 1 100%">
+                <label class="field__label" id="planLabel">Тариф</label>
+                <div class="seg" role="radiogroup" aria-labelledby="planLabel" data-plan-seg>
+                  <button type="button" class="seg__btn" data-value="week" aria-pressed="false">Неделя<small>7 дней</small></button>
+                  <button type="button" class="seg__btn is-on" data-value="month" aria-pressed="true">Месяц<small>30 дней</small></button>
+                  <button type="button" class="seg__btn" data-value="life" aria-pressed="false">Навсегда<small>бессрочно</small></button>
+                </div>
               </div>
               <div class="field">
                 <label class="field__label" for="keyCount">Количество</label>

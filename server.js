@@ -375,7 +375,9 @@ async function main() {
   app.use(express.static(__dirname, {
     extensions: ["html"],
     setHeaders(res, filePath) {
-      if (/\.html?$/i.test(filePath)) res.setHeader("Cache-Control", "no-cache");
+      if (/\.html?$/i.test(filePath) || /\.(js|css)$/i.test(filePath)) {
+        res.setHeader("Cache-Control", "no-cache");
+      }
     }
   }));
 

@@ -244,11 +244,25 @@
   }
 
   function bindKeys() {
+    var seg = $("[data-plan-seg]");
+    if (seg) {
+      seg.addEventListener("click", function (e) {
+        var btn = e.target.closest(".seg__btn");
+        if (!btn) return;
+        $$(".seg__btn", seg).forEach(function (b) {
+          var on = b === btn;
+          b.classList.toggle("is-on", on);
+          b.setAttribute("aria-pressed", String(on));
+        });
+      });
+    }
+
     var form = $('form[data-keys-generate]');
     if (form) {
       form.addEventListener("submit", async function (e) {
         e.preventDefault();
-        var plan = $("#keyPlan").value;
+        var planBtn = $(".seg__btn.is-on", seg);
+        var plan = planBtn ? planBtn.dataset.value : "month";
         var count = parseInt($("#keyCount").value, 10) || 1;
         count = Math.max(1, Math.min(count, 50));
 

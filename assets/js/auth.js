@@ -176,13 +176,54 @@
 
       if (page === "login") {
         var params = new URLSearchParams(location.search);
-        if (params.get("msg") === "banned" && window.toast) {
+        var msg = params.get("msg");
+        if (msg === "banned" && window.toast) {
           toast("Аккаунт заблокирован администратором", "bad");
+        } else if (msg === "deauth" && window.toast) {
+          toast("Вы деавторизованы. Войдите заново.");
         }
       }
       return page === "profile" ? me0 : null;
     }
     return null;
+  }
+
+  /* ------------------------------------------------- nav: вход сохранён */
+  function updateNavAuth(me) {
+    if (!me) return;
+    var actions = $(".nav__actions");
+    if (actions && ($('a[href="login.html"]', actions) || $('a[href="register.html"]', actions))) {
+      var toggle = $(".nav__toggle", actions);
+      actions.innerHTML =
+        '<a class="btn btn--ghost btn--sm" href="profile.html"><svg class="i"><use href="#i-user"></use></svg>' +
+        esc(me.login) + "</a>" +
+        '<button class="btn btn--quiet btn--sm" type="button" data-nav-logout><svg class="i"><use href="#i-logout"></use></svg>Выйти</button>' +
+        (toggle ? toggle.outerHTML : "");
+    }
+    var sheet = $(".nav__sheet");
+    var sheetActions = sheet && $(".nav__sheet-actions", sheet);
+    if (sheetActions && ($('a[href="login.html"]', sheet) || $('a[href="register.html"]', sheet))) {
+      sheetActions.innerHTML =
+        '<a class="btn btn--ghost btn--sm" href="profile.html">Профиль</a>' +
+        '<button class="btn btn--primary btn--sm" type="button" data-nav-logout>Выйти</button>';
+    }
+    $$("[data-nav-logout]").forEach(function (btn) {
+      btn.addEventListener("click", async function () {
+        await S.logout();
+        location.replace("login.html");
+      });
+    });
+  }
+
+  /* ------------------------------------------------------- деавторизация */
+  function bindDeauth() {
+    $$("[data-deauth]").forEach(function (btn) {
+      btn.addEventListener("click", async function () {
+        btn.disabled = true;
+        await S.logout();
+        location.replace("login.html?msg=deauth");
+      });
+    });
   }
 
   /* ----------------------------------------------------------------- forms */
@@ -304,9 +345,31 @@
     });
   }
 
+  function esc(v) {
+    return String(v == null ? "" : v).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
   async function boot() {
     if (!S) return;
-    injectAdminLink(await handleGuards());
+    var page = document.body.dataset.authPage;
+    var me;
+
+    if (page) {
+      me = await handleGuards();
+    } else {
+      me = await S.current();
+      if (me && me.banned) {
+        await S.logout();
+        me = null;
+      }
+    }
+
+    document.body.classList.add("auth-ready");
+    injectAdminLink(me);
+    updateNavAuth(me);
+    bindDeauth();
     initLoginForm();
     initRegisterForm();
     initKeyForm();
