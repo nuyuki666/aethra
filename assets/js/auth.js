@@ -9,7 +9,8 @@
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
 
   var PAY = {
-    tg: "https://t.me/aethra_support",
+    tg: "https://t.me/aethra_helper",
+    channel: "https://t.me/aethra_cl1ent",
     funpay: "",
     yookassa: "",
     skinback: ""

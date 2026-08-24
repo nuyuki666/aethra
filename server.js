@@ -399,8 +399,11 @@ async function main() {
       }
 
       await store.updateUser(user.login, { lastLogin: Date.now(), lastIp: clientIp(req) });
+      const token = crypto.randomBytes(32).toString("hex");
+      await store.createSession(token, user.login);
       res.json({
         ok: true,
+        token,
         login: user.login,
         avatar: user.avatar || "",
         lifetime: !!user.lifetime,
@@ -419,6 +422,36 @@ async function main() {
     const p = n => (n < 10 ? "0" : "") + n;
     return p(d.getDate()) + "." + p(d.getMonth() + 1) + "." + d.getFullYear();
   }
+
+  app.post("/api/loader/restore", async (req, res) => {
+    try {
+      const token = String((req.body && req.body.token) || "");
+      const hwid = String((req.body && req.body.hwid) || "").trim().slice(0, 80);
+      const user = token ? await store.getUserByToken(token) : null;
+      if (!user) return res.status(401).json({ ok: false, error: "Сессия истекла" });
+      if (user.banned) {
+        return res.status(403).json({ ok: false, error: "Аккаунт заблокирован" });
+      }
+      if (!subActive(user)) return res.status(403).json({ ok: false, error: "Нет активной подписки" });
+      if (user.hwid && user.hwid !== hwid) {
+        return res.status(403).json({ ok: false, hwidMismatch: true, error: "HWID не совпадает" });
+      }
+      if (!user.hwid && hwid) await store.updateUser(user.login, { hwid });
+
+      res.json({
+        ok: true,
+        token,
+        login: user.login,
+        avatar: user.avatar || "",
+        lifetime: !!user.lifetime,
+        subUntil: user.subUntil,
+        till: user.lifetime ? "Lifetime" : S_fmtShort(user.subUntil)
+      });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  });
 
   app.get("/api/loader/info", requireAuth(async (req, res) => {
     const u = req.user;
