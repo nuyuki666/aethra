@@ -129,6 +129,7 @@
 .btn--danger:hover { --_bg: rgba(244, 115, 111, 0.12); --_bd: rgba(244, 115, 111, 0.5); }
 
 .btn--sm { min-height: var(--btn-h-sm); padding-inline: var(--sp-4); font-size: var(--fs-xs); }
+.btn--xs { min-height: 26px; padding-inline: var(--sp-3); font-size: var(--fs-2xs); }
 .btn--block { width: 100%; }
 
 /* --------------------------------------------------------------------------
@@ -1260,8 +1261,9 @@
 .tbl tbody tr:hover { background: var(--w-04); }
 .tbl-actions {
   display: flex;
-  gap: var(--sp-2);
+  gap: var(--sp-1);
   flex-wrap: wrap;
+  max-width: 230px;
 }
 .tbl-actions .btn { flex: none; }
 
@@ -1277,7 +1279,7 @@ select.input optgroup {
 .badge { white-space: nowrap; }
 
 /* Таблицы админки: не сжимаемся в кашу, лучше скролл */
-.tbl { min-width: 680px; }
+.tbl { min-width: 860px; }
 
 /* --------------------------------------------------------------------------
    Segmented control — выбор тарифа ключа

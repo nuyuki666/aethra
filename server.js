@@ -50,6 +50,13 @@ function bad(res, error, extra) {
   return res.status(400).json(Object.assign({ ok: false, error }, extra || {}));
 }
 
+function clientIp(req) {
+  const fwd = String(req.headers["x-forwarded-for"] || "");
+  const first = fwd.split(",")[0].trim();
+  if (first) return first;
+  return req.socket && req.socket.remoteAddress ? req.socket.remoteAddress : "";
+}
+
 async function ensureAdmin(store) {
   let admin = await store.getUserByLogin(ADMIN_LOGIN);
   if (!admin) {
@@ -66,17 +73,8 @@ async function ensureAdmin(store) {
       lastLogin: null
     });
     console.log("[seed] Создан администратор: " + ADMIN_LOGIN);
-  } else {
-    if (admin.role !== "admin") {
-      admin = await store.updateUser(ADMIN_LOGIN, { role: "admin", lifetime: true });
-    }
-    if (process.env.ADMIN_PASS) {
-      const hash = await store.getPasswordHash(ADMIN_LOGIN);
-      if (hash && !verifyPass(process.env.ADMIN_PASS, hash)) {
-        await store.updateUser(ADMIN_LOGIN, { passHash: hashPass(process.env.ADMIN_PASS) });
-        console.log("[seed] Пароль администратора синхронизирован с ADMIN_PASS");
-      }
-    }
+  } else if (admin.role !== "admin") {
+    admin = await store.updateUser(ADMIN_LOGIN, { role: "admin", lifetime: true });
   }
   return admin;
 }
@@ -143,7 +141,8 @@ async function main() {
         lifetime: false,
         subUntil: null,
         regAt: Date.now(),
-        lastLogin: Date.now()
+        lastLogin: Date.now(),
+        lastIp: clientIp(req)
       });
 
       const token = newToken();
@@ -169,7 +168,7 @@ async function main() {
         return res.status(403).json({ ok: false, banned: true, error: "Аккаунт заблокирован администратором" });
       }
 
-      await store.updateUser(user.login, { lastLogin: Date.now() });
+      await store.updateUser(user.login, { lastLogin: Date.now(), lastIp: clientIp(req) });
       const token = newToken();
       await store.createSession(token, user.login);
       res.json({ ok: true, token, user });

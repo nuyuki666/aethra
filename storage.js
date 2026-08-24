@@ -221,6 +221,7 @@ class PgStore {
       text TEXT NOT NULL,
       at BIGINT NOT NULL
     )`);
+    await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_ip TEXT DEFAULT ''");
     return this;
   }
 
@@ -236,6 +237,7 @@ class PgStore {
       subUntil: r.sub_until == null ? null : Number(r.sub_until),
       regAt: Number(r.reg_at),
       lastLogin: r.last_login == null ? null : Number(r.last_login),
+      lastIp: r.last_ip || "",
       history: []
     };
   }
@@ -289,14 +291,15 @@ class PgStore {
   async createUser(f) {
     const res = await this.pool.query(
       `INSERT INTO users
-        (login, email, pass_hash, role, banned, ban_reason, lifetime, sub_until, reg_at, last_login)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+        (login, email, pass_hash, role, banned, ban_reason, lifetime, sub_until, reg_at, last_login, last_ip)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
        RETURNING *`,
       [
         f.login, f.email, f.passHash, f.role || "default",
         !!f.banned, f.banReason || "", !!f.lifetime,
         f.subUntil == null ? null : f.subUntil,
-        f.regAt, f.lastLogin == null ? null : f.lastLogin
+        f.regAt, f.lastLogin == null ? null : f.lastLogin,
+        f.lastIp || ""
       ]
     );
     const rows = await this._userRows("WHERE id = $1", [res.rows[0].id]);
@@ -306,7 +309,8 @@ class PgStore {
   async updateUser(login, patch) {
     const cols = {
       role: "role", banned: "banned", banReason: "ban_reason",
-      lifetime: "lifetime", subUntil: "sub_until", lastLogin: "last_login", email: "email"
+      lifetime: "lifetime", subUntil: "sub_until", lastLogin: "last_login",
+      lastIp: "last_ip", email: "email", passHash: "pass_hash"
     };
     const sets = [];
     const params = [];

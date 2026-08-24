@@ -114,7 +114,7 @@
 
     if (!users.length) {
       body.innerHTML =
-        '<tr><td colspan="7"><div class="empty" style="padding:var(--sp-5) 0">' +
+        '<tr><td colspan="8"><div class="empty" style="padding:var(--sp-5) 0">' +
         '<svg class="i"><use href="#i-inbox"></use></svg><p>Никого не найдено.</p></div></td></tr>';
       return;
     }
@@ -134,13 +134,13 @@
 
       var actions = [];
       if (!isAdmin) {
-        actions.push('<button class="btn btn--ghost btn--sm" data-act="grant" data-login="' + esc(u.login) + '" data-days="7">+7д</button>');
-        actions.push('<button class="btn btn--ghost btn--sm" data-act="grant" data-login="' + esc(u.login) + '" data-days="30">+30д</button>');
-        actions.push('<button class="btn btn--ghost btn--sm" data-act="custom" data-login="' + esc(u.login) + '">Дни…</button>');
-        actions.push('<button class="btn btn--quiet btn--sm" data-act="revoke" data-login="' + esc(u.login) + '">Снять</button>');
+        actions.push('<button class="btn btn--ghost btn--xs" data-act="grant" data-login="' + esc(u.login) + '" data-days="7">+7д</button>');
+        actions.push('<button class="btn btn--ghost btn--xs" data-act="grant" data-login="' + esc(u.login) + '" data-days="30">+30д</button>');
+        actions.push('<button class="btn btn--ghost btn--xs" data-act="custom" data-login="' + esc(u.login) + '">Дни…</button>');
+        actions.push('<button class="btn btn--quiet btn--xs" data-act="revoke" data-login="' + esc(u.login) + '">Снять</button>');
         actions.push(u.banned
-          ? '<button class="btn btn--ghost btn--sm" data-act="unban" data-login="' + esc(u.login) + '">Разбан</button>'
-          : '<button class="btn btn--danger btn--sm" data-act="ban" data-login="' + esc(u.login) + '">Бан</button>');
+          ? '<button class="btn btn--ghost btn--xs" data-act="unban" data-login="' + esc(u.login) + '">Разбан</button>'
+          : '<button class="btn btn--danger btn--xs" data-act="ban" data-login="' + esc(u.login) + '">Бан</button>');
       } else {
         actions.push('<span class="badge badge--ok">Это вы · админ</span>');
       }
@@ -150,6 +150,7 @@
         '<td class="mono text-dim">' + u.id + "</td>" +
         '<td><strong>' + esc(u.login) + "</strong></td>" +
         '<td class="text-muted">' + esc(u.email) + "</td>" +
+        '<td class="mono text-dim">' + esc(u.lastIp || "—") + "</td>" +
         '<td class="mono text-dim">' + S.fmtDateTime(u.regAt) + "</td>" +
         "<td>" + subCell + "</td>" +
         "<td>" + subBadge(u) + "</td>" +

@@ -269,9 +269,21 @@
 
     async function load() {
       var r = await S.chatGet(lastId);
-      if (!r.ok || !r.messages || !r.messages.length) return;
-      if (!cleared) { log.innerHTML = ""; cleared = true; }
-      r.messages.forEach(function (m) {
+      if (!r.ok) return;
+      var msgs = r.messages || [];
+      if (!cleared) {
+        cleared = true;
+        log.innerHTML = "";
+        if (!msgs.length) {
+          var empty = document.createElement("div");
+          empty.className = "chat__msg text-dim";
+          empty.style.fontSize = "var(--fs-sm)";
+          empty.textContent = "Сообщений пока нет — напишите первым!";
+          log.appendChild(empty);
+          return;
+        }
+      }
+      msgs.forEach(function (m) {
         lastId = Math.max(lastId, m.id);
         log.appendChild(render(m));
       });
