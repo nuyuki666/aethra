@@ -8,6 +8,23 @@
   var $ = function (sel, root) { return (root || document).querySelector(sel); };
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
 
+  var PAY = {
+    tg: "https://t.me/aethra_support",
+    funpay: "",
+    yookassa: "",
+    skinback: ""
+  };
+  var PLAN_INFO = {
+    week: { name: "Неделя", price: "249 ₽", term: "7 дней" },
+    month: { name: "Месяц", price: "699 ₽", term: "30 дней" },
+    life: { name: "Навсегда", price: "1 200 ₽", term: "бессрочно" }
+  };
+  var METHODS = [
+    { id: "funpay", name: "FunPay", desc: "Карта · СБП · баланс площадки", link: PAY.funpay },
+    { id: "yookassa", name: "ЮKassa", desc: "МИР · Visa · Mastercard · СБП", link: PAY.yookassa },
+    { id: "skinback", name: "SkinBack", desc: "Оплата скинами из Steam", link: PAY.skinback }
+  ];
+
   var RULES = {
     login: function (v) {
       if (v.length < 3) return "Минимум 3 символа";
@@ -309,6 +326,126 @@
     setInterval(load, 4000);
   }
 
+  /* ------------------------------------------------------- живой счётчик */
+  function initLivePlayers() {
+    var el = $("[data-live-players]");
+    if (!el) return;
+    async function tick() {
+      try {
+        var r = await fetch("/api/public-stats");
+        var d = await r.json();
+        if (d && typeof d.players === "number") el.textContent = d.players;
+      } catch (e) {}
+    }
+    tick();
+    setInterval(tick, 60000);
+  }
+
+  /* ------------------------------------------------------ модалка покупки */
+  function ensureModal() {
+    var m = $("[data-buy-modal]");
+    if (m) return m;
+    m = document.createElement("div");
+    m.className = "modal";
+    m.hidden = true;
+    m.setAttribute("data-buy-modal", "");
+    m.innerHTML =
+      '<div class="modal__backdrop" data-modal-close></div>' +
+      '<div class="modal__card" role="dialog" aria-modal="true" aria-label="Покупка подписки">' +
+      '<button class="btn btn--quiet btn--sm modal__x" type="button" data-modal-close aria-label="Закрыть">' +
+      '<svg class="i"><use href="#i-close"></use></svg></button>' +
+      '<div data-modal-body></div></div>';
+    document.body.appendChild(m);
+    m.addEventListener("click", function (e) {
+      if (e.target.closest("[data-modal-close]")) closeModal();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !m.hidden) closeModal();
+    });
+    return m;
+  }
+
+  function closeModal() {
+    var m = $("[data-buy-modal]");
+    if (m) m.hidden = true;
+  }
+
+  function orderCode() {
+    var abc = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+    var s = "";
+    for (var i = 0; i < 6; i++) s += abc[Math.floor(Math.random() * abc.length)];
+    return "AE-" + s;
+  }
+
+  function openBuyModal(planCode) {
+    var info = PLAN_INFO[planCode];
+    if (!info) return;
+    var m = ensureModal();
+    var body = $("[data-modal-body]", m);
+
+    var methods = METHODS.map(function (x, i) {
+      return (
+        '<button class="pay__btn" type="button" data-method="' + i + '">' +
+        '<span class="pay__logo">' + esc(x.name.slice(0, 2).toUpperCase()) + "</span>" +
+        "<span><span class='pay__name'>" + esc(x.name) + "</span>" +
+        "<span class='pay__desc'>" + esc(x.desc) + "</span></span>" +
+        '<svg class="i"><use href="#i-chevron-right"></use></svg></button>'
+      );
+    }).join("");
+
+    body.innerHTML =
+      '<span class="eyebrow">Покупка подписки</span>' +
+      '<h3 style="font-size:var(--fs-xl);margin-top:var(--sp-2)">' + esc(info.name) + " · " + esc(info.price) + "</h3>" +
+      '<p class="text-dim" style="font-size:var(--fs-sm);margin-top:var(--sp-1)">Срок: ' + esc(info.term) + ". Ключ приходит после подтверждения оплаты.</p>" +
+      '<div class="pay">' + methods + "</div>";
+
+    $$("[data-method]", body).forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        showInstructions(info, METHODS[parseInt(btn.dataset.method, 10)]);
+      });
+    });
+
+    m.hidden = false;
+  }
+
+  function showInstructions(info, method) {
+    var m = $("[data-buy-modal]");
+    var body = $("[data-modal-body]", m);
+    var order = orderCode();
+    var link = method.link || PAY.tg;
+
+    body.innerHTML =
+      '<span class="eyebrow">' + esc(method.name) + "</span>" +
+      '<h3 style="font-size:var(--fs-xl);margin-top:var(--sp-2)">' + esc(info.name) + " · " + esc(info.price) + "</h3>" +
+      '<ol class="steps">' +
+      "<li>Оплатите заказ <b class='mono'>" + esc(order) + "</b> через " + esc(method.name) + ".</li>" +
+      "<li>Напишите в поддержку: номер заказа и ваш логин.</li>" +
+      "<li>Получите ключ AETH-XXXX-XXXX и активируйте его во вкладке «Подписка».</li>" +
+      "</ol>" +
+      '<div style="display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-5)">' +
+      '<a class="btn btn--primary" href="' + esc(link) + '" target="_blank" rel="noopener">' +
+      '<svg class="i"><use href="#i-zap"></use></svg> Перейти к оплате</a>' +
+      '<a class="btn btn--ghost" href="' + esc(PAY.tg) + '" target="_blank" rel="noopener">' +
+      '<svg class="i"><use href="#i-send"></use></svg> Поддержка</a>' +
+      "</div>" +
+      '<p class="text-dim" style="font-size:var(--fs-xs);margin-top:var(--sp-4)">Зачисление до 5 минут. Ключ активируется во вкладке «Подписка» — срок пойдёт с момента активации.</p>';
+
+    m.hidden = false;
+  }
+
+  function initBuyButtons(me) {
+    $$("[data-buy]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        if (!me) {
+          toast("Войдите в аккаунт, чтобы купить подписку", "bad");
+          setTimeout(function () { location.href = "login.html"; }, 600);
+          return;
+        }
+        openBuyModal(btn.dataset.buy);
+      });
+    });
+  }
+
   /* ----------------------------------------------------------------- forms */
   function bindLiveValidation(inputs) {
     inputs.forEach(function (input) {
@@ -454,6 +591,8 @@
     updateNavAuth(me);
     bindDeauth();
     initChat(me);
+    initLivePlayers();
+    initBuyButtons(me);
     initLoginForm();
     initRegisterForm();
     initKeyForm();

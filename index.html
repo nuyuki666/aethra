@@ -13,14 +13,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/css/tokens.css?v=8">
-<link rel="stylesheet" href="assets/css/app.css?v=8">
+<link rel="stylesheet" href="assets/css/tokens.css?v=9">
+<link rel="stylesheet" href="assets/css/app.css?v=9">
 
-<script defer src="assets/js/icons.js?v=8"></script>
-<script defer src="assets/js/liquid.js?v=8"></script>
-<script defer src="assets/js/app.js?v=8"></script>
-<script defer src="assets/js/store.js?v=8"></script>
-<script defer src="assets/js/auth.js?v=8"></script>
+<script defer src="assets/js/icons.js?v=9"></script>
+<script defer src="assets/js/liquid.js?v=9"></script>
+<script defer src="assets/js/app.js?v=9"></script>
+<script defer src="assets/js/store.js?v=9"></script>
+<script defer src="assets/js/auth.js?v=9"></script>
 </head>
 <body>
 
@@ -112,7 +112,7 @@
       <dl class="hero__stats" data-reveal>
         <div class="hero__stat">
           <dt>Игроков сейчас</dt>
-          <dd><span data-count="1284">0</span></dd>
+          <dd><span data-count="0" data-live-players>0</span></dd>
         </div>
         <div class="hero__stat">
           <dt>Серверов</dt>
@@ -253,7 +253,7 @@
             <li><svg class="i"><use href="#i-check"></use></svg> Общий чат поддержки</li>
             <li class="is-off"><svg class="i"><use href="#i-close"></use></svg> Приоритетная очередь</li>
           </ul>
-          <a class="btn btn--ghost btn--block plan__cta" href="register.html">Выбрать</a>
+          <button class="btn btn--ghost btn--block plan__cta" type="button" data-buy="week">Выбрать</button>
         </article>
 
         <article class="card plan plan--featured" data-reveal>
@@ -266,19 +266,19 @@
             <li><svg class="i"><use href="#i-check"></use></svg> Приоритетная очередь в поддержке</li>
             <li><svg class="i"><use href="#i-check"></use></svg> Ранний доступ к обновлениям</li>
           </ul>
-          <a class="btn btn--primary btn--block plan__cta" href="register.html">Выбрать</a>
+          <button class="btn btn--primary btn--block plan__cta" type="button" data-buy="month">Выбрать</button>
         </article>
 
         <article class="card plan" data-reveal>
           <h3 class="plan__name">Навсегда</h3>
-          <p class="plan__price">3 490 ₽ <small>/ бессрочно</small></p>
+          <p class="plan__price">1 200 ₽ <small>/ бессрочно</small></p>
           <ul class="plan__list">
             <li><svg class="i"><use href="#i-check"></use></svg> Всё из месячного тарифа</li>
             <li><svg class="i"><use href="#i-check"></use></svg> Неограниченные сбросы HWID</li>
             <li><svg class="i"><use href="#i-check"></use></svg> Личный канал с поддержкой</li>
             <li><svg class="i"><use href="#i-check"></use></svg> Цена фиксируется навсегда</li>
           </ul>
-          <a class="btn btn--ghost btn--block plan__cta" href="register.html">Выбрать</a>
+          <button class="btn btn--ghost btn--block plan__cta" type="button" data-buy="life">Выбрать</button>
         </article>
       </div>
     </div>

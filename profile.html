@@ -11,14 +11,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/css/tokens.css?v=8">
-<link rel="stylesheet" href="assets/css/app.css?v=8">
+<link rel="stylesheet" href="assets/css/tokens.css?v=9">
+<link rel="stylesheet" href="assets/css/app.css?v=9">
 
-<script defer src="assets/js/icons.js?v=8"></script>
-<script defer src="assets/js/liquid.js?v=8"></script>
-<script defer src="assets/js/app.js?v=8"></script>
-<script defer src="assets/js/store.js?v=8"></script>
-<script defer src="assets/js/auth.js?v=8"></script>
+<script defer src="assets/js/icons.js?v=9"></script>
+<script defer src="assets/js/liquid.js?v=9"></script>
+<script defer src="assets/js/app.js?v=9"></script>
+<script defer src="assets/js/store.js?v=9"></script>
+<script defer src="assets/js/auth.js?v=9"></script>
 </head>
 <body data-auth-page="profile">
 
@@ -216,7 +216,7 @@
                 <li><svg class="i"><use href="#i-check"></use></svg> Полный доступ к сборке</li>
                 <li><svg class="i"><use href="#i-check"></use></svg> Одна привязка HWID</li>
               </ul>
-              <button class="btn btn--ghost btn--block plan__cta" type="button">Оплатить</button>
+              <button class="btn btn--ghost btn--block plan__cta" type="button" data-buy="week">Оплатить</button>
             </article>
 
             <article class="card plan plan--featured">
@@ -227,17 +227,17 @@
                 <li><svg class="i"><use href="#i-check"></use></svg> Два сброса HWID</li>
                 <li><svg class="i"><use href="#i-check"></use></svg> Приоритетная поддержка</li>
               </ul>
-              <button class="btn btn--primary btn--block plan__cta" type="button">Оплатить</button>
+              <button class="btn btn--primary btn--block plan__cta" type="button" data-buy="month">Оплатить</button>
             </article>
 
             <article class="card plan">
               <h3 class="plan__name">Навсегда</h3>
-              <p class="plan__price">3 490 ₽ <small>/ бессрочно</small></p>
+              <p class="plan__price">1 200 ₽ <small>/ бессрочно</small></p>
               <ul class="plan__list">
                 <li><svg class="i"><use href="#i-check"></use></svg> Без ограничений по HWID</li>
                 <li><svg class="i"><use href="#i-check"></use></svg> Личный канал поддержки</li>
               </ul>
-              <button class="btn btn--ghost btn--block plan__cta" type="button">Оплатить</button>
+              <button class="btn btn--ghost btn--block plan__cta" type="button" data-buy="life">Оплатить</button>
             </article>
           </div>
 
@@ -247,13 +247,13 @@
               <span class="eyebrow">Комиссия включена</span>
             </div>
             <dl class="kv">
-              <div class="kv__row"><dt>Банковская карта</dt><dd>МИР · Visa · Mastercard</dd></div>
-              <div class="kv__row"><dt>СБП</dt><dd>По номеру телефона</dd></div>
-              <div class="kv__row"><dt>Криптовалюта</dt><dd>USDT (TRC-20)</dd></div>
+              <div class="kv__row"><dt>FunPay</dt><dd>Карта · СБП · баланс площадки</dd></div>
+              <div class="kv__row"><dt>ЮKassa</dt><dd>МИР · Visa · Mastercard · СБП</dd></div>
+              <div class="kv__row"><dt>SkinBack</dt><dd>Оплата скинами из Steam</dd></div>
               <div class="kv__row"><dt>Зачисление</dt><dd>до 5 минут</dd></div>
             </dl>
             <p class="text-dim" style="font-size:var(--fs-xs);margin-top:var(--sp-4)">
-              Платёж обрабатывается провайдером. Мы не получаем и не храним реквизиты вашей карты.
+              После оплаты вы получаете ключ AETH-XXXX-XXXX — активируйте его на вкладке «Подписка».
             </p>
           </article>
         </section>

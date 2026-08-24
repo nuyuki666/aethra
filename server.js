@@ -243,6 +243,18 @@ async function main() {
     }
   }));
 
+  /* --------------------------------------------------------- public stats */
+  app.get("/api/public-stats", async (req, res) => {
+    try {
+      const users = await store.getAllUsers();
+      const players = users.filter(u => u.role !== "admin" && !u.banned && subActive(u)).length;
+      res.json({ ok: true, players });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, players: 0 });
+    }
+  });
+
   /* ------------------------------------------------------------------ chat */
   app.get("/api/chat", async (req, res) => {
     try {

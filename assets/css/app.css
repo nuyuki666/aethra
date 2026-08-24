@@ -1322,3 +1322,107 @@ select.input optgroup {
 /* Страницы входа/профиля: прячем контент, пока проверяется сессия — нет мигания */
 body[data-auth-page] main { visibility: hidden; }
 body[data-auth-page].auth-ready main { visibility: visible; }
+
+/* Панель навигации: тоже ждём проверку сессии — «Войти» не промелькивает */
+.nav__actions { visibility: hidden; }
+body.auth-ready .nav__actions { visibility: visible; }
+
+/* --------------------------------------------------------------------------
+   Модалка покупки подписки
+   -------------------------------------------------------------------------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: grid;
+  place-items: center;
+  padding: var(--sp-4);
+}
+.modal[hidden] { display: none; }
+.modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 6, 8, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.modal__card {
+  position: relative;
+  width: min(520px, 100%);
+  max-height: 86dvh;
+  overflow: auto;
+  padding: var(--card-pad);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  background: var(--bg-solid);
+  box-shadow: var(--sh-lg);
+  animation: toast-in var(--dur-slow) var(--ease-out) both;
+}
+.modal__x {
+  position: absolute;
+  top: var(--sp-3);
+  right: var(--sp-3);
+}
+
+.pay { display: grid; gap: var(--sp-2); margin-top: var(--sp-4); }
+.pay__btn {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--w-04);
+  text-align: left;
+  transition: border-color var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out);
+}
+.pay__btn:hover { border-color: var(--w-18); background: var(--w-06); }
+.pay__btn > svg { margin-left: auto; color: var(--fg-faint); }
+.pay__logo {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--w-06);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+.pay__name { display: block; font-weight: 600; font-size: var(--fs-sm); }
+.pay__desc { display: block; font-size: var(--fs-xs); color: var(--fg-dim); }
+
+.steps {
+  margin: var(--sp-4) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--sp-3);
+  counter-reset: step;
+}
+.steps li {
+  position: relative;
+  padding-left: calc(var(--sp-6) + var(--sp-2));
+  font-size: var(--fs-sm);
+  color: var(--fg-muted);
+  counter-increment: step;
+}
+.steps li::before {
+  content: counter(step, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 2px;
+  display: grid;
+  place-items: center;
+  width: var(--sp-6);
+  height: var(--sp-6);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-pill);
+  background: var(--w-04);
+  font-family: var(--font-mono);
+  font-size: var(--fs-2xs);
+  color: var(--a-400);
+}
