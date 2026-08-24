@@ -84,8 +84,8 @@
     fmtShort: fmtShort,
     hasToken: getToken,
 
-    register: async function (login, email, pass) {
-      var r = await api("/register", { login: login, email: email, password: pass });
+    register: async function (login, email, pass, turnstile) {
+      var r = await api("/register", { login: login, email: email, password: pass, turnstile: turnstile || "" });
       if (r.ok && r.token) setToken(r.token, true);
       return r;
     },
@@ -121,6 +121,10 @@
 
     changePassword: function (currentPassword, newPassword) {
       return api("/password", { currentPassword: currentPassword, newPassword: newPassword });
+    },
+
+    setAvatar: function (dataUrl) {
+      return api("/avatar", { dataUrl: dataUrl });
     },
 
     grant: async function (login, days) {

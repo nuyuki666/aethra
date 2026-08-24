@@ -1436,3 +1436,12 @@ body.auth-ready .nav__actions { visibility: visible; }
   font-size: var(--fs-2xs);
   color: var(--a-400);
 }
+
+/* QR-код 2FA на белой подложке, чтобы читался сканером */
+.qr-box {
+  width: max-content;
+  margin: var(--sp-4) auto 0;
+  padding: 10px;
+  background: #fff;
+  border-radius: var(--r-md);
+}

@@ -39,10 +39,9 @@ class FileStore {
   hist(login) {
     return this.data.history[login] || [];
   }
-
   pub(u) {
     if (!u) return null;
-    const { passHash, ...rest } = u;
+    const { passHash, totpSecret, ...rest } = u;
     rest.history = this.hist(rest.login).slice(0, HISTORY_LIMIT).map(h => ({ at: h.at, label: h.label }));
     return rest;
   }
@@ -222,6 +221,9 @@ class PgStore {
       at BIGINT NOT NULL
     )`);
     await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_ip TEXT DEFAULT ''");
+    await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT DEFAULT ''");
+    await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_secret TEXT DEFAULT ''");
+    await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_enabled BOOLEAN DEFAULT FALSE");
     return this;
   }
 
@@ -238,6 +240,8 @@ class PgStore {
       regAt: Number(r.reg_at),
       lastLogin: r.last_login == null ? null : Number(r.last_login),
       lastIp: r.last_ip || "",
+      avatar: r.avatar || "",
+      totpEnabled: !!r.totp_enabled,
       history: []
     };
   }
@@ -310,7 +314,8 @@ class PgStore {
     const cols = {
       role: "role", banned: "banned", banReason: "ban_reason",
       lifetime: "lifetime", subUntil: "sub_until", lastLogin: "last_login",
-      lastIp: "last_ip", email: "email", passHash: "pass_hash"
+      lastIp: "last_ip", email: "email", passHash: "pass_hash",
+      avatar: "avatar", totpSecret: "totp_secret", totpEnabled: "totp_enabled"
     };
     const sets = [];
     const params = [];

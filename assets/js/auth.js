@@ -106,7 +106,13 @@
   }
 
   function hydrateProfile(me) {
-    $$("[data-user-avatar]").forEach(function (el) { el.textContent = me.login.slice(0, 2).toUpperCase(); });
+    $$("[data-user-avatar]").forEach(function (el) {
+      if (me.avatar) {
+        el.innerHTML = '<img src="' + me.avatar + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+      } else {
+        el.textContent = me.login.slice(0, 2).toUpperCase();
+      }
+    });
     $$("[data-user-name]").forEach(function (el) { el.textContent = me.login; });
     $$("[data-user-meta]").forEach(function (el) {
       el.textContent = "Роль: " + (me.role === "admin" ? "Admin" : "Default") + " · ID " + me.id;
@@ -450,6 +456,86 @@
     });
   }
 
+  /* ------------------------------------------------------------ аватарка */
+  function initAvatar() {
+    var btn = $("[data-avatar-btn]");
+    var input = $("[data-avatar-input]");
+    if (!btn || !input) return;
+
+    btn.addEventListener("click", function () { input.click(); });
+
+    input.addEventListener("change", async function () {
+      var file = input.files && input.files[0];
+      input.value = "";
+      if (!file) return;
+      if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) { toast("Только PNG, JPG или WebP", "bad"); return; }
+      if (file.size > 5 * 1024 * 1024) { toast("Файл больше 5 МБ", "bad"); return; }
+
+      var dataUrl = await new Promise(function (res) {
+        var fr = new FileReader();
+        fr.onload = function () { res(fr.result); };
+        fr.readAsDataURL(file);
+      });
+      var img = await new Promise(function (res) {
+        var i = new Image();
+        i.onload = function () { res(i); };
+        i.src = dataUrl;
+      });
+
+      var size = 128;
+      var canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      var ctx = canvas.getContext("2d");
+      var side = Math.min(img.width, img.height);
+      ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size);
+      var out = canvas.toDataURL("image/jpeg", 0.85);
+
+      btn.disabled = true;
+      var r = await S.setAvatar(out);
+      btn.disabled = false;
+      if (!r.ok) { toast(r.error || "Не удалось загрузить аватарку", "bad"); return; }
+      toast("Аватарка обновлена");
+      hydrateProfile(await S.current());
+    });
+  }
+
+  /* ------------------------------------------------- Cloudflare Turnstile */
+  var tsToken = "";
+  var tsWidget = null;
+
+  function initTurnstile() {
+    var form = $('form[data-auth="register"]');
+    if (!form) return;
+
+    var wrap = document.createElement("div");
+    wrap.className = "field";
+    wrap.hidden = true;
+    wrap.innerHTML =
+      '<label class="field__label">Подтвердите, что вы не робот</label>' +
+      '<div data-turnstile></div>';
+    var submitBtn = $('button[type="submit"]', form);
+    submitBtn.parentNode.insertBefore(wrap, submitBtn);
+
+    fetch("/api/config").then(function (r) { return r.json(); }).then(function (cfg) {
+      if (!cfg.ok || !cfg.turnstileSiteKey) return;
+      var s = document.createElement("script");
+      s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      s.async = true;
+      s.onload = function () {
+        try {
+          tsWidget = window.turnstile.render($("[data-turnstile]", wrap), {
+            sitekey: cfg.turnstileSiteKey,
+            callback: function (t) { tsToken = t; },
+            "expired-callback": function () { tsToken = ""; }
+          });
+          wrap.hidden = false;
+        } catch (e) {}
+      };
+      document.head.appendChild(s);
+    }).catch(function () {});
+  }
+
   /* ----------------------------------------------------------------- forms */
   function bindLiveValidation(inputs) {
     inputs.forEach(function (input) {
@@ -469,6 +555,7 @@
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
       if (!inputs.map(validate).every(Boolean)) return;
+
       busy(form, true);
       var remember = !!$('input[name="remember"]', form).checked;
       var res = await S.authenticate($("#loginName").value.trim(), $("#loginPw").value, remember);
@@ -506,11 +593,16 @@
       var res = await S.register(
         $("#regLogin").value.trim(),
         $("#regEmail").value.trim(),
-        $("#regPw").value
+        $("#regPw").value,
+        tsToken
       );
       busy(form, false);
 
       if (!res.ok) {
+        if (res.error.indexOf("Cloudflare") > -1 && tsWidget !== null && window.turnstile) {
+          window.turnstile.reset(tsWidget);
+          tsToken = "";
+        }
         var isLoginErr = res.error.indexOf("логин") > -1;
         var isEmailErr = res.error.indexOf("e-mail") > -1;
         fieldError($("#regLogin"), isLoginErr ? res.error : "");
@@ -595,8 +687,10 @@
     updateNavAuth(me);
     bindDeauth();
     initChat(me);
+    initAvatar();
     initLivePlayers();
     initBuyButtons(me);
+    initTurnstile();
     initLoginForm();
     initRegisterForm();
     initKeyForm();

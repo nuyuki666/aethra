@@ -11,14 +11,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/css/tokens.css?v=11">
-<link rel="stylesheet" href="assets/css/app.css?v=11">
+<link rel="stylesheet" href="assets/css/tokens.css?v=13">
+<link rel="stylesheet" href="assets/css/app.css?v=13">
 
-<script defer src="assets/js/icons.js?v=11"></script>
-<script defer src="assets/js/liquid.js?v=11"></script>
-<script defer src="assets/js/app.js?v=11"></script>
-<script defer src="assets/js/store.js?v=11"></script>
-<script defer src="assets/js/auth.js?v=11"></script>
+<script defer src="assets/js/icons.js?v=13"></script>
+<script defer src="assets/js/liquid.js?v=13"></script>
+<script defer src="assets/js/app.js?v=13"></script>
+<script defer src="assets/js/store.js?v=13"></script>
+<script defer src="assets/js/auth.js?v=13"></script>
 </head>
 <body data-auth-page="profile">
 
@@ -106,7 +106,8 @@
                   <p class="text-dim" style="font-size:var(--fs-sm)" data-user-meta>Роль: Default · ID 25</p>
                 </div>
                 <div style="display:flex;gap:var(--sp-2);flex-wrap:wrap">
-                  <button class="btn btn--ghost btn--sm" type="button">Изменить</button>
+                  <button class="btn btn--ghost btn--sm" type="button" data-avatar-btn>Изменить</button>
+                  <input type="file" accept="image/png,image/jpeg,image/webp" data-avatar-input hidden>
                   <span class="badge badge--warn" data-sub-badge><svg class="i"><use href="#i-warn"></use></svg> Подписка неактивна</span>
                 </div>
             </div>
@@ -351,20 +352,6 @@
           </article>
 
           <div class="activity">
-            <article class="card">
-              <div class="panel-head">
-                <h3>Google Authenticator</h3>
-                <span class="badge">Не подключён</span>
-              </div>
-              <p class="text-muted" style="font-size:var(--fs-sm)">
-                Второй фактор защищает вход и сброс привязки HWID. Понадобится любое TOTP-приложение:
-                Google Authenticator, Aegis или 1Password.
-              </p>
-              <button class="btn btn--ghost" type="button" style="margin-top:var(--sp-5)">
-                <svg class="i"><use href="#i-lock"></use></svg> Подключить
-              </button>
-            </article>
-
             <article class="card">
               <div class="panel-head">
                 <h3>Привязка оборудования</h3>

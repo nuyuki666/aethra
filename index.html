@@ -13,14 +13,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/css/tokens.css?v=11">
-<link rel="stylesheet" href="assets/css/app.css?v=11">
+<link rel="stylesheet" href="assets/css/tokens.css?v=13">
+<link rel="stylesheet" href="assets/css/app.css?v=13">
 
-<script defer src="assets/js/icons.js?v=11"></script>
-<script defer src="assets/js/liquid.js?v=11"></script>
-<script defer src="assets/js/app.js?v=11"></script>
-<script defer src="assets/js/store.js?v=11"></script>
-<script defer src="assets/js/auth.js?v=11"></script>
+<script defer src="assets/js/icons.js?v=13"></script>
+<script defer src="assets/js/liquid.js?v=13"></script>
+<script defer src="assets/js/app.js?v=13"></script>
+<script defer src="assets/js/store.js?v=13"></script>
+<script defer src="assets/js/auth.js?v=13"></script>
 </head>
 <body>
 
@@ -166,14 +166,14 @@
 
         <article class="card card--interactive bento--wide" data-reveal>
           <div class="card__icon"><svg class="i"><use href="#i-shield"></use></svg></div>
-          <h3 class="card__title">Привязка HWID и 2FA</h3>
+          <h3 class="card__title">Привязка HWID</h3>
           <p class="card__text">
             Доступ живёт на вашем железе, а не в пересланном архиве. Сброс привязки —
-            из кабинета, подтверждение — через Google Authenticator.
+            из кабинета в пару кликов, с подтверждением паролем.
           </p>
           <div style="display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-5)">
             <span class="badge badge--ok"><svg class="i"><use href="#i-check"></use></svg> HWID</span>
-            <span class="badge badge--ok"><svg class="i"><use href="#i-check"></use></svg> TOTP</span>
+            <span class="badge badge--ok"><svg class="i"><use href="#i-check"></use></svg> Cloudflare-защита</span>
             <span class="badge"><svg class="i"><use href="#i-clock"></use></svg> Журнал входов</span>
           </div>
         </article>
@@ -318,10 +318,11 @@
           </div>
         </details>
         <details class="faq__item">
-          <summary class="faq__q">Как включить двухфакторную защиту?<svg class="i"><use href="#i-plus"></use></svg></summary>
+          <summary class="faq__q">Как защитить аккаунт от угона?<svg class="i"><use href="#i-plus"></use></svg></summary>
           <div class="faq__a">
-            Профиль → Инструменты → Google Authenticator. Отсканируйте QR-код и подтвердите
-            шестизначный код. После этого вход и сброс HWID требуют подтверждения.
+            Придумайте уникальный пароль и не делитесь им. Все входы с нового IP видны
+            в журнале, а при подозрениях можно мгновенно деавторизовать устройство
+            в профиле → Инструменты.
           </div>
         </details>
       </div>

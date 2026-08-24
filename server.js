@@ -127,6 +127,9 @@ async function main() {
       if (!EMAIL_RE.test(email)) return bad(res, "Введите корректный e-mail");
       if (password.length < 8 || password.length > 128) return bad(res, "Пароль: минимум 8 символов");
 
+      const human = await verifyTurnstile(String((req.body && req.body.turnstile) || ""), clientIp(req));
+      if (!human) return bad(res, "Пройдите проверку Cloudflare");
+
       if (await store.getUserByLoginOrEmail(login)) return bad(res, "Такой логин уже занят");
       if ((await store.getAllUsers()).some(u => u.email.toLowerCase() === email.toLowerCase()))
         return bad(res, "Этот e-mail уже используется");
@@ -254,6 +257,45 @@ async function main() {
       res.status(500).json({ ok: false, players: 0 });
     }
   });
+
+  /* --------------------------------------------------------- turnstile */
+  async function verifyTurnstile(token, ip) {
+    const secret = process.env.TURNSTILE_SECRET;
+    if (!secret) return true;
+    if (!token) return false;
+    try {
+      const r = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ secret, response: token, remoteip: ip || "" })
+      });
+      const d = await r.json();
+      return !!d.success;
+    } catch (e) {
+      console.error("turnstile verify failed:", e);
+      return false;
+    }
+  }
+
+  app.get("/api/config", (req, res) => {
+    res.json({ ok: true, turnstileSiteKey: process.env.TURNSTILE_SITEKEY || "" });
+  });
+
+  /* ----------------------------------------------------- avatar & misc */
+  app.post("/api/avatar", requireAuth(async (req, res) => {
+    try {
+      const dataUrl = String((req.body && req.body.dataUrl) || "");
+      if (!/^data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+/=]+$/.test(dataUrl)) {
+        return bad(res, "Неверный формат изображения");
+      }
+      if (dataUrl.length > 300000) return bad(res, "Картинка слишком большая");
+      await store.updateUser(req.user.login, { avatar: dataUrl });
+      res.json({ ok: true, avatar: dataUrl });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  }));
 
   /* ------------------------------------------------------------------ chat */
   app.get("/api/chat", async (req, res) => {
