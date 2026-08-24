@@ -4,3 +4,4 @@ data/
 *.log
 site-clone/
 .claude/
+peroxidehook-loader-main/
