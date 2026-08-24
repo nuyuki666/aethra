@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aethra — контроль игры без лишнего шума</title>
+<meta name="description" content="Личный кабинет, подписка и загрузка лоадера Aethra в одном защищённом месте. Прозрачная статистика активности, привязка HWID, двухфакторная защита.">
+<meta name="theme-color" content="#08090b">
+<meta property="og:title" content="Aethra — контроль игры без лишнего шума">
+<meta property="og:description" content="Личный кабинет, подписка и загрузка лоадера в одном защищённом месте.">
+<meta property="og:type" content="website">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/app.css">
+
+<script defer src="assets/js/icons.js"></script>
+<script defer src="assets/js/liquid.js"></script>
+<script defer src="assets/js/app.js"></script>
+<script defer src="assets/js/store.js"></script>
+<script defer src="assets/js/auth.js"></script>
+</head>
+<body>
+
+<a class="skip-link" href="#main">Перейти к содержимому</a>
+
+<div class="backdrop" aria-hidden="true">
+  <canvas class="backdrop__canvas"></canvas>
+  <div class="backdrop__fallback"></div>
+</div>
+
+<!-- ============================================================ navigation -->
+<header class="nav">
+  <nav class="nav__inner" aria-label="Основная навигация">
+    <a class="brand" href="index.html">
+      <svg class="i brand__mark" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2.5 2.5 21h19z"/><path d="M8.4 15h7.2"/>
+      </svg>
+      Aethra
+    </a>
+
+    <ul class="nav__links">
+      <span class="nav__pill" aria-hidden="true"></span>
+      <li><a class="nav__link" href="index.html" aria-current="page"><svg class="i"><use href="#i-home"></use></svg>Главная</a></li>
+      <li><a class="nav__link" href="#features"><svg class="i"><use href="#i-layers"></use></svg>Возможности</a></li>
+      <li><a class="nav__link" href="#activity"><svg class="i"><use href="#i-activity"></use></svg>Статистика</a></li>
+      <li><a class="nav__link" href="#pricing"><svg class="i"><use href="#i-card"></use></svg>Тарифы</a></li>
+      <li><a class="nav__link" href="terms.html"><svg class="i"><use href="#i-doc"></use></svg>Условия</a></li>
+    </ul>
+
+    <div class="nav__actions">
+      <a class="btn btn--quiet btn--sm" href="login.html"><svg class="i"><use href="#i-login"></use></svg>Войти</a>
+      <a class="btn btn--primary btn--sm" href="register.html">Регистрация</a>
+      <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navSheet" aria-label="Меню">
+        <svg class="i i--lg"><use href="#i-menu"></use></svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="nav__sheet" id="navSheet" hidden>
+    <a class="nav__sheet-link" href="index.html" aria-current="page"><svg class="i"><use href="#i-home"></use></svg>Главная</a>
+    <a class="nav__sheet-link" href="#features"><svg class="i"><use href="#i-layers"></use></svg>Возможности</a>
+    <a class="nav__sheet-link" href="#activity"><svg class="i"><use href="#i-activity"></use></svg>Статистика</a>
+    <a class="nav__sheet-link" href="#pricing"><svg class="i"><use href="#i-card"></use></svg>Тарифы</a>
+    <a class="nav__sheet-link" href="terms.html"><svg class="i"><use href="#i-doc"></use></svg>Условия</a>
+    <div class="nav__sheet-actions">
+      <a class="btn btn--ghost btn--sm" href="login.html">Войти</a>
+      <a class="btn btn--primary btn--sm" href="register.html">Регистрация</a>
+    </div>
+  </div>
+</header>
+
+<main class="page" id="main">
+
+  <!-- ================================================================ hero -->
+  <section class="hero">
+    <div class="shell">
+      <span class="hero__badge" data-reveal>
+        <span class="pulse"></span> Aethra Legit · сборка 2.4.1
+      </span>
+
+      <h1 class="hero__title" data-reveal>
+        <span class="line">Контроль игры.</span>
+        <span class="line dim">Без лишнего шума.</span>
+      </h1>
+
+      <p class="hero__lede" data-reveal>
+        Личный кабинет, подписка и загрузка лоадера в одном защищённом месте —
+        без форумов, архивов с паролем и переписок в личке.
+      </p>
+
+      <div class="hero__cta" data-reveal>
+        <a class="btn btn--primary" href="register.html">
+          Создать аккаунт <svg class="i"><use href="#i-arrow-right"></use></svg>
+        </a>
+        <a class="btn btn--ghost" href="login.html">Войти в профиль</a>
+      </div>
+
+      <div data-reveal>
+        <div class="social-rail">
+          <a class="social-rail__item" href="#" rel="noopener">
+            <svg class="i i--solid"><use href="#i-discord"></use></svg> Discord
+          </a>
+          <a class="social-rail__item" href="#" rel="noopener">
+            <svg class="i"><use href="#i-telegram"></use></svg> Telegram
+          </a>
+        </div>
+      </div>
+
+      <dl class="hero__stats" data-reveal>
+        <div class="hero__stat">
+          <dt>Игроков сейчас</dt>
+          <dd><span data-count="1284">0</span></dd>
+        </div>
+        <div class="hero__stat">
+          <dt>Серверов</dt>
+          <dd><span data-count="3">0</span></dd>
+        </div>
+        <div class="hero__stat">
+          <dt>Аптайм за 30 дней</dt>
+          <dd><span data-count="99.8" data-decimals="1" data-suffix="%">0</span></dd>
+        </div>
+        <div class="hero__stat">
+          <dt>Средний ответ</dt>
+          <dd><span data-count="6" data-suffix=" мин">0</span></dd>
+        </div>
+      </dl>
+    </div>
+
+    <a class="hero__scroll" href="#features" aria-label="К разделу «Возможности»">
+      Листайте
+      <svg class="i"><use href="#i-arrow-down"></use></svg>
+    </a>
+  </section>
+
+  <!-- ============================================================ features -->
+  <section class="section" id="features">
+    <div class="shell">
+      <div class="section__head" data-reveal>
+        <span class="eyebrow">Возможности</span>
+        <h2 class="section__title">Всё, ради чего вы обычно открываете пять вкладок</h2>
+        <p class="section__lede">
+          Один аккаунт закрывает покупку, доступ, обновления и поддержку. Ничего лишнего
+          на экране — и ничего важного за его пределами.
+        </p>
+      </div>
+
+      <div class="bento" data-reveal-group>
+        <article class="card card--interactive bento--wide" data-reveal>
+          <div class="card__icon"><svg class="i"><use href="#i-download"></use></svg></div>
+          <h3 class="card__title">Лоадер в один клик</h3>
+          <p class="card__text">
+            Актуальная сборка всегда на странице профиля. Версия, хеш и дата публикации
+            видны до скачивания — вы точно знаете, что запускаете.
+          </p>
+          <div class="kv" style="margin-top:var(--sp-5)">
+            <div class="kv__row"><dt>Версия</dt><dd>2.4.1</dd></div>
+            <div class="kv__row" style="border-bottom:0"><dt>SHA-256</dt><dd>a91f…7c2d</dd></div>
+          </div>
+        </article>
+
+        <article class="card card--interactive bento--wide" data-reveal>
+          <div class="card__icon"><svg class="i"><use href="#i-shield"></use></svg></div>
+          <h3 class="card__title">Привязка HWID и 2FA</h3>
+          <p class="card__text">
+            Доступ живёт на вашем железе, а не в пересланном архиве. Сброс привязки —
+            из кабинета, подтверждение — через Google Authenticator.
+          </p>
+          <div style="display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-5)">
+            <span class="badge badge--ok"><svg class="i"><use href="#i-check"></use></svg> HWID</span>
+            <span class="badge badge--ok"><svg class="i"><use href="#i-check"></use></svg> TOTP</span>
+            <span class="badge"><svg class="i"><use href="#i-clock"></use></svg> Журнал входов</span>
+          </div>
+        </article>
+
+        <article class="card card--interactive" data-reveal>
+          <div class="card__icon"><svg class="i"><use href="#i-key"></use></svg></div>
+          <h3 class="card__title">Ключи вместо переписки</h3>
+          <p class="card__text">Купили — активировали. История покупок и сроков всегда под рукой.</p>
+        </article>
+
+        <article class="card card--interactive" data-reveal>
+          <div class="card__icon"><svg class="i"><use href="#i-gauge"></use></svg></div>
+          <h3 class="card__title">Честная статистика</h3>
+          <p class="card__text">Реальные часы по серверам, а не круглые числа с потолка.</p>
+        </article>
+
+        <article class="card card--interactive" data-reveal>
+          <div class="card__icon"><svg class="i"><use href="#i-refresh"></use></svg></div>
+          <h3 class="card__title">Обновления без простоев</h3>
+          <p class="card__text">Патч выкатывается до вечернего прайма, статус виден на главной.</p>
+        </article>
+
+        <article class="card card--interactive bento--full" data-reveal>
+          <div style="display:flex;flex-wrap:wrap;gap:var(--sp-6);align-items:center;justify-content:space-between">
+            <div style="max-width:34rem">
+              <div class="card__icon"><svg class="i"><use href="#i-message"></use></svg></div>
+              <h3 class="card__title">Поддержка, которая отвечает</h3>
+              <p class="card__text">
+                Общий чат в кабинете и Telegram для приватных вопросов. Медианный ответ —
+                шесть минут в рабочие часы, до тридцати ночью.
+              </p>
+            </div>
+            <a class="btn btn--ghost" href="#">Написать в Telegram <svg class="i"><use href="#i-arrow-right"></use></svg></a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ activity -->
+  <section class="section" id="activity">
+    <div class="shell">
+      <div class="section__head" data-reveal>
+        <span class="eyebrow">Активность</span>
+        <h2 class="section__title">Где наши игроки проводят время</h2>
+        <p class="section__lede">
+          Сводка по трём ключевым серверам за последние 12 часов. Обновляется каждые пять минут.
+        </p>
+      </div>
+
+      <div class="activity" data-reveal-group>
+        <article class="card" data-reveal>
+          <div class="panel-head">
+            <h3>Игроков онлайн</h3>
+            <span class="badge badge--ok"><span class="pulse"></span> Обновлено сейчас</span>
+          </div>
+
+          <div class="chart" data-series='{"labels":["09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00"],"values":[412,468,502,544,596,640,712,806,948,1104,1226,1284],"unit":" игроков"}'></div>
+
+          <div class="legend">
+            <span class="legend__item"><span class="legend__swatch"></span> Суммарно по серверам</span>
+            <span class="legend__item">Пик: <b class="mono tnum">1284</b> в 20:00</span>
+            <span class="legend__item">Мин.: <b class="mono tnum">412</b> в 09:00</span>
+          </div>
+        </article>
+
+        <article class="card" data-reveal>
+          <div class="panel-head">
+            <h3>Распределение по серверам</h3>
+            <span class="eyebrow">12 ч</span>
+          </div>
+
+          <ul class="server-list">
+            <li class="server">
+              <span class="server__logo">FT</span>
+              <div>
+                <div class="server__name">FunTime</div>
+                <div class="bar"><span class="bar__fill" data-value="46"></span></div>
+              </div>
+              <span class="server__value">46%</span>
+            </li>
+            <li class="server">
+              <span class="server__logo">HW</span>
+              <div>
+                <div class="server__name">HolyWorld</div>
+                <div class="bar"><span class="bar__fill" data-value="33"></span></div>
+              </div>
+              <span class="server__value">33%</span>
+            </li>
+            <li class="server">
+              <span class="server__logo">ST</span>
+              <div>
+                <div class="server__name">SpookyTime</div>
+                <div class="bar"><span class="bar__fill" data-value="21"></span></div>
+              </div>
+              <span class="server__value">21%</span>
+            </li>
+          </ul>
+
+          <hr class="divider" style="margin-block:var(--sp-5)">
+
+          <div class="panel-head" style="margin-bottom:var(--sp-3)">
+            <h3>Топ по наигранности</h3>
+            <span class="eyebrow">За сутки</span>
+          </div>
+
+          <ol class="board">
+            <li class="board__row">
+              <span class="board__rank">01</span>
+              <span class="avatar">RI</span>
+              <div>
+                <div class="board__name">Ril1k</div>
+                <div class="board__sub">FunTime 23м · SpookyTime 1ч · HolyWorld 1ч 24м</div>
+              </div>
+              <span class="board__time">1ч 48м</span>
+            </li>
+            <li class="board__row">
+              <span class="board__rank">02</span>
+              <span class="avatar">78</span>
+              <div>
+                <div class="board__name">782</div>
+                <div class="board__sub">FunTime 23м · SpookyTime 0м · HolyWorld 0м</div>
+              </div>
+              <span class="board__time">23м</span>
+            </li>
+            <li class="board__row">
+              <span class="board__rank">03</span>
+              <span class="avatar">N0</span>
+              <div>
+                <div class="board__name">n0va</div>
+                <div class="board__sub">FunTime 12м · SpookyTime 6м · HolyWorld 0м</div>
+              </div>
+              <span class="board__time">18м</span>
+            </li>
+          </ol>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================= pricing -->
+  <section class="section" id="pricing">
+    <div class="shell">
+      <div class="section__head" data-reveal>
+        <span class="eyebrow">Тарифы</span>
+        <h2 class="section__title">Один доступ, три горизонта</h2>
+        <p class="section__lede">
+          Цена фиксируется в момент покупки. Продление — тем же ключом, без повторной привязки.
+        </p>
+      </div>
+
+      <div class="plans" data-reveal-group>
+        <article class="card plan" data-reveal>
+          <h3 class="plan__name">Неделя</h3>
+          <p class="plan__price">249 ₽ <small>/ 7 дней</small></p>
+          <ul class="plan__list">
+            <li><svg class="i"><use href="#i-check"></use></svg> Полный доступ к сборке</li>
+            <li><svg class="i"><use href="#i-check"></use></svg> Одна привязка HWID</li>
+            <li><svg class="i"><use href="#i-check"></use></svg> Общий чат поддержки</li>
+            <li class="is-off"><svg class="i"><use href="#i-close"></use></svg> Приоритетная очередь</li>
+          </ul>
+          <a class="btn btn--ghost btn--block plan__cta" href="register.html">Выбрать</a>
+        </article>
+
+        <article class="card plan plan--featured" data-reveal>
+          <span class="plan__tag">Выбор игроков</span>
+          <h3 class="plan__name">Месяц</h3>
+          <p class="plan__price">699 ₽ <small>/ 30 дней</small></p>
+          <ul class="plan__list">
+            <li><svg class="i"><use href="#i-check"></use></svg> Всё из недельного тарифа</li>
+            <li><svg class="i"><use href="#i-check"></use></svg> Два сброса HWID в месяц</li>
+            <li><svg class="i"><use href="#i-check"></use></svg> Приоритетная очередь в поддержке</li>
+            <li><svg class="i"><use href="#i-check"></use></svg> Ранний доступ к обновлениям</li>
+          </ul>
+          <a class="btn btn--primary btn--block plan__cta" href="register.html">Выбрать</a>
+        </article>
+
+        <article class="card plan" data-reveal>
+          <h3 class="plan__name">Навсегда</h3>
+          <p class="plan__price">3 490 ₽ <small>/ бессрочно</small></p>
+          <ul class="plan__list">
+            <li><svg class="i"><use href="#i-check"></use></svg> Всё из месячного тарифа</li>
+            <li><svg class="i"><use href="#i-check"></use></svg> Неограниченные сбросы HWID</li>
+            <li><svg class="i"><use href="#i-check"></use></svg> Личный канал с поддержкой</li>
+            <li><svg class="i"><use href="#i-check"></use></svg> Цена фиксируется навсегда</li>
+          </ul>
+          <a class="btn btn--ghost btn--block plan__cta" href="register.html">Выбрать</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================= faq -->
+  <section class="section section--tight" id="faq">
+    <div class="shell">
+      <div class="section__head" data-reveal>
+        <span class="eyebrow">Вопросы</span>
+        <h2 class="section__title">Коротко о главном</h2>
+      </div>
+
+      <div class="faq" data-reveal>
+        <details class="faq__item">
+          <summary class="faq__q">Что происходит после оплаты?<svg class="i"><use href="#i-plus"></use></svg></summary>
+          <div class="faq__a">
+            Ключ появляется в разделе «Подписка» сразу после подтверждения платежа. Активация
+            занимает один клик, доступ открывается мгновенно — ждать ответа оператора не нужно.
+          </div>
+        </details>
+        <details class="faq__item">
+          <summary class="faq__q">Можно ли перенести доступ на другой компьютер?<svg class="i"><use href="#i-plus"></use></svg></summary>
+          <div class="faq__a">
+            Да. Сброс HWID доступен из кабинета: на недельном тарифе — по запросу в поддержку,
+            на месячном — дважды в месяц самостоятельно, на бессрочном — без ограничений.
+          </div>
+        </details>
+        <details class="faq__item">
+          <summary class="faq__q">Что делать, если сборка не запускается?<svg class="i"><use href="#i-plus"></use></svg></summary>
+          <div class="faq__a">
+            Напишите в поддержку с версией сборки и логом запуска. Если запустить не получается
+            по нашей вине, средства возвращаются — это отдельно закреплено в условиях.
+          </div>
+        </details>
+        <details class="faq__item">
+          <summary class="faq__q">Как включить двухфакторную защиту?<svg class="i"><use href="#i-plus"></use></svg></summary>
+          <div class="faq__a">
+            Профиль → Инструменты → Google Authenticator. Отсканируйте QR-код и подтвердите
+            шестизначный код. После этого вход и сброс HWID требуют подтверждения.
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ cta band -->
+  <section class="section section--tight">
+    <div class="shell">
+      <div class="card cta-band" data-reveal>
+        <h2>Аккаунт создаётся за минуту</h2>
+        <p>Регистрация бесплатна. Ключ можно активировать когда угодно — доступ начнёт отсчёт с этого момента.</p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="register.html">Создать аккаунт <svg class="i"><use href="#i-arrow-right"></use></svg></a>
+          <a class="btn btn--ghost" href="terms.html">Прочитать условия</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ================================================================ footer -->
+<footer class="footer page">
+  <div class="shell">
+    <div class="footer__grid">
+      <div class="footer__about">
+        <a class="brand" href="index.html">
+          <svg class="i brand__mark" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2.5 2.5 21h19z"/><path d="M8.4 15h7.2"/>
+          </svg>
+          Aethra
+        </a>
+        <p>Личный кабинет, подписка и загрузка лоадера в одном защищённом месте.</p>
+      </div>
+
+      <div>
+        <h4>Продукт</h4>
+        <ul>
+          <li><a href="#features">Возможности</a></li>
+          <li><a href="#activity">Статистика</a></li>
+          <li><a href="#pricing">Тарифы</a></li>
+          <li><a href="#faq">Вопросы</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Аккаунт</h4>
+        <ul>
+          <li><a href="login.html">Вход</a></li>
+          <li><a href="register.html">Регистрация</a></li>
+          <li><a href="profile.html">Профиль</a></li>
+          <li><a href="profile.html#panel-subscription">Подписка</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Связь</h4>
+        <ul>
+          <li><a href="#" rel="noopener">Discord</a></li>
+          <li><a href="#" rel="noopener">Telegram</a></li>
+          <li><a href="terms.html">Условия</a></li>
+          <li><a href="terms.html#contacts">Поддержка</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer__base">
+      <span>© <span data-year>2026</span> aethradlc.ru</span>
+      <span class="mono">Все данные на странице — демонстрационные</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

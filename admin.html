@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Админ-панель — Aethra</title>
+<meta name="description" content="Административная панель Aethra.">
+<meta name="theme-color" content="#08090b">
+<meta name="robots" content="noindex">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/app.css">
+
+<script defer src="assets/js/icons.js"></script>
+<script defer src="assets/js/liquid.js"></script>
+<script defer src="assets/js/app.js"></script>
+<script defer src="assets/js/store.js"></script>
+<script defer src="assets/js/auth.js"></script>
+<script defer src="assets/js/admin.js"></script>
+</head>
+<body data-auth-page="admin">
+
+<a class="skip-link" href="#main">Перейти к содержимому</a>
+
+<div class="backdrop" aria-hidden="true">
+  <canvas class="backdrop__canvas"></canvas>
+  <div class="backdrop__fallback"></div>
+</div>
+
+<header class="nav">
+  <nav class="nav__inner" aria-label="Основная навигация">
+    <a class="brand" href="index.html">
+      <svg class="i brand__mark" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2.5 2.5 21h19z"/><path d="M8.4 15h7.2"/>
+      </svg>
+      Aethra
+    </a>
+
+    <ul class="nav__links">
+      <span class="nav__pill" aria-hidden="true"></span>
+      <li><a class="nav__link" href="index.html"><svg class="i"><use href="#i-home"></use></svg>Главная</a></li>
+      <li><a class="nav__link" href="profile.html"><svg class="i"><use href="#i-user"></use></svg>Профиль</a></li>
+      <li><a class="nav__link" href="terms.html"><svg class="i"><use href="#i-doc"></use></svg>Условия</a></li>
+      <li><a class="nav__link" href="admin.html" aria-current="page"><svg class="i"><use href="#i-shield"></use></svg>Админка</a></li>
+    </ul>
+
+    <div class="nav__actions">
+      <button class="btn btn--quiet btn--sm" type="button" data-admin-logout><svg class="i"><use href="#i-logout"></use></svg>Выйти</button>
+      <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navSheet" aria-label="Меню">
+        <svg class="i i--lg"><use href="#i-menu"></use></svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="nav__sheet" id="navSheet" hidden>
+    <a class="nav__sheet-link" href="index.html"><svg class="i"><use href="#i-home"></use></svg>Главная</a>
+    <a class="nav__sheet-link" href="profile.html"><svg class="i"><use href="#i-user"></use></svg>Профиль</a>
+    <a class="nav__sheet-link" href="terms.html"><svg class="i"><use href="#i-doc"></use></svg>Условия</a>
+    <div class="nav__sheet-actions" style="grid-template-columns:1fr">
+      <button class="btn btn--ghost btn--sm" type="button" data-admin-logout>Выйти</button>
+    </div>
+  </div>
+</header>
+
+<main class="page" id="main">
+  <div class="shell">
+    <div class="dash">
+
+      <!-- ------------------------------------------------------ side tabs -->
+      <nav class="dash__nav" data-tabs role="tablist" aria-orientation="vertical" aria-label="Разделы админки">
+        <button class="dash__tab" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true">
+          <svg class="i"><use href="#i-gauge"></use></svg> Обзор
+        </button>
+        <button class="dash__tab" role="tab" id="tab-users" aria-controls="panel-users" aria-selected="false" tabindex="-1">
+          <svg class="i"><use href="#i-user-plus"></use></svg> Пользователи
+        </button>
+        <button class="dash__tab" role="tab" id="tab-keys" aria-controls="panel-keys" aria-selected="false" tabindex="-1">
+          <svg class="i"><use href="#i-key"></use></svg> Ключи
+        </button>
+      </nav>
+
+      <div>
+        <!-- =============================================== panel: overview -->
+        <section class="dash__panel" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" tabindex="0">
+          <div class="page-head">
+            <div>
+              <h1>Админ-панель</h1>
+              <p>Управление пользователями, подписками и ключами Aethra</p>
+            </div>
+            <span class="badge badge--ok"><svg class="i"><use href="#i-shield"></use></svg> <span data-admin-name>elyww</span></span>
+          </div>
+
+          <div class="stats">
+            <article class="card stat">
+              <span class="eyebrow">Пользователей</span>
+              <p class="stat__num tnum" data-stat="users">0</p>
+            </article>
+            <article class="card stat">
+              <span class="eyebrow">Активных подписок</span>
+              <p class="stat__num tnum" data-stat="subs">0</p>
+            </article>
+            <article class="card stat">
+              <span class="eyebrow">Забанено</span>
+              <p class="stat__num tnum" data-stat="bans">0</p>
+            </article>
+            <article class="card stat">
+              <span class="eyebrow">Свободных ключей</span>
+              <p class="stat__num tnum" data-stat="keys">0</p>
+            </article>
+          </div>
+
+          <article class="card">
+            <div class="panel-head">
+              <h3>Последние регистрации</h3>
+              <span class="eyebrow">Новые сверху</span>
+            </div>
+            <div data-recent></div>
+          </article>
+        </section>
+
+        <!-- ================================================= panel: users -->
+        <section class="dash__panel" id="panel-users" role="tabpanel" aria-labelledby="tab-users" tabindex="0" hidden>
+          <div class="page-head">
+            <div>
+              <h1>Пользователи</h1>
+              <p>Выдача и отзыв подписки, блокировки, все аккаунты</p>
+            </div>
+          </div>
+
+          <article class="card">
+            <form class="form-row" data-users-search onsubmit="return false" style="margin-bottom:var(--sp-4)">
+              <div class="field">
+                <label class="field__label" for="userSearch">Поиск</label>
+                <input class="input" id="userSearch" type="search" placeholder="Логин или e-mail…" autocomplete="off">
+              </div>
+              <span class="badge" style="align-self:center"><span data-users-count>0</span> чел.</span>
+            </form>
+
+            <div class="tbl-scroll">
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Логин</th>
+                    <th>E-mail</th>
+                    <th>Регистрация</th>
+                    <th>Подписка</th>
+                    <th>Статус</th>
+                    <th>Действия</th>
+                  </tr>
+                </thead>
+                <tbody data-users-body></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <!-- ================================================== panel: keys -->
+        <section class="dash__panel" id="panel-keys" role="tabpanel" aria-labelledby="tab-keys" tabindex="0" hidden>
+          <div class="page-head">
+            <div>
+              <h1>Ключи подписки</h1>
+              <p>Генерация ключей формата AETH-XXXX-XXXX</p>
+            </div>
+          </div>
+
+          <article class="card">
+            <div class="panel-head">
+              <h3>Создать ключи</h3>
+              <span class="eyebrow">Активируются на странице «Подписка»</span>
+            </div>
+
+            <form class="form-row" data-keys-generate>
+              <div class="field">
+                <label class="field__label" for="keyPlan">Тариф</label>
+                <select class="input" id="keyPlan">
+                  <option value="week">Неделя · 7 дней</option>
+                  <option value="month" selected>Месяц · 30 дней</option>
+                  <option value="life">Навсегда · бессрочно</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="field__label" for="keyCount">Количество</label>
+                <input class="input" id="keyCount" type="number" min="1" max="50" value="5" inputmode="numeric">
+              </div>
+              <button class="btn btn--primary" type="submit">
+                <svg class="i"><use href="#i-zap"></use></svg> Создать
+              </button>
+            </form>
+          </article>
+
+          <article class="card">
+            <div class="panel-head">
+              <h3>Все ключи</h3>
+              <span class="eyebrow"><span data-keys-count>0</span> шт.</span>
+            </div>
+            <div data-keys-empty class="empty" hidden>
+              <svg class="i"><use href="#i-inbox"></use></svg>
+              <p>Ключей пока нет. Создайте первую партию выше.</p>
+            </div>
+            <div class="tbl-scroll" data-keys-table hidden>
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>Ключ</th>
+                    <th>Тариф</th>
+                    <th>Статус</th>
+                    <th>Активировал</th>
+                    <th>Создан</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody data-keys-body></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer page">
+  <div class="shell">
+    <div class="footer__base" style="margin-top:0;border-top:0;padding-top:0">
+      <span>© <span data-year>2026</span> aethradlc.ru</span>
+      <span class="mono">Доступ только для администратора</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

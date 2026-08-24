@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Профиль — Aethra</title>
+<meta name="description" content="Личный кабинет Aethra: аккаунт, подписка, ключи, привязка HWID и двухфакторная защита.">
+<meta name="theme-color" content="#08090b">
+<meta name="robots" content="noindex">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/app.css">
+
+<script defer src="assets/js/icons.js"></script>
+<script defer src="assets/js/liquid.js"></script>
+<script defer src="assets/js/app.js"></script>
+<script defer src="assets/js/store.js"></script>
+<script defer src="assets/js/auth.js"></script>
+</head>
+<body data-auth-page="profile">
+
+<a class="skip-link" href="#main">Перейти к содержимому</a>
+
+<div class="backdrop" aria-hidden="true">
+  <canvas class="backdrop__canvas"></canvas>
+  <div class="backdrop__fallback"></div>
+</div>
+
+<header class="nav">
+  <nav class="nav__inner" aria-label="Основная навигация">
+    <a class="brand" href="index.html">
+      <svg class="i brand__mark" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2.5 2.5 21h19z"/><path d="M8.4 15h7.2"/>
+      </svg>
+      Aethra
+    </a>
+
+    <ul class="nav__links">
+      <span class="nav__pill" aria-hidden="true"></span>
+      <li><a class="nav__link" href="index.html"><svg class="i"><use href="#i-home"></use></svg>Главная</a></li>
+      <li><a class="nav__link" href="index.html#activity"><svg class="i"><use href="#i-activity"></use></svg>Статистика</a></li>
+      <li><a class="nav__link" href="terms.html"><svg class="i"><use href="#i-doc"></use></svg>Условия</a></li>
+      <li><a class="nav__link" href="profile.html" aria-current="page"><svg class="i"><use href="#i-user"></use></svg>Профиль</a></li>
+    </ul>
+
+    <div class="nav__actions">
+      <a class="btn btn--quiet btn--sm" href="index.html"><svg class="i"><use href="#i-logout"></use></svg>Выйти</a>
+      <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navSheet" aria-label="Меню">
+        <svg class="i i--lg"><use href="#i-menu"></use></svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="nav__sheet" id="navSheet" hidden>
+    <a class="nav__sheet-link" href="index.html"><svg class="i"><use href="#i-home"></use></svg>Главная</a>
+    <a class="nav__sheet-link" href="index.html#activity"><svg class="i"><use href="#i-activity"></use></svg>Статистика</a>
+    <a class="nav__sheet-link" href="terms.html"><svg class="i"><use href="#i-doc"></use></svg>Условия</a>
+    <a class="nav__sheet-link" href="profile.html" aria-current="page"><svg class="i"><use href="#i-user"></use></svg>Профиль</a>
+    <div class="nav__sheet-actions" style="grid-template-columns:1fr">
+      <a class="btn btn--ghost btn--sm" href="index.html">Выйти</a>
+    </div>
+  </div>
+</header>
+
+<main class="page" id="main">
+  <div class="shell">
+    <div class="dash">
+
+      <!-- ------------------------------------------------------ side tabs -->
+      <nav class="dash__nav" data-tabs role="tablist" aria-orientation="vertical" aria-label="Разделы профиля">
+        <button class="dash__tab" role="tab" id="tab-account" aria-controls="panel-account" aria-selected="true">
+          <svg class="i"><use href="#i-user"></use></svg> Аккаунт
+        </button>
+        <button class="dash__tab" role="tab" id="tab-buy" aria-controls="panel-buy" aria-selected="false" tabindex="-1">
+          <svg class="i"><use href="#i-card"></use></svg> Купить ключ
+        </button>
+        <button class="dash__tab" role="tab" id="tab-subscription" aria-controls="panel-subscription" aria-selected="false" tabindex="-1">
+          <svg class="i"><use href="#i-key"></use></svg> Подписка
+        </button>
+        <button class="dash__tab" role="tab" id="tab-tools" aria-controls="panel-tools" aria-selected="false" tabindex="-1">
+          <svg class="i"><use href="#i-sliders"></use></svg> Инструменты
+        </button>
+      </nav>
+
+      <div>
+        <!-- ================================================ panel: account -->
+        <section class="dash__panel" id="panel-account" role="tabpanel" aria-labelledby="tab-account" tabindex="0">
+          <div class="page-head">
+            <div>
+              <h1>Аккаунт</h1>
+              <p>Ваш профиль, активность и данные аккаунта</p>
+            </div>
+            <a class="btn btn--primary" href="#" download>
+              <svg class="i"><use href="#i-download"></use></svg> Скачать лоадер
+            </a>
+          </div>
+
+          <article class="card">
+            <div style="display:flex;align-items:center;gap:var(--sp-4);flex-wrap:wrap">
+              <span class="avatar avatar--lg" data-user-avatar>AW</span>
+                <div style="flex:1 1 12rem">
+                  <h2 style="font-size:var(--fs-lg)" data-user-name>awdawd</h2>
+                  <p class="text-dim" style="font-size:var(--fs-sm)" data-user-meta>Роль: Default · ID 25</p>
+                </div>
+                <div style="display:flex;gap:var(--sp-2);flex-wrap:wrap">
+                  <button class="btn btn--ghost btn--sm" type="button">Изменить</button>
+                  <span class="badge badge--warn" data-sub-badge><svg class="i"><use href="#i-warn"></use></svg> Подписка неактивна</span>
+                </div>
+            </div>
+
+            <hr class="divider" style="margin-block:var(--sp-5)">
+
+            <span class="eyebrow">Детали аккаунта</span>
+            <dl class="kv" style="margin-top:var(--sp-3)">
+              <div class="kv__row"><dt>ID</dt><dd data-kv="id">25</dd></div>
+              <div class="kv__row"><dt>Роль</dt><dd data-kv="role">Default</dd></div>
+              <div class="kv__row"><dt>Логин</dt><dd data-kv="login">awdawd</dd></div>
+              <div class="kv__row"><dt>E-mail</dt><dd data-kv="email">—</dd></div>
+              <div class="kv__row"><dt>Дата регистрации</dt><dd data-kv="reg">26.07.2026 00:31</dd></div>
+              <div class="kv__row"><dt>Последний вход</dt><dd data-kv="last">—</dd></div>
+              <div class="kv__row"><dt>HWID</dt><dd>Не привязан</dd></div>
+            </dl>
+          </article>
+
+          <div class="activity">
+            <article class="card chat" data-chat>
+              <div class="panel-head">
+                <h3>Общий чат</h3>
+                <span class="eyebrow">0 на сайте · 0 в игре</span>
+              </div>
+
+              <div class="chat__log" aria-live="polite">
+                <div class="chat__msg">
+                  <div class="skeleton" style="width:28px;height:28px;border-radius:50%"></div>
+                  <div>
+                    <div class="skeleton" style="width:120px;height:11px;margin-bottom:8px"></div>
+                    <div class="skeleton" style="width:100%;height:11px"></div>
+                  </div>
+                </div>
+                <div class="chat__msg">
+                  <div class="skeleton" style="width:28px;height:28px;border-radius:50%"></div>
+                  <div>
+                    <div class="skeleton" style="width:90px;height:11px;margin-bottom:8px"></div>
+                    <div class="skeleton" style="width:76%;height:11px"></div>
+                  </div>
+                </div>
+              </div>
+
+              <form class="chat__form">
+                <label class="visually-hidden" for="chatInput">Сообщение</label>
+                <input class="input" id="chatInput" type="text" placeholder="Напишите сообщение" maxlength="240" autocomplete="off">
+                <button class="btn btn--primary" type="submit">
+                  <svg class="i"><use href="#i-send"></use></svg><span class="visually-hidden">Отправить</span>
+                </button>
+              </form>
+            </article>
+
+            <article class="card">
+              <div class="panel-head">
+                <h3>Активность</h3>
+                <span class="eyebrow">Всего</span>
+              </div>
+
+              <ul class="server-list">
+                <li class="server">
+                  <span class="server__logo">FT</span>
+                  <div>
+                    <div class="server__name">FunTime</div>
+                    <div class="server__meta">0 ч 0 м наиграно</div>
+                  </div>
+                  <span class="server__value">0%</span>
+                </li>
+                <li class="server">
+                  <span class="server__logo">HW</span>
+                  <div>
+                    <div class="server__name">HolyWorld</div>
+                    <div class="server__meta">0 ч 0 м наиграно</div>
+                  </div>
+                  <span class="server__value">0%</span>
+                </li>
+                <li class="server">
+                  <span class="server__logo">ST</span>
+                  <div>
+                    <div class="server__name">SpookyTime</div>
+                    <div class="server__meta">0 ч 0 м наиграно</div>
+                  </div>
+                  <span class="server__value">0%</span>
+                </li>
+              </ul>
+
+              <div class="empty" style="margin-top:var(--sp-4)">
+                <svg class="i"><use href="#i-inbox"></use></svg>
+                <p>Статистика появится после первого запуска лоадера с активной подпиской.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ==================================================== panel: buy -->
+        <section class="dash__panel" id="panel-buy" role="tabpanel" aria-labelledby="tab-buy" tabindex="0" hidden>
+          <div class="page-head">
+            <div>
+              <h1>Купить ключ</h1>
+              <p>Ключ приходит на страницу «Подписка» сразу после оплаты</p>
+            </div>
+          </div>
+
+          <div class="plans">
+            <article class="card plan">
+              <h3 class="plan__name">Неделя</h3>
+              <p class="plan__price">249 ₽ <small>/ 7 дней</small></p>
+              <ul class="plan__list">
+                <li><svg class="i"><use href="#i-check"></use></svg> Полный доступ к сборке</li>
+                <li><svg class="i"><use href="#i-check"></use></svg> Одна привязка HWID</li>
+              </ul>
+              <button class="btn btn--ghost btn--block plan__cta" type="button">Оплатить</button>
+            </article>
+
+            <article class="card plan plan--featured">
+              <span class="plan__tag">Выгодно</span>
+              <h3 class="plan__name">Месяц</h3>
+              <p class="plan__price">699 ₽ <small>/ 30 дней</small></p>
+              <ul class="plan__list">
+                <li><svg class="i"><use href="#i-check"></use></svg> Два сброса HWID</li>
+                <li><svg class="i"><use href="#i-check"></use></svg> Приоритетная поддержка</li>
+              </ul>
+              <button class="btn btn--primary btn--block plan__cta" type="button">Оплатить</button>
+            </article>
+
+            <article class="card plan">
+              <h3 class="plan__name">Навсегда</h3>
+              <p class="plan__price">3 490 ₽ <small>/ бессрочно</small></p>
+              <ul class="plan__list">
+                <li><svg class="i"><use href="#i-check"></use></svg> Без ограничений по HWID</li>
+                <li><svg class="i"><use href="#i-check"></use></svg> Личный канал поддержки</li>
+              </ul>
+              <button class="btn btn--ghost btn--block plan__cta" type="button">Оплатить</button>
+            </article>
+          </div>
+
+          <article class="card">
+            <div class="panel-head">
+              <h3>Способы оплаты</h3>
+              <span class="eyebrow">Комиссия включена</span>
+            </div>
+            <dl class="kv">
+              <div class="kv__row"><dt>Банковская карта</dt><dd>МИР · Visa · Mastercard</dd></div>
+              <div class="kv__row"><dt>СБП</dt><dd>По номеру телефона</dd></div>
+              <div class="kv__row"><dt>Криптовалюта</dt><dd>USDT (TRC-20)</dd></div>
+              <div class="kv__row"><dt>Зачисление</dt><dd>до 5 минут</dd></div>
+            </dl>
+            <p class="text-dim" style="font-size:var(--fs-xs);margin-top:var(--sp-4)">
+              Платёж обрабатывается провайдером. Мы не получаем и не храним реквизиты вашей карты.
+            </p>
+          </article>
+        </section>
+
+        <!-- =========================================== panel: subscription -->
+        <section class="dash__panel" id="panel-subscription" role="tabpanel" aria-labelledby="tab-subscription" tabindex="0" hidden>
+          <div class="page-head">
+            <div>
+              <h1>Подписка</h1>
+              <p>Текущий доступ и история покупок</p>
+            </div>
+            <button class="btn btn--primary" type="button">Купить ключ</button>
+          </div>
+
+          <article class="card">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-4);flex-wrap:wrap">
+              <div>
+                <span class="eyebrow">Текущий статус</span>
+                <p style="font-size:var(--fs-lg);font-weight:650;margin-top:var(--sp-2)" data-sub-title>Нет активной подписки</p>
+                <p class="text-dim" style="font-size:var(--fs-sm)" data-sub-note>Активируйте ключ — отсчёт начнётся с этого момента.</p>
+              </div>
+              <span class="badge badge--bad" data-sub-badge>Неактивна</span>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="panel-head">
+              <h3>Активация ключа</h3>
+              <span class="eyebrow">Формат AETH-XXXX-XXXX</span>
+            </div>
+
+            <form class="form-row" data-validate data-auth="key">
+              <div class="field">
+                <label class="field__label" for="keyInput">Ключ доступа</label>
+                <input class="input input--mono" id="keyInput" name="key" type="text" placeholder="AETH-0000-0000" autocomplete="off" data-rule="required" aria-describedby="keyHint">
+                <p class="field__hint" id="keyHint">Ключ выдаётся один раз, регистр не важен.</p>
+                <p class="field__error" role="alert"></p>
+              </div>
+              <button class="btn btn--primary" type="submit">Активировать</button>
+            </form>
+          </article>
+
+          <article class="card">
+            <div class="panel-head">
+              <h3>Что вы покупали</h3>
+              <span class="eyebrow">История</span>
+            </div>
+            <div data-history>
+              <div class="empty">
+                <svg class="i"><use href="#i-inbox"></use></svg>
+                <p>Покупок пока нет. После активации ключа здесь появятся дата и тариф.</p>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <!-- ================================================== panel: tools -->
+        <section class="dash__panel" id="panel-tools" role="tabpanel" aria-labelledby="tab-tools" tabindex="0" hidden>
+          <div class="page-head">
+            <div>
+              <h1>Инструменты</h1>
+              <p>Безопасность аккаунта и привязка оборудования</p>
+            </div>
+          </div>
+
+          <article class="card">
+            <div class="panel-head">
+              <h3>Смена пароля</h3>
+              <span class="eyebrow">Минимум 8 символов</span>
+            </div>
+
+            <form data-validate data-success="Пароль обновлён" data-reset="true">
+              <div class="form-grid">
+                <div class="field">
+                  <label class="field__label" for="pwCurrent">Текущий пароль</label>
+                  <input class="input" id="pwCurrent" type="password" autocomplete="current-password" data-rule="required">
+                  <p class="field__error" role="alert"></p>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="pwNew">Новый пароль</label>
+                  <input class="input" id="pwNew" type="password" autocomplete="new-password" data-rule="password" data-strength="pwMeter">
+                  <div class="strength" id="pwMeter" aria-hidden="true">
+                    <span class="strength__seg"></span><span class="strength__seg"></span><span class="strength__seg"></span>
+                  </div>
+                  <p class="field__error" role="alert"></p>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="pwRepeat">Подтвердите пароль</label>
+                  <input class="input" id="pwRepeat" type="password" autocomplete="new-password" data-rule="password" data-match="pwNew">
+                  <p class="field__error" role="alert"></p>
+                </div>
+              </div>
+              <button class="btn btn--primary" type="submit" style="margin-top:var(--sp-5)">Сменить пароль</button>
+            </form>
+          </article>
+
+          <div class="activity">
+            <article class="card">
+              <div class="panel-head">
+                <h3>Google Authenticator</h3>
+                <span class="badge">Не подключён</span>
+              </div>
+              <p class="text-muted" style="font-size:var(--fs-sm)">
+                Второй фактор защищает вход и сброс привязки HWID. Понадобится любое TOTP-приложение:
+                Google Authenticator, Aegis или 1Password.
+              </p>
+              <button class="btn btn--ghost" type="button" style="margin-top:var(--sp-5)">
+                <svg class="i"><use href="#i-lock"></use></svg> Подключить
+              </button>
+            </article>
+
+            <article class="card">
+              <div class="panel-head">
+                <h3>Привязка оборудования</h3>
+                <span class="badge">HWID не привязан</span>
+              </div>
+              <dl class="kv">
+                <div class="kv__row"><dt>Текущий HWID</dt><dd>—</dd></div>
+                <div class="kv__row"><dt>Сбросов доступно</dt><dd>0 / 0</dd></div>
+                <div class="kv__row" style="border-bottom:0"><dt>Последний вход</dt><dd>26.07.2026 09:31</dd></div>
+              </dl>
+              <div style="display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-5)">
+                <button class="btn btn--ghost btn--sm" type="button" data-copy="25">
+                  <svg class="i"><use href="#i-copy"></use></svg> Скопировать ID
+                </button>
+                <button class="btn btn--danger btn--sm" type="button" aria-disabled="true">Сбросить HWID</button>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer page">
+  <div class="shell">
+    <div class="footer__base" style="margin-top:0;border-top:0;padding-top:0">
+      <span>© <span data-year>2026</span> aethradlc.ru</span>
+      <span class="mono">Все данные на странице — демонстрационные</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

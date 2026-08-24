@@ -1,0 +1,17 @@
+{
+  "name": "aethra-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Aethra site with auth, subscriptions and admin panel",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  }
+}

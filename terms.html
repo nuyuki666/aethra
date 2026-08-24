@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Условия использования — Aethra</title>
+<meta name="description" content="Условия использования сайта и продуктов Aethra: правила, отказ от ответственности, возврат средств и контакты поддержки.">
+<meta name="theme-color" content="#08090b">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/app.css">
+
+<script defer src="assets/js/icons.js"></script>
+<script defer src="assets/js/liquid.js"></script>
+<script defer src="assets/js/app.js"></script>
+</head>
+<body>
+
+<a class="skip-link" href="#main">Перейти к содержимому</a>
+
+<div class="backdrop" aria-hidden="true">
+  <canvas class="backdrop__canvas"></canvas>
+  <div class="backdrop__fallback"></div>
+</div>
+
+<header class="nav">
+  <nav class="nav__inner" aria-label="Основная навигация">
+    <a class="brand" href="index.html">
+      <svg class="i brand__mark" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2.5 2.5 21h19z"/><path d="M8.4 15h7.2"/>
+      </svg>
+      Aethra
+    </a>
+
+    <ul class="nav__links">
+      <span class="nav__pill" aria-hidden="true"></span>
+      <li><a class="nav__link" href="index.html"><svg class="i"><use href="#i-home"></use></svg>Главная</a></li>
+      <li><a class="nav__link" href="index.html#features"><svg class="i"><use href="#i-layers"></use></svg>Возможности</a></li>
+      <li><a class="nav__link" href="index.html#activity"><svg class="i"><use href="#i-activity"></use></svg>Статистика</a></li>
+      <li><a class="nav__link" href="index.html#pricing"><svg class="i"><use href="#i-card"></use></svg>Тарифы</a></li>
+      <li><a class="nav__link" href="terms.html" aria-current="page"><svg class="i"><use href="#i-doc"></use></svg>Условия</a></li>
+    </ul>
+
+    <div class="nav__actions">
+      <a class="btn btn--quiet btn--sm" href="login.html"><svg class="i"><use href="#i-login"></use></svg>Войти</a>
+      <a class="btn btn--primary btn--sm" href="register.html">Регистрация</a>
+      <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="navSheet" aria-label="Меню">
+        <svg class="i i--lg"><use href="#i-menu"></use></svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="nav__sheet" id="navSheet" hidden>
+    <a class="nav__sheet-link" href="index.html"><svg class="i"><use href="#i-home"></use></svg>Главная</a>
+    <a class="nav__sheet-link" href="index.html#features"><svg class="i"><use href="#i-layers"></use></svg>Возможности</a>
+    <a class="nav__sheet-link" href="index.html#activity"><svg class="i"><use href="#i-activity"></use></svg>Статистика</a>
+    <a class="nav__sheet-link" href="index.html#pricing"><svg class="i"><use href="#i-card"></use></svg>Тарифы</a>
+    <a class="nav__sheet-link" href="terms.html" aria-current="page"><svg class="i"><use href="#i-doc"></use></svg>Условия</a>
+    <div class="nav__sheet-actions">
+      <a class="btn btn--ghost btn--sm" href="login.html">Войти</a>
+      <a class="btn btn--primary btn--sm" href="register.html">Регистрация</a>
+    </div>
+  </div>
+</header>
+
+<main class="page" id="main">
+  <section class="section" style="padding-top:calc(var(--nav-h) + var(--sp-9))">
+    <div class="shell">
+      <div class="section__head" data-reveal>
+        <span class="eyebrow">Aethra · редакция от 26.07.2026</span>
+        <h1 class="section__title">Условия использования</h1>
+        <p class="section__lede">
+          Короткий документ без юридического тумана. Используя сайт, вы соглашаетесь
+          с пунктами ниже и подтверждаете, что действуете в рамках применимого законодательства.
+        </p>
+      </div>
+
+      <div class="doc">
+        <nav class="toc" aria-label="Содержание">
+          <a class="toc__link is-active" href="#general">Общие положения</a>
+          <a class="toc__link" href="#access">Доступ и оплата</a>
+          <a class="toc__link" href="#refund">Возврат средств</a>
+          <a class="toc__link" href="#data">Данные и приватность</a>
+          <a class="toc__link" href="#disclaimer">Отказ от ответственности</a>
+          <a class="toc__link" href="#contacts">Контакты</a>
+        </nav>
+
+        <article class="card prose" data-reveal>
+          <h2 id="general">Общие положения</h2>
+          <ol>
+            <li><b>1.1</b><span>Запрещено использовать сайт и его материалы в целях, противоречащих законодательству вашей страны или международным нормам.</span></li>
+            <li><b>1.2</b><span>Администрация не несёт ответственности за возможные последствия использования приобретённых товаров или услуг, включая ограничение доступа, технические сбои и другие риски.</span></li>
+            <li><b>1.3</b><span>Все товары и услуги предоставляются в исходном виде без дополнительных гарантий, если иное прямо не указано.</span></li>
+            <li><b>1.4</b><span>Запрещается взлом, обход защиты, декомпиляция, дамп, модификация, реверс-инжиниринг и иное вмешательство в работу программного обеспечения, полученного через данный сайт. При выявлении подобных действий доступ может быть ограничен без возврата средств.</span></li>
+          </ol>
+
+          <h2 id="access">Доступ и оплата</h2>
+          <ol>
+            <li><b>2.1</b><span>Доступ выдаётся на аккаунт и привязывается к оборудованию (HWID). Передача, продажа и сдача доступа в аренду третьим лицам не допускаются.</span></li>
+            <li><b>2.2</b><span>Срок подписки начинает отсчёт с момента активации ключа, а не с момента покупки.</span></li>
+            <li><b>2.3</b><span>Цена фиксируется в момент оплаты. Изменение тарифов не затрагивает уже оплаченные периоды.</span></li>
+            <li><b>2.4</b><span>Количество самостоятельных сбросов HWID зависит от тарифа и указано на странице тарифов.</span></li>
+          </ol>
+
+          <h2 id="refund">Возврат средств</h2>
+          <ol>
+            <li><b>3.1</b><span>Товар подлежит возврату исключительно в случае, если программное обеспечение невозможно запустить по причине, зависящей от администрации.</span></li>
+            <li><b>3.2</b><span>Заявка на возврат подаётся в течение 48 часов с момента активации и сопровождается логом запуска и версией сборки.</span></li>
+            <li><b>3.3</b><span>Возврат не производится при нарушении пунктов 1.4 и 2.1.</span></li>
+          </ol>
+
+          <div class="callout">
+            <svg class="i"><use href="#i-warn"></use></svg>
+            <p>
+              Использование стороннего программного обеспечения может нарушать правила игровых
+              серверов и повлечь блокировку вашей учётной записи в игре. Ответственность за это
+              решение остаётся на пользователе.
+            </p>
+          </div>
+
+          <h2 id="data">Данные и приватность</h2>
+          <ol>
+            <li><b>4.1</b><span>Мы храним логин, e-mail, хеш пароля, идентификатор оборудования и историю покупок — минимум, необходимый для работы сервиса.</span></li>
+            <li><b>4.2</b><span>Пароли хранятся только в виде необратимого хеша. Сотрудники поддержки не видят и не запрашивают ваш пароль.</span></li>
+            <li><b>4.3</b><span>Данные не передаются третьим лицам, за исключением платёжного провайдера в объёме, необходимом для проведения оплаты.</span></li>
+            <li><b>4.4</b><span>Удаление аккаунта по запросу выполняется в течение 7 рабочих дней и снимает все активные привязки.</span></li>
+          </ol>
+
+          <h2 id="disclaimer">Отказ от ответственности</h2>
+          <p>
+            Информация и материалы на сайте публикуются «как есть», без гарантий точности,
+            стабильности или постоянной доступности. Использование продукции и услуг
+            осуществляется на ваш страх и риск. Администрация не несёт ответственности
+            за возможные убытки или неудобства, возникшие в процессе эксплуатации.
+          </p>
+          <p>
+            Изменения в условиях публикуются на этой странице с обновлением даты редакции.
+            Продолжая пользоваться сервисом после публикации, вы принимаете новую редакцию.
+          </p>
+
+          <h2 id="contacts">Контакты</h2>
+          <p>
+            Поддержка в Telegram: <a href="#" rel="noopener">@telegeram4</a>.
+            Общий чат доступен в личном кабинете после входа.
+          </p>
+          <p class="text-dim" style="font-size:var(--fs-sm)">
+            Среднее время ответа — 6 минут в рабочие часы, до 30 минут ночью.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer page">
+  <div class="shell">
+    <div class="footer__base" style="margin-top:0;border-top:0;padding-top:0">
+      <span>© <span data-year>2026</span> aethradlc.ru</span>
+      <a href="index.html">На главную</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

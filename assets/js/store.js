@@ -1,0 +1,144 @@
+/* ==========================================================================
+   Aethra — API client (общается с server.js)
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  var TOKEN_KEY = "aethra_token";
+
+  var PLANS = {
+    week: { label: "Неделя", days: 7 },
+    month: { label: "Месяц", days: 30 },
+    life: { label: "Навсегда", days: null }
+  };
+
+  function getToken() {
+    try {
+      return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function setToken(token, remember) {
+    clearToken();
+    try {
+      (remember ? localStorage : sessionStorage).setItem(TOKEN_KEY, token);
+    } catch (e) {}
+  }
+
+  function clearToken() {
+    try {
+      sessionStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(TOKEN_KEY);
+    } catch (e) {}
+  }
+
+  async function api(path, body, method) {
+    var options = {
+      method: method || (body !== undefined ? "POST" : "GET"),
+      headers: { "Content-Type": "application/json" }
+    };
+    var t = getToken();
+    if (t) options.headers.Authorization = "Bearer " + t;
+    if (body !== undefined) options.body = JSON.stringify(body);
+
+    var res;
+    try {
+      res = await fetch("/api" + path, options);
+    } catch (e) {
+      return { ok: false, error: "Сервер недоступен. Запустите server.js (start.bat)" };
+    }
+
+    var data = null;
+    try { data = await res.json(); } catch (e) {}
+    if (!res.ok) {
+      var out = data && typeof data === "object"
+        ? Object.assign({}, data)
+        : { ok: false, error: "Ошибка сервера (" + res.status + ")" };
+      out.status = res.status;
+      return out;
+    }
+    if (data && typeof data === "object") data.status = res.status;
+    return data;
+  }
+
+  function fmtDateTime(ts) {
+    if (!ts) return "—";
+    var d = new Date(ts);
+    var p = function (n) { return (n < 10 ? "0" : "") + n; };
+    return p(d.getDate()) + "." + p(d.getMonth() + 1) + "." + d.getFullYear() +
+      " " + p(d.getHours()) + ":" + p(d.getMinutes());
+  }
+
+  window.AethraStore = {
+    PLANS: PLANS,
+    fmtDateTime: fmtDateTime,
+    hasToken: getToken,
+
+    register: async function (login, email, pass) {
+      var r = await api("/register", { login: login, email: email, password: pass });
+      if (r.ok && r.token) setToken(r.token, true);
+      return r;
+    },
+
+    authenticate: async function (q, pass, remember) {
+      var r = await api("/login", { login: q, password: pass });
+      if (r.ok && r.token) setToken(r.token, !!remember);
+      return r;
+    },
+
+    current: async function () {
+      if (!getToken()) return null;
+      var r = await api("/me");
+      if (r.status === 401) clearToken();
+      return r.ok ? r.user : null;
+    },
+
+    logout: async function () {
+      await api("/logout", {});
+      clearToken();
+    },
+
+    redeem: function (code) {
+      return api("/redeem", { code: code });
+    },
+
+    grant: async function (login, days) {
+      return api("/admin/grant", { login: login, days: days == null ? null : parseInt(days, 10) });
+    },
+    revoke: function (login) {
+      return api("/admin/revoke", { login: login });
+    },
+    ban: function (login, reason) {
+      return api("/admin/ban", { login: login, reason: reason || "" });
+    },
+    unban: function (login) {
+      return api("/admin/unban", { login: login });
+    },
+
+    makeKeys: async function (plan, count) {
+      var r = await api("/admin/keys", { plan: plan, count: parseInt(count, 10) });
+      return r && r.ok ? r.codes : [];
+    },
+    removeKey: async function (code) {
+      var r = await api("/admin/keys/delete", { code: code });
+      return !!(r && r.ok);
+    },
+    keysList: async function () {
+      var r = await api("/admin/keys");
+      return r && r.ok ? r.keys : [];
+    },
+
+    users: async function () {
+      var r = await api("/admin/users");
+      return r && r.ok ? r.users : [];
+    },
+    stats: async function () {
+      var r = await api("/admin/stats");
+      return r && r.ok
+        ? r.stats
+        : { users: 0, subs: 0, bans: 0, keys: 0 };
+    }
+  };
+})();
