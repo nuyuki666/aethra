@@ -46,6 +46,12 @@ function keyCode() {
   return "AETH-" + block(4) + "-" + block(4);
 }
 
+function promoCode() {
+  let s = "";
+  for (let i = 0; i < 5; i++) s += KEY_ALPHABET[crypto.randomInt(KEY_ALPHABET.length)];
+  return "PROMO-" + s;
+}
+
 function bad(res, error, extra) {
   return res.status(400).json(Object.assign({ ok: false, error }, extra || {}));
 }
@@ -291,6 +297,65 @@ async function main() {
       if (dataUrl.length > 300000) return bad(res, "Картинка слишком большая");
       await store.updateUser(req.user.login, { avatar: dataUrl });
       res.json({ ok: true, avatar: dataUrl });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  }));
+
+  /* ------------------------------------------------------------- промокоды */
+  app.post("/api/promo/check", requireAuth(async (req, res) => {
+    try {
+      const p = await store.getPromo(String((req.body && req.body.code) || ""));
+      if (!p) return bad(res, "Промокод не найден или больше не активен");
+      res.json({ ok: true, percent: p.percent });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  }));
+
+  app.post("/api/promo/use", requireAuth(async (req, res) => {
+    try {
+      await store.incrPromoUse(String((req.body && req.body.code) || ""));
+      res.json({ ok: true });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  }));
+
+  app.get("/api/admin/promos", requireAdmin(async (req, res) => {
+    res.json({ ok: true, promos: await store.getAllPromos() });
+  }));
+
+  app.post("/api/admin/promos", requireAdmin(async (req, res) => {
+    try {
+      const percent = parseInt((req.body && req.body.percent), 10);
+      const count = parseInt((req.body && req.body.count), 10);
+      if (!percent || percent < 1 || percent > 90) return bad(res, "Скидка: от 1 до 90%");
+      if (!count || count < 1 || count > 50) return bad(res, "Количество: от 1 до 50");
+
+      const codes = [];
+      for (let i = 0; i < count; i++) codes.push(promoCode());
+      await store.upsertPromos(codes.map(code => ({
+        code,
+        percent,
+        createdAt: Date.now(),
+        createdBy: req.user.login
+      })));
+      res.json({ ok: true, codes, percent });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  }));
+
+  app.post("/api/admin/promos/delete", requireAdmin(async (req, res) => {
+    try {
+      const removed = await store.deletePromo(String((req.body && req.body.code) || ""));
+      if (!removed) return bad(res, "Промокод не найден");
+      res.json({ ok: true });
     } catch (e) {
       console.error(e);
       res.status(500).json({ ok: false, error: "Ошибка сервера" });

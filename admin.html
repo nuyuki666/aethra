@@ -11,15 +11,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/css/tokens.css?v=14">
-<link rel="stylesheet" href="assets/css/app.css?v=14">
+<link rel="stylesheet" href="assets/css/tokens.css?v=15">
+<link rel="stylesheet" href="assets/css/app.css?v=15">
 
-<script defer src="assets/js/icons.js?v=14"></script>
-<script defer src="assets/js/liquid.js?v=14"></script>
-<script defer src="assets/js/app.js?v=14"></script>
-<script defer src="assets/js/store.js?v=14"></script>
-<script defer src="assets/js/auth.js?v=14"></script>
-<script defer src="assets/js/admin.js?v=14"></script>
+<script defer src="assets/js/icons.js?v=15"></script>
+<script defer src="assets/js/liquid.js?v=15"></script>
+<script defer src="assets/js/app.js?v=15"></script>
+<script defer src="assets/js/store.js?v=15"></script>
+<script defer src="assets/js/auth.js?v=15"></script>
+<script defer src="assets/js/admin.js?v=15"></script>
 </head>
 <body data-auth-page="admin">
 
@@ -79,6 +79,9 @@
         </button>
         <button class="dash__tab" role="tab" id="tab-keys" aria-controls="panel-keys" aria-selected="false" tabindex="-1">
           <svg class="i"><use href="#i-key"></use></svg> Ключи
+        </button>
+        <button class="dash__tab" role="tab" id="tab-promos" aria-controls="panel-promos" aria-selected="false" tabindex="-1">
+          <svg class="i"><use href="#i-spark"></use></svg> Промокоды
         </button>
       </nav>
 
@@ -218,6 +221,63 @@
             </div>
           </article>
         </section>
+
+        <!-- =============================================== panel: promos -->
+        <section class="dash__panel" id="panel-promos" role="tabpanel" aria-labelledby="tab-promos" tabindex="0" hidden>
+          <div class="page-head">
+            <div>
+              <h1>Промокоды</h1>
+              <p>Скидка в процентах применяется к цене тарифа при покупке</p>
+            </div>
+          </div>
+
+          <article class="card">
+            <div class="panel-head">
+              <h3>Создать промокоды</h3>
+              <span class="eyebrow">Формат PROMO-XXXXX</span>
+            </div>
+
+            <form class="form-row" data-promos-generate>
+              <div class="field">
+                <label class="field__label" for="promoPercent">Скидка, %</label>
+                <input class="input" id="promoPercent" type="number" min="1" max="90" value="10" inputmode="numeric">
+              </div>
+              <div class="field">
+                <label class="field__label" for="promoCount">Количество</label>
+                <input class="input" id="promoCount" type="number" min="1" max="50" value="5" inputmode="numeric">
+              </div>
+              <button class="btn btn--primary" type="submit">
+                <svg class="i"><use href="#i-spark"></use></svg> Создать
+              </button>
+            </form>
+          </article>
+
+          <article class="card">
+            <div class="panel-head">
+              <h3>Все промокоды</h3>
+              <span class="eyebrow"><span data-promos-count>0</span> шт.</span>
+            </div>
+            <div data-promos-empty class="empty" hidden>
+              <svg class="i"><use href="#i-inbox"></use></svg>
+              <p>Промокодов пока нет. Создайте первую партию выше.</p>
+            </div>
+            <div class="tbl-scroll" data-promos-table hidden>
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>Код</th>
+                    <th>Скидка</th>
+                    <th>Применений</th>
+                    <th>Создан</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody data-promos-body></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
       </div>
     </div>
   </div>

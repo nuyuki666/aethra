@@ -26,6 +26,7 @@ class FileStore {
       if (!Array.isArray(this.data[k])) this.data[k] = [];
     });
     if (!Array.isArray(this.data.messages)) this.data.messages = [];
+    if (!Array.isArray(this.data.promos)) this.data.promos = [];
     if (!this.data.history || typeof this.data.history !== "object") this.data.history = {};
     this.persist();
     return this;
@@ -169,6 +170,47 @@ class FileStore {
     this.persist();
     return msg;
   }
+
+  async upsertPromos(list) {
+    for (const p of list) {
+      this.data.promos.unshift({
+        code: p.code,
+        percent: p.percent,
+        active: true,
+        uses: 0,
+        createdAt: p.createdAt,
+        createdBy: p.createdBy
+      });
+    }
+    this.persist();
+  }
+
+  async getAllPromos() {
+    return this.data.promos.map(p => ({ ...p }));
+  }
+
+  async getPromo(code) {
+    code = String(code || "").toUpperCase();
+    const p = this.data.promos.find(x => x.code === code && x.active);
+    return p ? { code: p.code, percent: p.percent } : null;
+  }
+
+  async incrPromoUse(code) {
+    code = String(code || "").toUpperCase();
+    const p = this.data.promos.find(x => x.code === code);
+    if (!p) return false;
+    p.uses = (p.uses || 0) + 1;
+    this.persist();
+    return true;
+  }
+
+  async deletePromo(code) {
+    const before = this.data.promos.length;
+    this.data.promos = this.data.promos.filter(p => p.code !== String(code));
+    const removed = this.data.promos.length < before;
+    if (removed) this.persist();
+    return removed;
+  }
 }
 
 /* ==========================================================================
@@ -219,6 +261,14 @@ class PgStore {
       login TEXT NOT NULL,
       text TEXT NOT NULL,
       at BIGINT NOT NULL
+    )`);
+    await this.pool.query(`CREATE TABLE IF NOT EXISTS promos (
+      code TEXT PRIMARY KEY,
+      percent INTEGER NOT NULL,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      uses INTEGER NOT NULL DEFAULT 0,
+      created_at BIGINT NOT NULL,
+      created_by TEXT NOT NULL
     )`);
     await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_ip TEXT DEFAULT ''");
     await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT DEFAULT ''");
@@ -427,6 +477,48 @@ class PgStore {
     );
     const r = res.rows[0];
     return { id: r.id, login: r.login, text: r.text, at: Number(r.at) };
+  }
+
+  async upsertPromos(list) {
+    for (const p of list) {
+      await this.pool.query(
+        "INSERT INTO promos (code, percent, active, uses, created_at, created_by) VALUES ($1,$2,TRUE,0,$3,$4) ON CONFLICT (code) DO NOTHING",
+        [p.code, p.percent, p.createdAt, p.createdBy]
+      );
+    }
+  }
+
+  async getAllPromos() {
+    const res = await this.pool.query("SELECT * FROM promos ORDER BY created_at DESC");
+    return res.rows.map(r => ({
+      code: r.code,
+      percent: r.percent,
+      active: r.active,
+      uses: r.uses,
+      createdAt: Number(r.created_at),
+      createdBy: r.created_by
+    }));
+  }
+
+  async getPromo(code) {
+    const res = await this.pool.query(
+      "SELECT code, percent FROM promos WHERE UPPER(code) = UPPER($1) AND active = TRUE",
+      [String(code || "")]
+    );
+    return res.rows[0] ? { code: res.rows[0].code, percent: res.rows[0].percent } : null;
+  }
+
+  async incrPromoUse(code) {
+    const res = await this.pool.query(
+      "UPDATE promos SET uses = uses + 1 WHERE UPPER(code) = UPPER($1) RETURNING code",
+      [String(code || "")]
+    );
+    return res.rowCount > 0;
+  }
+
+  async deletePromo(code) {
+    const res = await this.pool.query("DELETE FROM promos WHERE UPPER(code) = UPPER($1)", [String(code)]);
+    return res.rowCount > 0;
   }
 }
 

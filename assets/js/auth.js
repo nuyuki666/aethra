@@ -15,9 +15,9 @@
     skinback: ""
   };
   var PLAN_INFO = {
-    week: { name: "Неделя", price: "249 ₽", term: "7 дней" },
-    month: { name: "Месяц", price: "699 ₽", term: "30 дней" },
-    life: { name: "Навсегда", price: "1 200 ₽", term: "бессрочно" }
+    week: { name: "Неделя", price: "100 ₽", term: "7 дней" },
+    month: { name: "Месяц", price: "300 ₽", term: "30 дней" },
+    life: { name: "Навсегда", price: "450 ₽", term: "бессрочно" }
   };
   var METHODS = [
     { id: "funpay", name: "FunPay", desc: "Карта · СБП · баланс площадки", link: PAY.funpay },
@@ -424,38 +424,81 @@
       '<span class="eyebrow">Покупка подписки</span>' +
       '<h3 style="font-size:var(--fs-xl);margin-top:var(--sp-2)">' + esc(info.name) + " · " + esc(info.price) + "</h3>" +
       '<p class="text-dim" style="font-size:var(--fs-sm);margin-top:var(--sp-1)">Срок: ' + esc(info.term) + ". Ключ приходит после подтверждения оплаты.</p>" +
+      '<div class="promo-row">' +
+      '<input class="input input--mono" data-promo-input placeholder="ПРОМОКОД" maxlength="24" autocomplete="off" style="text-transform:uppercase">' +
+      '<button class="btn btn--ghost" type="button" data-promo-apply>Применить</button>' +
+      "</div>" +
+      '<p class="text-dim" data-promo-status style="font-size:var(--fs-sm);min-height:1.2em;margin-top:var(--sp-2)"></p>' +
       '<div class="pay">' + methods + "</div>";
+
+    var promoInput = $("[data-promo-input]", body);
+    var status = $("[data-promo-status]", body);
+    var promo = { code: "", percent: 0 };
+
+    function finalPrice() {
+      var base = parseInt(info.price, 10) || 0;
+      var val = promo.percent > 0 ? Math.round(base * (100 - promo.percent) / 100) : base;
+      return val + " ₽";
+    }
+
+    $("[data-promo-apply]", body).addEventListener("click", async function () {
+      var code = promoInput.value.trim().toUpperCase();
+      if (!code) { status.textContent = "Введите промокод"; return; }
+      var r = await S.promoCheck(code);
+      if (!r.ok) {
+        promo = { code: "", percent: 0 };
+        status.innerHTML = '<span style="color:var(--bad)">' + esc(r.error) + "</span>";
+        return;
+      }
+      promo = { code: code, percent: r.percent };
+      status.innerHTML = '<span style="color:var(--ok)">Промокод применён: −' + r.percent +
+        "% → " + finalPrice() + " вместо " + esc(info.price) + "</span>";
+    });
 
     $$("[data-method]", body).forEach(function (btn) {
       btn.addEventListener("click", function () {
-        showInstructions(info, METHODS[parseInt(btn.dataset.method, 10)]);
+        showInstructions(info, METHODS[parseInt(btn.dataset.method, 10)], promo);
       });
     });
 
     m.hidden = false;
   }
 
-  function showInstructions(info, method) {
+  function showInstructions(info, method, promo) {
     var m = $("[data-buy-modal]");
     var body = $("[data-modal-body]", m);
     var order = orderCode();
     var link = method.link || PAY.tg;
+    promo = promo || { code: "", percent: 0 };
+    var base = parseInt(info.price, 10) || 0;
+    var total = promo.percent > 0 ? Math.round(base * (100 - promo.percent) / 100) : base;
+
+    var promoLine = promo.percent > 0
+      ? '<p style="margin-top:var(--sp-3);font-size:var(--fs-sm)">К оплате: <b style="font-size:var(--fs-lg);color:var(--ok)">' + total +
+        " ₽</b> <s class='text-dim'>" + base + " ₽</s> <span class='badge badge--ok'>−" + promo.percent + "% по " + esc(promo.code) + "</span></p>"
+      : '<p style="margin-top:var(--sp-3);font-size:var(--fs-sm)">К оплате: <b style="font-size:var(--fs-lg)">' + base + " ₽</b></p>";
 
     body.innerHTML =
       '<span class="eyebrow">' + esc(method.name) + "</span>" +
-      '<h3 style="font-size:var(--fs-xl);margin-top:var(--sp-2)">' + esc(info.name) + " · " + esc(info.price) + "</h3>" +
+      '<h3 style="font-size:var(--fs-xl);margin-top:var(--sp-2)">' + esc(info.name) + " · " + esc(info.term) + "</h3>" +
+      promoLine +
       '<ol class="steps">' +
       "<li>Оплатите заказ <b class='mono'>" + esc(order) + "</b> через " + esc(method.name) + ".</li>" +
       "<li>Напишите в поддержку: номер заказа и ваш логин.</li>" +
       "<li>Получите ключ AETH-XXXX-XXXX и активируйте его во вкладке «Подписка».</li>" +
       "</ol>" +
       '<div style="display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-5)">' +
-      '<a class="btn btn--primary" href="' + esc(link) + '" target="_blank" rel="noopener">' +
+      '<a class="btn btn--primary" href="' + esc(link) + '" target="_blank" rel="noopener" data-pay-go>' +
       '<svg class="i"><use href="#i-zap"></use></svg> Перейти к оплате</a>' +
       '<a class="btn btn--ghost" href="' + esc(PAY.tg) + '" target="_blank" rel="noopener">' +
       '<svg class="i"><use href="#i-send"></use></svg> Поддержка</a>' +
       "</div>" +
       '<p class="text-dim" style="font-size:var(--fs-xs);margin-top:var(--sp-4)">Зачисление до 5 минут. Ключ активируется во вкладке «Подписка» — срок пойдёт с момента активации.</p>';
+
+    var go = $("[data-pay-go]", body);
+    if (go && promo.code) {
+      go.addEventListener("click", function () { S.promoUse(promo.code); });
+    }
 
     m.hidden = false;
   }

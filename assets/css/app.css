@@ -1375,6 +1375,9 @@ body.auth-ready .nav__actions { visibility: visible; }
 }
 
 .pay { display: grid; gap: var(--sp-2); margin-top: var(--sp-4); }
+.promo-row { display: flex; gap: var(--sp-2); margin-top: var(--sp-4); }
+.promo-row .input { flex: 1; min-width: 0; }
+.promo-row .btn { flex: none; }
 .pay__btn {
   display: flex;
   align-items: center;

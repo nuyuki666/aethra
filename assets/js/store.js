@@ -133,6 +133,26 @@
       return api("/avatar", { dataUrl: dataUrl });
     },
 
+    promoCheck: function (code) {
+      return api("/promo/check", { code: code });
+    },
+    promoUse: function (code) {
+      return api("/promo/use", { code: code });
+    },
+
+    promosList: async function () {
+      var r = await api("/admin/promos");
+      return r && r.ok ? r.promos : [];
+    },
+    makePromos: async function (percent, count) {
+      var r = await api("/admin/promos", { percent: percent, count: count });
+      return r && r.ok ? r : { ok: false, codes: [] };
+    },
+    removePromo: async function (code) {
+      var r = await api("/admin/promos/delete", { code: code });
+      return !!(r && r.ok);
+    },
+
     grant: async function (login, days) {
       return api("/admin/grant", { login: login, days: days == null ? null : parseInt(days, 10) });
     },

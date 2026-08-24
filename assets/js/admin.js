@@ -52,7 +52,7 @@
   }
 
   async function renderAll() {
-    await Promise.all([renderStats(), renderUsers(), renderKeys()]);
+    await Promise.all([renderStats(), renderUsers(), renderKeys(), renderPromos()]);
   }
 
   /* -------------------------------------------------------------- overview */
@@ -295,6 +295,71 @@
     });
   }
 
+  /* ---------------------------------------------------------------- промо */
+  async function renderPromos() {
+    var body = $("[data-promos-body]");
+    if (!body) return;
+    var promos = await S.promosList();
+
+    var emptyEl = $("[data-promos-empty]");
+    var tableEl = $("[data-promos-table]");
+    var counter = $("[data-promos-count]");
+    if (counter) counter.textContent = promos.length;
+    if (emptyEl) emptyEl.hidden = promos.length > 0;
+    if (tableEl) tableEl.hidden = promos.length === 0;
+
+    body.innerHTML = promos.map(function (p) {
+      return (
+        "<tr>" +
+        '<td class="mono">' + p.code + "</td>" +
+        '<td><span class="badge badge--ok">−' + p.percent + "%</span></td>" +
+        '<td class="mono text-dim">' + (p.uses || 0) + "</td>" +
+        '<td class="mono text-dim">' + S.fmtDateTime(p.createdAt) + "</td>" +
+        '<td><div class="tbl-actions">' +
+        '<button class="btn btn--ghost btn--xs" data-promo-copy="' + p.code + '" aria-label="Скопировать"><svg class="i"><use href="#i-copy"></use></svg></button>' +
+        '<button class="btn btn--danger btn--xs" data-promo-del="' + p.code + '" aria-label="Удалить"><svg class="i"><use href="#i-close"></use></svg></button>' +
+        "</div></td>" +
+        "</tr>"
+      );
+    }).join("");
+  }
+
+  function bindPromos() {
+    var form = $('form[data-promos-generate]');
+    if (form) {
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        var percent = parseInt($("#promoPercent").value, 10) || 0;
+        var count = parseInt($("#promoCount").value, 10) || 1;
+        count = Math.max(1, Math.min(count, 50));
+
+        var r = await S.makePromos(percent, count);
+        if (r.ok) toast("Создано промокодов: " + r.codes.length + " (−" + percent + "%)");
+        else toast("Не удалось создать промокоды", "bad");
+        await renderPromos();
+      });
+    }
+
+    var body = $("[data-promos-body]");
+    if (!body) return;
+    body.addEventListener("click", async function (e) {
+      var cp = e.target.closest("button[data-promo-copy]");
+      if (cp) { copyKey(cp.dataset.promoCopy); return; }
+
+      var del = e.target.closest("button[data-promo-del]");
+      if (del) {
+        del.disabled = true;
+        if (await S.removePromo(del.dataset.promoDel)) {
+          toast("Промокод удалён");
+          await renderPromos();
+        } else {
+          toast("Не удалось удалить", "bad");
+          del.disabled = false;
+        }
+      }
+    });
+  }
+
   /* ---------------------------------------------------------------- logout */
   function bindLogout() {
     $$("[data-admin-logout]").forEach(function (btn) {
@@ -312,6 +377,7 @@
     await renderAll();
     bindUsers();
     bindKeys();
+    bindPromos();
     bindLogout();
   }
 
