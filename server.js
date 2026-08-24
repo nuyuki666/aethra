@@ -2,6 +2,7 @@
 
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 const crypto = require("crypto");
 const { createStore } = require("./storage");
 
@@ -361,6 +362,111 @@ async function main() {
       res.status(500).json({ ok: false, error: "Ошибка сервера" });
     }
   }));
+
+  /* ------------------------------------------------------ лоадер и HWID */
+  const HWID_RESET_LIMIT = 2;
+  const LOADER_FILE = path.join(__dirname, "downloads", "AethraLoader.exe");
+
+  function maskHwid(h) {
+    if (!h) return "";
+    return h.length > 12 ? h.slice(0, 6) + "…" + h.slice(-4) : h;
+  }
+
+  app.post("/api/loader/login", async (req, res) => {
+    try {
+      const login = String((req.body && req.body.login) || "").trim();
+      const password = String((req.body && req.body.password) || "");
+      const hwid = String((req.body && req.body.hwid) || "").trim().slice(0, 80);
+
+      const hash = await store.getPasswordHash(login);
+      if (!hash || !verifyPass(password, hash)) {
+        return res.status(401).json({ ok: false, error: "Неверный логин или пароль" });
+      }
+      const user = await store.getUserByLoginOrEmail(login);
+      if (!user) return res.status(401).json({ ok: false, error: "Неверный логин или пароль" });
+      if (user.banned) return res.status(403).json({ ok: false, error: "Аккаунт заблокирован" });
+      if (!subActive(user)) return res.status(403).json({ ok: false, error: "Нет активной подписки. Купите ключ на сайте" });
+
+      if (!user.hwid) {
+        await store.updateUser(user.login, { hwid });
+        await store.addHistory(user.login, "HWID привязан через лоадер");
+      } else if (user.hwid !== hwid) {
+        return res.status(403).json({
+          ok: false,
+          hwidMismatch: true,
+          error: "Подписка привязана к другому ПК. Сбросьте HWID в профиле на сайте"
+        });
+      }
+
+      await store.updateUser(user.login, { lastLogin: Date.now(), lastIp: clientIp(req) });
+      res.json({
+        ok: true,
+        login: user.login,
+        lifetime: !!user.lifetime,
+        subUntil: user.subUntil,
+        till: user.lifetime ? "Lifetime" : S_fmtShort(user.subUntil)
+      });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  });
+
+  function S_fmtShort(ts) {
+    if (!ts) return "—";
+    const d = new Date(ts);
+    const p = n => (n < 10 ? "0" : "") + n;
+    return p(d.getDate()) + "." + p(d.getMonth() + 1) + "." + d.getFullYear();
+  }
+
+  app.get("/api/loader/info", requireAuth(async (req, res) => {
+    const u = req.user;
+    res.json({
+      ok: true,
+      hwid: u.hwid || "",
+      hwidMasked: u.hwid ? maskHwid(u.hwid) : "",
+      resetsLeft: Math.max(0, HWID_RESET_LIMIT - (u.hwidResets || 0)),
+      resetLimit: HWID_RESET_LIMIT,
+      subActive: subActive(u),
+      lifetime: !!u.lifetime,
+      subUntil: u.subUntil
+    });
+  }));
+
+  app.post("/api/hwid/reset", requireAuth(async (req, res) => {
+    try {
+      const u = req.user;
+      const used = u.hwidResets || 0;
+      if (used >= HWID_RESET_LIMIT) return bad(res, "Лимит сбросов исчерпан. Напишите в поддержку");
+      if (!u.hwid) return bad(res, "HWID не привязан");
+      await store.updateUser(u.login, { hwid: "", hwidResets: used + 1 });
+      await store.addHistory(u.login, "Сброс привязки HWID (" + (used + 1) + "/" + HWID_RESET_LIMIT + ")");
+      res.json({
+        ok: true,
+        resetsLeft: HWID_RESET_LIMIT - used - 1,
+        resetLimit: HWID_RESET_LIMIT
+      });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  }));
+
+  app.get("/api/download/loader", async (req, res) => {
+    try {
+      const token = String(req.query.t || "");
+      const user = token ? await store.getUserByToken(token) : null;
+      if (!user) return res.status(401).json({ ok: false, error: "Нужно войти в аккаунт" });
+      if (!subActive(user)) return res.status(403).json({ ok: false, error: "Нужна активная подписка" });
+      if (!fs.existsSync(LOADER_FILE)) {
+        return res.status(404).json({ ok: false, error: "Файл лоадера пока не загружен администратором" });
+      }
+      res.download(LOADER_FILE, "AethraLoader.exe");
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  });
 
   /* ------------------------------------------------------------------ chat */
   app.get("/api/chat", async (req, res) => {

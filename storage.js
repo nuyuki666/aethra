@@ -274,6 +274,8 @@ class PgStore {
     await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar TEXT DEFAULT ''");
     await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_secret TEXT DEFAULT ''");
     await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_enabled BOOLEAN DEFAULT FALSE");
+    await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS hwid TEXT DEFAULT ''");
+    await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS hwid_resets INTEGER NOT NULL DEFAULT 0");
     return this;
   }
 
@@ -292,6 +294,8 @@ class PgStore {
       lastIp: r.last_ip || "",
       avatar: r.avatar || "",
       totpEnabled: !!r.totp_enabled,
+      hwid: r.hwid || "",
+      hwidResets: r.hwid_resets || 0,
       history: []
     };
   }
@@ -365,7 +369,8 @@ class PgStore {
       role: "role", banned: "banned", banReason: "ban_reason",
       lifetime: "lifetime", subUntil: "sub_until", lastLogin: "last_login",
       lastIp: "last_ip", email: "email", passHash: "pass_hash",
-      avatar: "avatar", totpSecret: "totp_secret", totpEnabled: "totp_enabled"
+      avatar: "avatar", totpSecret: "totp_secret", totpEnabled: "totp_enabled",
+      hwid: "hwid", hwidResets: "hwid_resets"
     };
     const sets = [];
     const params = [];

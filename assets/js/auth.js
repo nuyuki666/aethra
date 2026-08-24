@@ -596,6 +596,53 @@
     }).catch(function () {});
   }
 
+  /* --------------------------------------------------- HWID и лоадер */
+  async function refreshHwid() {
+    var r = await S.loaderInfo();
+    if (!r.ok) return;
+    var kv = $('[data-kv="hwid"]');
+    if (kv) kv.textContent = r.hwid ? r.hwidMasked : "Не привязан";
+    var badge = $("[data-hwid-badge]");
+    if (badge) {
+      badge.className = "badge" + (r.hwid ? " badge--ok" : "");
+      badge.textContent = r.hwid ? "HWID привязан" : "HWID не привязан";
+    }
+    var resets = $("[data-hwid-resets]");
+    if (resets) resets.textContent = r.resetsLeft + " / " + r.resetLimit;
+    var resetBtn = $("[data-hwid-reset]");
+    if (resetBtn) resetBtn.disabled = !r.hwid || r.resetsLeft <= 0;
+  }
+
+  function initHwid() {
+    var resetBtn = $("[data-hwid-reset]");
+    if (resetBtn) {
+      resetBtn.addEventListener("click", async function () {
+        resetBtn.disabled = true;
+        var r = await S.hwidReset();
+        if (!r.ok) { toast(r.error || "Ошибка", "bad"); refreshHwid(); return; }
+        toast("HWID сброшен. Следующий вход с любого ПК привяжет его заново");
+        refreshHwid();
+      });
+    }
+
+    var dl = $("[data-download-loader]");
+    if (dl) {
+      dl.addEventListener("click", function (e) {
+        e.preventDefault();
+        var t = S.hasToken();
+        if (!t) { toast("Войдите в аккаунт", "bad"); return; }
+        toast("Проверяем подписку…");
+        S.loaderInfo().then(function (r) {
+          if (r.ok && r.subActive) {
+            window.location.href = "/api/download/loader?t=" + encodeURIComponent(t);
+          } else {
+            toast("Нужна активная подписка — купите ключ во вкладке «Купить ключ»", "bad");
+          }
+        });
+      });
+    }
+  }
+
   /* ----------------------------------------------------------------- forms */
   function bindLiveValidation(inputs) {
     inputs.forEach(function (input) {
@@ -749,6 +796,8 @@
     bindDeauth();
     initChat(me);
     initAvatar();
+    initHwid();
+    refreshHwid();
     initLivePlayers();
     initBuyButtons(me);
     initTurnstile();

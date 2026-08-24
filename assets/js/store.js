@@ -140,6 +140,13 @@
       return api("/promo/use", { code: code });
     },
 
+    loaderInfo: function () {
+      return api("/loader/info");
+    },
+    hwidReset: function () {
+      return api("/hwid/reset", {});
+    },
+
     promosList: async function () {
       var r = await api("/admin/promos");
       return r && r.ok ? r.promos : [];

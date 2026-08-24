@@ -93,7 +93,7 @@
               <h1>Аккаунт</h1>
               <p>Ваш профиль, активность и данные аккаунта</p>
             </div>
-            <a class="btn btn--primary" href="#" download>
+            <a class="btn btn--primary" href="#" data-download-loader>
               <svg class="i"><use href="#i-download"></use></svg> Скачать лоадер
             </a>
           </div>
@@ -355,18 +355,18 @@
             <article class="card">
               <div class="panel-head">
                 <h3>Привязка оборудования</h3>
-                <span class="badge">HWID не привязан</span>
+                <span class="badge" data-hwid-badge>HWID не привязан</span>
               </div>
               <dl class="kv">
-                <div class="kv__row"><dt>Текущий HWID</dt><dd>—</dd></div>
-                <div class="kv__row"><dt>Сбросов доступно</dt><dd>0 / 0</dd></div>
+                <div class="kv__row"><dt>Текущий HWID</dt><dd data-kv="hwid">Не привязан</dd></div>
+                <div class="kv__row"><dt>Сбросов доступно</dt><dd><span data-hwid-resets>0 / 2</span></dd></div>
                 <div class="kv__row" style="border-bottom:0"><dt>Последний вход</dt><dd data-kv="last">—</dd></div>
               </dl>
               <div style="display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-5)">
                 <button class="btn btn--ghost btn--sm" type="button" data-copy="25">
                   <svg class="i"><use href="#i-copy"></use></svg> Скопировать ID
                 </button>
-                <button class="btn btn--danger btn--sm" type="button" aria-disabled="true">Сбросить HWID</button>
+                <button class="btn btn--danger btn--sm" type="button" data-hwid-reset>Сбросить HWID</button>
               </div>
             </article>
 
