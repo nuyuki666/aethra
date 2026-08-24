@@ -208,6 +208,10 @@
   /* ------------------------------------------------- nav: вход сохранён */
   function updateNavAuth(me) {
     if (!me) return;
+
+    $$("[data-guest-only]").forEach(function (el) { el.hidden = true; });
+    $$("[data-auth-only]").forEach(function (el) { el.hidden = false; });
+
     var actions = $(".nav__actions");
     if (actions && ($('a[href="login.html"]', actions) || $('a[href="register.html"]', actions))) {
       var toggle = $(".nav__toggle", actions);

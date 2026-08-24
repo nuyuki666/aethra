@@ -1278,8 +1278,15 @@ select.input optgroup {
 /* Плашки не переносятся — «HWID НЕ ПРИВЯЗАН» остаётся одной строкой */
 .badge { white-space: nowrap; }
 
-/* Таблицы админки: не сжимаемся в кашу, лучше скролл */
-.tbl { min-width: 860px; }
+/* Таблицы админки: компактно, без уезда за край */
+.tbl { min-width: 780px; }
+.tbl td { padding: var(--sp-2) var(--sp-3); }
+.cell-ellipsis {
+  max-width: 190px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* --------------------------------------------------------------------------
    Segmented control — выбор тарифа ключа

@@ -13,14 +13,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/css/tokens.css?v=9">
-<link rel="stylesheet" href="assets/css/app.css?v=9">
+<link rel="stylesheet" href="assets/css/tokens.css?v=10">
+<link rel="stylesheet" href="assets/css/app.css?v=10">
 
-<script defer src="assets/js/icons.js?v=9"></script>
-<script defer src="assets/js/liquid.js?v=9"></script>
-<script defer src="assets/js/app.js?v=9"></script>
-<script defer src="assets/js/store.js?v=9"></script>
-<script defer src="assets/js/auth.js?v=9"></script>
+<script defer src="assets/js/icons.js?v=10"></script>
+<script defer src="assets/js/liquid.js?v=10"></script>
+<script defer src="assets/js/app.js?v=10"></script>
+<script defer src="assets/js/store.js?v=10"></script>
+<script defer src="assets/js/auth.js?v=10"></script>
 </head>
 <body>
 
@@ -92,10 +92,13 @@
       </p>
 
       <div class="hero__cta" data-reveal>
-        <a class="btn btn--primary" href="register.html">
+        <a class="btn btn--primary" href="profile.html" data-auth-only hidden>
+          Личный кабинет <svg class="i"><use href="#i-arrow-right"></use></svg>
+        </a>
+        <a class="btn btn--primary" href="register.html" data-guest-only>
           Создать аккаунт <svg class="i"><use href="#i-arrow-right"></use></svg>
         </a>
-        <a class="btn btn--ghost" href="login.html">Войти в профиль</a>
+        <a class="btn btn--ghost" href="login.html" data-guest-only>Войти в профиль</a>
       </div>
 
       <div data-reveal>

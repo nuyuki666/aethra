@@ -114,7 +114,7 @@
 
     if (!users.length) {
       body.innerHTML =
-        '<tr><td colspan="8"><div class="empty" style="padding:var(--sp-5) 0">' +
+        '<tr><td colspan="7"><div class="empty" style="padding:var(--sp-5) 0">' +
         '<svg class="i"><use href="#i-inbox"></use></svg><p>Никого не найдено.</p></div></td></tr>';
       return;
     }
@@ -124,10 +124,10 @@
       var subCell;
       if (u.lifetime) subCell = '<span class="mono">Навсегда</span>';
       else if (u.subUntil && u.subUntil > Date.now()) {
-        subCell = '<span class="mono">' + S.fmtDateTime(u.subUntil) + "</span> " +
+        subCell = '<span class="mono">' + S.fmtShort(u.subUntil) + "</span> " +
                   '<small class="text-dim">(' + Math.ceil((u.subUntil - Date.now()) / 86400000) + " дн.)</small>";
       } else if (u.subUntil) {
-        subCell = '<span class="text-dim mono">Истекла ' + S.fmtDateTime(u.subUntil) + "</span>";
+        subCell = '<span class="text-dim mono">Истекла ' + S.fmtShort(u.subUntil) + "</span>";
       } else {
         subCell = '<span class="text-dim">Нет</span>';
       }
@@ -149,9 +149,8 @@
         "<tr>" +
         '<td class="mono text-dim">' + u.id + "</td>" +
         '<td><strong>' + esc(u.login) + "</strong></td>" +
-        '<td class="text-muted">' + esc(u.email) + "</td>" +
+        '<td class="text-muted cell-ellipsis">' + esc(u.email) + "</td>" +
         '<td class="mono text-dim">' + esc(u.lastIp || "—") + "</td>" +
-        '<td class="mono text-dim">' + S.fmtDateTime(u.regAt) + "</td>" +
         "<td>" + subCell + "</td>" +
         "<td>" + subBadge(u) + "</td>" +
         '<td><div class="tbl-actions">' + actions.join("") + "</div></td>" +

@@ -71,9 +71,17 @@
       " " + p(d.getHours()) + ":" + p(d.getMinutes());
   }
 
+  function fmtShort(ts) {
+    if (!ts) return "—";
+    var d = new Date(ts);
+    var p = function (n) { return (n < 10 ? "0" : "") + n; };
+    return p(d.getDate()) + "." + p(d.getMonth() + 1) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
+  }
+
   window.AethraStore = {
     PLANS: PLANS,
     fmtDateTime: fmtDateTime,
+    fmtShort: fmtShort,
     hasToken: getToken,
 
     register: async function (login, email, pass) {
