@@ -281,12 +281,36 @@
     });
   }
 
+  function initPasswordForm() {
+    var form = $('form[data-auth="password"]');
+    if (!form) return;
+    var inputs = $$("input[data-rule]", form);
+    bindLiveValidation(inputs);
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      if (!inputs.map(validate).every(Boolean)) return;
+      busy(form, true, "Сохраняем…");
+      var res = await S.changePassword($("#pwCurrent").value, $("#pwNew").value);
+      busy(form, false);
+
+      if (!res.ok) {
+        fieldError($("#pwCurrent"), res.error || "Ошибка");
+        toast(res.error || "Ошибка", "bad");
+        return;
+      }
+      form.reset();
+      toast("Пароль изменён. Не забудьте его!");
+    });
+  }
+
   async function boot() {
     if (!S) return;
     injectAdminLink(await handleGuards());
     initLoginForm();
     initRegisterForm();
     initKeyForm();
+    initPasswordForm();
   }
 
   boot();

@@ -224,6 +224,26 @@ async function main() {
     }
   }));
 
+  app.post("/api/password", requireAuth(async (req, res) => {
+    try {
+      const cur = String((req.body && req.body.currentPassword) || "");
+      const next = String((req.body && req.body.newPassword) || "");
+
+      if (next.length < 8 || next.length > 128) return bad(res, "Новый пароль: минимум 8 символов");
+
+      const hash = await store.getPasswordHash(req.user.login);
+      if (!hash || !verifyPass(cur, hash)) return bad(res, "Текущий пароль неверный");
+      if (cur === next) return bad(res, "Новый пароль совпадает со старым");
+
+      await store.updateUser(req.user.login, { passHash: hashPass(next) });
+      await store.addHistory(req.user.login, "Пароль изменён через профиль");
+      res.json({ ok: true });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  }));
+
   /* ----------------------------------------------------------------- admin */
   app.get("/api/admin/users", requireAdmin(async (req, res) => {
     res.json({ ok: true, users: await store.getAllUsers() });

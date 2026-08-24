@@ -1263,3 +1263,18 @@
   gap: var(--sp-2);
   flex-wrap: wrap;
 }
+.tbl-actions .btn { flex: none; }
+
+/* Нативный выпадающий список: читаемые пункты в тёмной теме */
+select.input { cursor: pointer; }
+select.input option,
+select.input optgroup {
+  background: var(--n-900);
+  color: var(--n-050);
+}
+
+/* Плашки не переносятся — «HWID НЕ ПРИВЯЗАН» остаётся одной строкой */
+.badge { white-space: nowrap; }
+
+/* Таблицы админки: не сжимаемся в кашу, лучше скролл */
+.tbl { min-width: 680px; }

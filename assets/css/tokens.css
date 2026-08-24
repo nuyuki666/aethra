@@ -5,6 +5,8 @@
 
 /* ---------- Layer 1: primitives ---------- */
 :root {
+  color-scheme: dark;
+
   /* Neutral ramp — cool-tinted, never pure #000 (OLED smear) */
   --n-950: #08090b;
   --n-925: #0b0d10;

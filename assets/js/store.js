@@ -104,6 +104,10 @@
       return api("/redeem", { code: code });
     },
 
+    changePassword: function (currentPassword, newPassword) {
+      return api("/password", { currentPassword: currentPassword, newPassword: newPassword });
+    },
+
     grant: async function (login, days) {
       return api("/admin/grant", { login: login, days: days == null ? null : parseInt(days, 10) });
     },
