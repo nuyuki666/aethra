@@ -34,6 +34,8 @@
     } catch (e) {}
   }
 
+  var offlineNotified = false;
+
   async function api(path, body, method) {
     var options = {
       method: method || (body !== undefined ? "POST" : "GET"),
@@ -47,7 +49,11 @@
     try {
       res = await fetch("/api" + path, options);
     } catch (e) {
-      return { ok: false, error: "Сервер недоступен. Запустите server.js (start.bat)" };
+      if (!offlineNotified) {
+        offlineNotified = true;
+        try { window.dispatchEvent(new CustomEvent("aethra:offline")); } catch (err) {}
+      }
+      return { ok: false, error: "Сервер недоступен. Если включен VPN/прокси — отключите его для этого сайта и обновите страницу" };
     }
 
     var data = null;

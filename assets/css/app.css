@@ -1445,3 +1445,28 @@ body.auth-ready .nav__actions { visibility: visible; }
   background: #fff;
   border-radius: var(--r-md);
 }
+
+/* Баннер «сервер недоступен» (обычно VPN/прокси-расширение) */
+.offline-banner {
+  position: fixed;
+  left: 50%;
+  bottom: var(--sp-5);
+  translate: -50% 0;
+  z-index: var(--z-overlay);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: min(640px, calc(100vw - var(--sp-6)));
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid rgba(244, 193, 92, 0.4);
+  border-radius: var(--r-md);
+  background: rgba(20, 16, 8, 0.96);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--sh-lg);
+  font-size: var(--fs-sm);
+  animation: toast-in var(--dur-slow) var(--ease-out) both;
+}
+.offline-banner .i { color: var(--warn); flex: none; }
+.offline-banner div { flex: 1; }
+.offline-banner b { color: var(--warn); }

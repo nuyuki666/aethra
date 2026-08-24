@@ -75,6 +75,23 @@
     }
   }
 
+  /* ------------------------------------------ баннер недоступности (VPN) */
+  function showOfflineBanner() {
+    if ($("[data-offline-banner]")) return;
+    var b = document.createElement("div");
+    b.className = "offline-banner";
+    b.setAttribute("data-offline-banner", "");
+    b.innerHTML =
+      '<svg class="i"><use href="#i-warn"></use></svg>' +
+      "<div><b>Сервер недоступен.</b> Если включен VPN или прокси-расширение " +
+      "(Юбуст VPN и похожие) — отключите их для этого сайта и обновите страницу.</div>" +
+      '<button class="btn btn--primary btn--sm" type="button" data-offline-reload>Обновить</button>' +
+      '<button class="btn btn--quiet btn--sm" type="button" data-offline-close aria-label="Скрыть">✕</button>';
+    document.body.appendChild(b);
+    $("[data-offline-reload]", b).addEventListener("click", function () { location.reload(); });
+    $("[data-offline-close]", b).addEventListener("click", function () { b.remove(); });
+  }
+
   /* ------------------------------------------------------------------- nav */
   function injectAdminLink(me) {
     if (!me || me.role !== "admin") return;
@@ -669,6 +686,7 @@
 
   async function boot() {
     if (!S) return;
+    window.addEventListener("aethra:offline", showOfflineBanner);
     var page = document.body.dataset.authPage;
     var me;
 
