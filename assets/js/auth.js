@@ -226,6 +226,77 @@
     });
   }
 
+  /* -------------------------------------------------------------- общий чат */
+  function initChat(me) {
+    var chat = $("[data-chat]");
+    if (!chat || !me) return;
+    var log = $(".chat__log", chat);
+    var form = $(".chat__form", chat);
+    var input = $("input", form);
+    var lastId = 0;
+    var cleared = false;
+
+    function time(ts) {
+      var d = new Date(ts);
+      var p = function (n) { return (n < 10 ? "0" : "") + n; };
+      return p(d.getHours()) + ":" + p(d.getMinutes());
+    }
+
+    function render(m) {
+      var el = document.createElement("div");
+      el.className = "chat__msg";
+      var av = document.createElement("div");
+      av.className = "avatar";
+      av.textContent = String(m.login).slice(0, 2).toUpperCase();
+      var wrap = document.createElement("div");
+      var author = document.createElement("div");
+      author.className = "chat__author";
+      var name = document.createElement("span");
+      name.textContent = "";
+      author.appendChild(document.createTextNode(m.login + (m.login === me.login ? " (вы)" : "")));
+      var stamp = document.createElement("span");
+      stamp.textContent = time(m.at);
+      author.appendChild(stamp);
+      var body = document.createElement("div");
+      body.className = "chat__body";
+      body.textContent = m.text;
+      wrap.appendChild(author);
+      wrap.appendChild(body);
+      el.appendChild(av);
+      el.appendChild(wrap);
+      return el;
+    }
+
+    async function load() {
+      var r = await S.chatGet(lastId);
+      if (!r.ok || !r.messages || !r.messages.length) return;
+      if (!cleared) { log.innerHTML = ""; cleared = true; }
+      r.messages.forEach(function (m) {
+        lastId = Math.max(lastId, m.id);
+        log.appendChild(render(m));
+      });
+      while (log.children.length > 80) log.removeChild(log.firstChild);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      var text = input.value.trim();
+      if (!text) return;
+      input.value = "";
+      var r = await S.chatSend(text);
+      if (!r.ok) {
+        toast(r.error || "Сообщение не отправлено", "bad");
+        input.value = text;
+        return;
+      }
+      await load();
+    });
+
+    load();
+    setInterval(load, 4000);
+  }
+
   /* ----------------------------------------------------------------- forms */
   function bindLiveValidation(inputs) {
     inputs.forEach(function (input) {
@@ -370,6 +441,7 @@
     injectAdminLink(me);
     updateNavAuth(me);
     bindDeauth();
+    initChat(me);
     initLoginForm();
     initRegisterForm();
     initKeyForm();

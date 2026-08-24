@@ -34,7 +34,7 @@ echo Адрес:  http://localhost:%PORT%
 echo Остановить - закройте это окно или нажмите Ctrl+C.
 echo.
 
-start "" /min cmd /c "timeout /t 3 /nobreak >nul & start "" http://localhost:%PORT%/index.html"
+start "" /min cmd /c "timeout /t 3 /nobreak >nul & start "" http://localhost:%PORT%/main"
 
 node server.js
 

@@ -564,51 +564,6 @@
     });
   }
 
-  /* ------------------------------------------------------------------- chat */
-  function initChat() {
-    var chat = $("[data-chat]");
-    if (!chat) return;
-    var log = $(".chat__log", chat);
-    var form = $(".chat__form", chat);
-    var input = $("input", form);
-
-    var seed = [
-      { a: "Ril1k", t: "12:04", m: "Кто-нибудь пробовал новую сборку на FunTime?" },
-      { a: "782", t: "12:06", m: "Да, полёт нормальный. Профиль legit не трогал." },
-      { a: "n0va", t: "12:09", m: "HWID привязался с первого раза, без ребута." }
-    ];
-
-    // simulate the network round-trip the skeletons stand in for
-    setTimeout(function () {
-      log.innerHTML = "";
-      seed.forEach(function (m) { append(m.a, m.t, m.m); });
-      log.scrollTop = log.scrollHeight;
-    }, 700);
-
-    function append(author, time, body) {
-      var el = document.createElement("div");
-      el.className = "chat__msg";
-      el.innerHTML =
-        '<div class="avatar"></div><div><div class="chat__author"></div><div class="chat__body"></div></div>';
-      $(".avatar", el).textContent = author.slice(0, 2).toUpperCase();
-      $(".chat__author", el).innerHTML = "<span></span>";
-      $(".chat__author", el).insertBefore(document.createTextNode(author), $(".chat__author span", el));
-      $(".chat__author span", el).textContent = time;
-      $(".chat__body", el).textContent = body;
-      log.appendChild(el);
-    }
-
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      var text = input.value.trim();
-      if (!text) return;
-      var now = new Date();
-      append("awdawd", ("0" + now.getHours()).slice(-2) + ":" + ("0" + now.getMinutes()).slice(-2), text);
-      log.scrollTop = log.scrollHeight;
-      input.value = "";
-    });
-  }
-
   /* ------------------------------------------------------------------- misc */
   function initMisc() {
     $$("[data-year]").forEach(function (el) { el.textContent = new Date().getFullYear(); });
@@ -636,7 +591,6 @@
     initTabs();
     initCopy();
     initForms();
-    initChat();
     initMisc();
   }
 

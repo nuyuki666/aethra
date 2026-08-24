@@ -104,6 +104,13 @@
       return api("/redeem", { code: code });
     },
 
+    chatGet: async function (after) {
+      return api("/chat?after=" + (parseInt(after, 10) || 0));
+    },
+    chatSend: function (text) {
+      return api("/chat", { text: text });
+    },
+
     changePassword: function (currentPassword, newPassword) {
       return api("/password", { currentPassword: currentPassword, newPassword: newPassword });
     },

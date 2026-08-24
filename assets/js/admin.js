@@ -300,7 +300,7 @@
     $$("[data-admin-logout]").forEach(function (btn) {
       btn.addEventListener("click", async function () {
         await S.logout();
-        location.replace("index.html");
+        location.replace("/main");
       });
     });
   }

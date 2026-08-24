@@ -25,6 +25,7 @@ class FileStore {
     ["users", "keys", "sessions"].forEach(k => {
       if (!Array.isArray(this.data[k])) this.data[k] = [];
     });
+    if (!Array.isArray(this.data.messages)) this.data.messages = [];
     if (!this.data.history || typeof this.data.history !== "object") this.data.history = {};
     this.persist();
     return this;
@@ -153,6 +154,22 @@ class FileStore {
   async getAllUsers() {
     return this.data.users.map(u => this.pub(u));
   }
+
+  async getChatMessages(after) {
+    return this.data.messages
+      .filter(m => m.id > (parseInt(after, 10) || 0))
+      .slice(-50)
+      .map(m => ({ ...m }));
+  }
+
+  async addChatMessage(login, text) {
+    const id = this.data.messages.reduce((m, x) => Math.max(m, x.id), 0) + 1;
+    const msg = { id, login, text: String(text).slice(0, 240), at: Date.now() };
+    this.data.messages.push(msg);
+    if (this.data.messages.length > 500) this.data.messages = this.data.messages.slice(-300);
+    this.persist();
+    return msg;
+  }
 }
 
 /* ==========================================================================
@@ -197,6 +214,12 @@ class PgStore {
       token TEXT PRIMARY KEY,
       login TEXT NOT NULL,
       created_at BIGINT NOT NULL
+    )`);
+    await this.pool.query(`CREATE TABLE IF NOT EXISTS messages (
+      id SERIAL PRIMARY KEY,
+      login TEXT NOT NULL,
+      text TEXT NOT NULL,
+      at BIGINT NOT NULL
     )`);
     return this;
   }
@@ -377,6 +400,24 @@ class PgStore {
 
   async getAllUsers() {
     return this._userRows("ORDER BY id ASC", []);
+  }
+
+  async getChatMessages(after) {
+    const a = parseInt(after, 10) || 0;
+    const query = a > 0
+      ? "SELECT id, login, text, at FROM messages WHERE id > $1 ORDER BY id ASC LIMIT 100"
+      : "SELECT * FROM (SELECT id, login, text, at FROM messages ORDER BY id DESC LIMIT 50) t ORDER BY id ASC";
+    const res = await this.pool.query(query, a > 0 ? [a] : []);
+    return res.rows.map(r => ({ id: r.id, login: r.login, text: r.text, at: Number(r.at) }));
+  }
+
+  async addChatMessage(login, text) {
+    const res = await this.pool.query(
+      "INSERT INTO messages (login, text, at) VALUES ($1,$2,$3) RETURNING id, login, text, at",
+      [login, String(text).slice(0, 240), Date.now()]
+    );
+    const r = res.rows[0];
+    return { id: r.id, login: r.login, text: r.text, at: Number(r.at) };
   }
 }
 

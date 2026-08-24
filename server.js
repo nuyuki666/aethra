@@ -244,6 +244,29 @@ async function main() {
     }
   }));
 
+  /* ------------------------------------------------------------------ chat */
+  app.get("/api/chat", async (req, res) => {
+    try {
+      const after = parseInt(req.query.after, 10) || 0;
+      res.json({ ok: true, messages: await store.getChatMessages(after) });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  });
+
+  app.post("/api/chat", requireAuth(async (req, res) => {
+    try {
+      const text = String((req.body && req.body.text) || "").trim().slice(0, 240);
+      if (!text) return bad(res, "Пустое сообщение");
+      const msg = await store.addChatMessage(req.user.login, text);
+      res.json({ ok: true, message: msg });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  }));
+
   /* ----------------------------------------------------------------- admin */
   app.get("/api/admin/users", requireAdmin(async (req, res) => {
     res.json({ ok: true, users: await store.getAllUsers() });
@@ -372,6 +395,9 @@ async function main() {
   }));
 
   /* ---------------------------------------------------------------- static */
+  app.get("/main", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
+  app.get("/index.html", (req, res) => res.redirect(301, "/main"));
+
   app.use(express.static(__dirname, {
     extensions: ["html"],
     setHeaders(res, filePath) {
