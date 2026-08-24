@@ -151,8 +151,8 @@
       var r = await api("/admin/promos");
       return r && r.ok ? r.promos : [];
     },
-    makePromos: async function (percent, count) {
-      var r = await api("/admin/promos", { percent: percent, count: count });
+    makePromos: async function (percent, count, maxUses) {
+      var r = await api("/admin/promos", { percent: percent, count: parseInt(count, 10), maxUses: parseInt(maxUses, 10) || 0 });
       return r && r.ok ? r : { ok: false, codes: [] };
     },
     removePromo: async function (code) {
@@ -173,8 +173,8 @@
       return api("/admin/unban", { login: login });
     },
 
-    makeKeys: async function (plan, count) {
-      var r = await api("/admin/keys", { plan: plan, count: parseInt(count, 10) });
+    makeKeys: async function (plan, count, maxUses) {
+      var r = await api("/admin/keys", { plan: plan, count: parseInt(count, 10), maxUses: parseInt(maxUses, 10) || 1 });
       return r && r.ok ? r.codes : [];
     },
     removeKey: async function (code) {

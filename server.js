@@ -208,7 +208,9 @@ async function main() {
 
       const key = await store.getKey(code);
       if (!key) return bad(res, "Ключ не найден");
-      if (key.usedBy) return bad(res, "Ключ уже активирован");
+      const maxUses = key.maxUses || 1;
+      if ((key.uses || 0) >= maxUses) return bad(res, "Лимит активаций ключа исчерпан");
+      if (key.usedBy && maxUses === 1) return bad(res, "Ключ уже активирован");
 
       const plan = PLANS[key.plan];
       if (!plan) return bad(res, "Неизвестный тариф ключа");
@@ -334,14 +336,17 @@ async function main() {
     try {
       const percent = parseInt((req.body && req.body.percent), 10);
       const count = parseInt((req.body && req.body.count), 10);
+      const maxUses = parseInt((req.body && req.body.maxUses), 10) || 0;
       if (!percent || percent < 1 || percent > 90) return bad(res, "Скидка: от 1 до 90%");
       if (!count || count < 1 || count > 50) return bad(res, "Количество: от 1 до 50");
+      if (maxUses < 0 || maxUses > 1000) return bad(res, "Лимит активаций: 0 (безлимит) или 1–1000");
 
       const codes = [];
       for (let i = 0; i < count; i++) codes.push(promoCode());
       await store.upsertPromos(codes.map(code => ({
         code,
         percent,
+        maxUses,
         createdAt: Date.now(),
         createdBy: req.user.login
       })));
@@ -638,8 +643,10 @@ async function main() {
     try {
       const planCode = String((req.body && req.body.plan) || "");
       const count = parseInt((req.body && req.body.count), 10);
+      const maxUses = parseInt((req.body && req.body.maxUses), 10) || 1;
       if (!PLANS[planCode]) return bad(res, "Неизвестный тариф");
       if (!count || count < 1 || count > 50) return bad(res, "Количество: от 1 до 50");
+      if (maxUses < 1 || maxUses > 100) return bad(res, "Активаций на ключ: от 1 до 100");
 
       const codes = [];
       for (let i = 0; i < count; i++) codes.push(keyCode());
@@ -647,7 +654,8 @@ async function main() {
         code,
         plan: planCode,
         createdAt: Date.now(),
-        createdBy: req.user.login
+        createdBy: req.user.login,
+        maxUses
       })));
       res.json({ ok: true, codes, plan: PLANS[planCode] });
     } catch (e) {

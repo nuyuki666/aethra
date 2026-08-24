@@ -12,15 +12,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/css/tokens.css?v=17">
-<link rel="stylesheet" href="assets/css/app.css?v=17">
+<link rel="stylesheet" href="assets/css/tokens.css?v=18">
+<link rel="stylesheet" href="assets/css/app.css?v=18">
 
-<script defer src="assets/js/icons.js?v=17"></script>
-<script defer src="assets/js/liquid.js?v=17"></script>
-<script defer src="assets/js/app.js?v=17"></script>
-<script defer src="assets/js/store.js?v=17"></script>
-<script defer src="assets/js/auth.js?v=17"></script>
-<script defer src="assets/js/admin.js?v=17"></script>
+<script defer src="assets/js/icons.js?v=18"></script>
+<script defer src="assets/js/liquid.js?v=18"></script>
+<script defer src="assets/js/app.js?v=18"></script>
+<script defer src="assets/js/store.js?v=18"></script>
+<script defer src="assets/js/auth.js?v=18"></script>
+<script defer src="assets/js/admin.js?v=18"></script>
 </head>
 <body data-auth-page="admin">
 
@@ -191,6 +191,10 @@
                 <label class="field__label" for="keyCount">Количество</label>
                 <input class="input" id="keyCount" type="number" min="1" max="50" value="5" inputmode="numeric">
               </div>
+              <div class="field">
+                <label class="field__label" for="keyMaxUses">Активаций на ключ</label>
+                <input class="input" id="keyMaxUses" type="number" min="1" max="100" value="1" inputmode="numeric">
+              </div>
               <button class="btn btn--primary" type="submit">
                 <svg class="i"><use href="#i-zap"></use></svg> Создать
               </button>
@@ -210,8 +214,9 @@
               <table class="tbl">
                 <thead>
                   <tr>
-                    <th>Ключ</th>
+                    <th>Код</th>
                     <th>Тариф</th>
+                    <th>Активации</th>
                     <th>Статус</th>
                     <th>Активировал</th>
                     <th>Создан</th>
@@ -248,6 +253,10 @@
                 <label class="field__label" for="promoCount">Количество</label>
                 <input class="input" id="promoCount" type="number" min="1" max="50" value="5" inputmode="numeric">
               </div>
+              <div class="field">
+                <label class="field__label" for="promoMaxUses">Лимит активаций (0 — ∞)</label>
+                <input class="input" id="promoMaxUses" type="number" min="0" max="1000" value="0" inputmode="numeric">
+              </div>
               <button class="btn btn--primary" type="submit">
                 <svg class="i"><use href="#i-spark"></use></svg> Создать
               </button>
@@ -269,6 +278,7 @@
                   <tr>
                     <th>Код</th>
                     <th>Скидка</th>
+                    <th>Лимит</th>
                     <th>Применений</th>
                     <th>Создан</th>
                     <th></th>

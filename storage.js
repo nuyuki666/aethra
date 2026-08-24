@@ -119,7 +119,9 @@ class FileStore {
         createdAt: k.createdAt,
         createdBy: k.createdBy,
         usedBy: null,
-        usedAt: null
+        usedAt: null,
+        maxUses: k.maxUses || 1,
+        uses: 0
       });
     }
     this.persist();
@@ -136,7 +138,10 @@ class FileStore {
 
   async consumeKey(code, login) {
     const k = await this.getKey(code);
-    if (!k || k.usedBy) return null;
+    if (!k) return null;
+    const max = k.maxUses || 1;
+    if ((k.uses || 0) >= max) return null;
+    k.uses = (k.uses || 0) + 1;
     k.usedBy = login;
     k.usedAt = Date.now();
     this.persist();
@@ -178,6 +183,7 @@ class FileStore {
         percent: p.percent,
         active: true,
         uses: 0,
+        maxUses: p.maxUses || 0,
         createdAt: p.createdAt,
         createdBy: p.createdBy
       });
@@ -191,13 +197,17 @@ class FileStore {
 
   async getPromo(code) {
     code = String(code || "").toUpperCase();
-    const p = this.data.promos.find(x => x.code === code && x.active);
+    const p = this.data.promos.find(x =>
+      x.code === code && x.active && ((x.maxUses || 0) === 0 || (x.uses || 0) < x.maxUses)
+    );
     return p ? { code: p.code, percent: p.percent } : null;
   }
 
   async incrPromoUse(code) {
     code = String(code || "").toUpperCase();
-    const p = this.data.promos.find(x => x.code === code);
+    const p = this.data.promos.find(x =>
+      x.code === code && x.active && ((x.maxUses || 0) === 0 || (x.uses || 0) < x.maxUses)
+    );
     if (!p) return false;
     p.uses = (p.uses || 0) + 1;
     this.persist();
@@ -276,6 +286,9 @@ class PgStore {
     await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS totp_enabled BOOLEAN DEFAULT FALSE");
     await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS hwid TEXT DEFAULT ''");
     await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS hwid_resets INTEGER NOT NULL DEFAULT 0");
+    await this.pool.query("ALTER TABLE keys ADD COLUMN IF NOT EXISTS max_uses INTEGER NOT NULL DEFAULT 1");
+    await this.pool.query("ALTER TABLE keys ADD COLUMN IF NOT EXISTS uses INTEGER NOT NULL DEFAULT 0");
+    await this.pool.query("ALTER TABLE promos ADD COLUMN IF NOT EXISTS max_uses INTEGER NOT NULL DEFAULT 0");
     return this;
   }
 
@@ -421,9 +434,9 @@ class PgStore {
   async upsertKeys(keys) {
     for (const k of keys) {
       await this.pool.query(
-        `INSERT INTO keys (code, plan, created_at, created_by)
-         VALUES ($1,$2,$3,$4) ON CONFLICT (code) DO NOTHING`,
-        [k.code, k.plan, k.createdAt, k.createdBy]
+        `INSERT INTO keys (code, plan, created_at, created_by, max_uses)
+         VALUES ($1,$2,$3,$4,$5) ON CONFLICT (code) DO NOTHING`,
+        [k.code, k.plan, k.createdAt, k.createdBy, k.maxUses || 1]
       );
     }
   }
@@ -435,7 +448,9 @@ class PgStore {
       createdAt: Number(r.created_at),
       createdBy: r.created_by,
       usedBy: r.used_by,
-      usedAt: r.used_at == null ? null : Number(r.used_at)
+      usedAt: r.used_at == null ? null : Number(r.used_at),
+      maxUses: r.max_uses == null ? 1 : Number(r.max_uses),
+      uses: r.uses == null ? 0 : Number(r.uses)
     };
   }
 
@@ -451,7 +466,9 @@ class PgStore {
 
   async consumeKey(code, login) {
     const res = await this.pool.query(
-      "UPDATE keys SET used_by = $2, used_at = $3 WHERE UPPER(code) = UPPER($1) AND used_by IS NULL RETURNING *",
+      `UPDATE keys SET used_by = $2, used_at = $3, uses = uses + 1
+       WHERE UPPER(code) = UPPER($1) AND uses < max_uses
+       RETURNING *`,
       [String(code), login, Date.now()]
     );
     return res.rows[0] ? this.mapKey(res.rows[0]) : null;
@@ -487,8 +504,8 @@ class PgStore {
   async upsertPromos(list) {
     for (const p of list) {
       await this.pool.query(
-        "INSERT INTO promos (code, percent, active, uses, created_at, created_by) VALUES ($1,$2,TRUE,0,$3,$4) ON CONFLICT (code) DO NOTHING",
-        [p.code, p.percent, p.createdAt, p.createdBy]
+        "INSERT INTO promos (code, percent, active, uses, max_uses, created_at, created_by) VALUES ($1,$2,TRUE,0,$3,$4,$5) ON CONFLICT (code) DO NOTHING",
+        [p.code, p.percent, p.maxUses || 0, p.createdAt, p.createdBy]
       );
     }
   }
@@ -500,6 +517,7 @@ class PgStore {
       percent: r.percent,
       active: r.active,
       uses: r.uses,
+      maxUses: r.max_uses == null ? 0 : Number(r.max_uses),
       createdAt: Number(r.created_at),
       createdBy: r.created_by
     }));
@@ -507,7 +525,7 @@ class PgStore {
 
   async getPromo(code) {
     const res = await this.pool.query(
-      "SELECT code, percent FROM promos WHERE UPPER(code) = UPPER($1) AND active = TRUE",
+      "SELECT code, percent FROM promos WHERE UPPER(code) = UPPER($1) AND active = TRUE AND (max_uses = 0 OR uses < max_uses)",
       [String(code || "")]
     );
     return res.rows[0] ? { code: res.rows[0].code, percent: res.rows[0].percent } : null;
@@ -515,7 +533,7 @@ class PgStore {
 
   async incrPromoUse(code) {
     const res = await this.pool.query(
-      "UPDATE promos SET uses = uses + 1 WHERE UPPER(code) = UPPER($1) RETURNING code",
+      "UPDATE promos SET uses = uses + 1 WHERE UPPER(code) = UPPER($1) AND active = TRUE AND (max_uses = 0 OR uses < max_uses) RETURNING code",
       [String(code || "")]
     );
     return res.rowCount > 0;
