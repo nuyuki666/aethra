@@ -402,6 +402,7 @@ async function main() {
       res.json({
         ok: true,
         login: user.login,
+        avatar: user.avatar || "",
         lifetime: !!user.lifetime,
         subUntil: user.subUntil,
         till: user.lifetime ? "Lifetime" : S_fmtShort(user.subUntil)
@@ -462,6 +463,22 @@ async function main() {
         return res.status(404).json({ ok: false, error: "Файл лоадера пока не загружен администратором" });
       }
       res.download(LOADER_FILE, "AethraLoader.exe");
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  });
+
+  app.get("/api/avatars", async (req, res) => {
+    try {
+      const logins = String(req.query.logins || "")
+        .split(",").map(s => s.trim()).filter(Boolean).slice(0, 50);
+      const avatars = {};
+      for (const l of logins) {
+        const u = await store.getUserByLogin(l);
+        if (u && u.avatar) avatars[u.login] = u.avatar;
+      }
+      res.json({ ok: true, avatars });
     } catch (e) {
       console.error(e);
       res.status(500).json({ ok: false, error: "Ошибка сервера" });

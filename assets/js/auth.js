@@ -279,6 +279,7 @@
     var input = $("input", form);
     var lastId = 0;
     var cleared = false;
+    var avatarCache = {};
 
     function time(ts) {
       var d = new Date(ts);
@@ -291,12 +292,15 @@
       el.className = "chat__msg";
       var av = document.createElement("div");
       av.className = "avatar";
-      av.textContent = String(m.login).slice(0, 2).toUpperCase();
+      av.setAttribute("data-chat-avatar", m.login);
+      if (avatarCache[m.login]) {
+        av.innerHTML = '<img src="' + avatarCache[m.login] + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+      } else {
+        av.textContent = String(m.login).slice(0, 2).toUpperCase();
+      }
       var wrap = document.createElement("div");
       var author = document.createElement("div");
       author.className = "chat__author";
-      var name = document.createElement("span");
-      name.textContent = "";
       author.appendChild(document.createTextNode(m.login + (m.login === me.login ? " (вы)" : "")));
       var stamp = document.createElement("span");
       stamp.textContent = time(m.at);
@@ -309,6 +313,28 @@
       el.appendChild(av);
       el.appendChild(wrap);
       return el;
+    }
+
+    function refreshAvatars() {
+      var need = {};
+      $$("[data-chat-avatar]", log).forEach(function (el) {
+        var l = el.getAttribute("data-chat-avatar");
+        if (!avatarCache[l]) need[l] = true;
+      });
+      var logins = Object.keys(need);
+      if (!logins.length) return;
+      fetch("/api/avatars?logins=" + encodeURIComponent(logins.join(",")))
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d || !d.ok) return;
+          Object.keys(d.avatars).forEach(function (l) { avatarCache[l] = d.avatars[l]; });
+          $$("[data-chat-avatar]", log).forEach(function (el) {
+            var l = el.getAttribute("data-chat-avatar");
+            if (avatarCache[l] && !el.querySelector("img")) {
+              el.innerHTML = '<img src="' + avatarCache[l] + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+            }
+          });
+        }).catch(function () {});
     }
 
     async function load() {
@@ -333,6 +359,7 @@
       });
       while (log.children.length > 80) log.removeChild(log.firstChild);
       log.scrollTop = log.scrollHeight;
+      refreshAvatars();
     }
 
     form.addEventListener("submit", async function (e) {
