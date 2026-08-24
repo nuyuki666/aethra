@@ -1326,6 +1326,9 @@ select.input optgroup {
   .seg { grid-template-columns: 1fr; }
 }
 
+/* Атрибут hidden всегда сильнее любых display у классов */
+[hidden] { display: none !important; }
+
 /* Страницы входа/профиля: прячем контент, пока проверяется сессия — нет мигания */
 body[data-auth-page] main { visibility: hidden; }
 body[data-auth-page].auth-ready main { visibility: visible; }
