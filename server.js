@@ -4,6 +4,7 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
+const cookieParser = require("cookie-parser");
 const { createStore } = require("./storage");
 
 const PORT = process.env.PORT || 5177;
@@ -96,6 +97,7 @@ async function main() {
 
   const app = express();
   app.disable("x-powered-by");
+  app.use(cookieParser());
   app.use(express.json({ limit: "64kb" }));
 
   /* ------------------------------------------------------------ auth utils */
@@ -701,6 +703,58 @@ async function main() {
   /* ---------------------------------------------------------------- static */
   app.get("/main", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
   app.get("/index.html", (req, res) => res.redirect(301, "/main"));
+
+  // Лоадер доступен только авторизованным пользователям с подпиской
+  app.use("/loader", async (req, res, next) => {
+    try {
+      // Проверяем токен из cookie или заголовка
+      const token = req.cookies?.token || (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+      if (!token) {
+        return res.status(401).send(`
+          <!DOCTYPE html>
+          <html lang="ru">
+          <head><meta charset="utf-8"><title>Требуется авторизация</title></head>
+          <body><h1>Требуется авторизация</h1><p>Войдите в аккаунт для доступа к лоадеру.</p><a href="/login.html">Войти</a></body>
+          </html>
+        `);
+      }
+
+      const user = await store.getUserByToken(token);
+      if (!user) {
+        return res.status(401).send(`
+          <!DOCTYPE html>
+          <html lang="ru">
+          <head><meta charset="utf-8"><title>Сессия истекла</title></head>
+          <body><h1>Сессия истекла</h1><p>Войдите в аккаунт снова.</p><a href="/login.html">Войти</a></body>
+          </html>
+        `);
+      }
+
+      if (!subActive(user)) {
+        return res.status(403).send(`
+          <!DOCTYPE html>
+          <html lang="ru">
+          <head><meta charset="utf-8"><title>Нет подписки</title></head>
+          <body><h1>Нужна активная подписка</h1><p>Активируйте ключ в профиле для доступа к лоадеру.</p><a href="/profile.html#panel-subscription">Активировать ключ</a></body>
+          </html>
+        `);
+      }
+
+      // Пользователь авторизован и имеет подписку
+      next();
+    } catch (e) {
+      console.error(e);
+      res.status(500).send("Ошибка сервера");
+    }
+  });
+
+  app.use("/loader", express.static(path.join(__dirname, "loader"), {
+    setHeaders(res, filePath) {
+      if (/\.(js|css)$/i.test(filePath)) {
+        res.setHeader("Cache-Control", "no-cache");
+      }
+    }
+  }));
 
   app.use(express.static(__dirname, {
     extensions: ["html"],

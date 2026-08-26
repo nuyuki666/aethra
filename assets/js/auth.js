@@ -662,9 +662,10 @@
         toast("Проверяем подписку…");
         S.loaderInfo().then(function (r) {
           if (r.ok && r.subActive) {
-            window.location.href = "/api/download/loader?t=" + encodeURIComponent(t);
+            // Открываем веб-версию лоадера в новой вкладке
+            window.open("/loader/index.html", "_blank");
           } else {
-            toast("Нужна активная подписка — купите ключ во вкладке «Купить ключ»", "bad");
+            toast("Нужна активная подписку — купите ключ во вкладке «Купить ключ»", "bad");
           }
         });
       });
