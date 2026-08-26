@@ -114,7 +114,7 @@
 
     if (!users.length) {
       body.innerHTML =
-        '<tr><td colspan="7"><div class="empty" style="padding:var(--sp-5) 0">' +
+        '<tr><td colspan="8"><div class="empty" style="padding:var(--sp-5) 0">' +
         '<svg class="i"><use href="#i-inbox"></use></svg><p>Никого не найдено.</p></div></td></tr>';
       return;
     }
@@ -226,17 +226,25 @@
     if (tableEl) tableEl.hidden = keys.length === 0;
 
     body.innerHTML = keys.map(function (k) {
-      var used = !!k.usedBy;
+      var max = k.maxUses || 1;
+      var uses = k.uses || 0;
+      var exhausted = uses >= max;
+      var status = max > 1
+        ? (exhausted ? '<span class="badge badge--bad">Исчерпан</span>' : '<span class="badge badge--ok">Свободен</span>')
+        : (k.usedBy ? '<span class="badge badge--warn">Использован</span>' : '<span class="badge badge--ok">Свободен</span>');
+      var planName = k.plan === "custom" ? "Своё · " + (k.days || "?") + " дн." : planLabel(k.plan);
+
       return (
         "<tr>" +
         '<td class="mono">' + k.code + "</td>" +
-        "<td>" + esc(planLabel(k.plan)) + "</td>" +
-        "<td>" + (used ? '<span class="badge badge--warn">Использован</span>' : '<span class="badge badge--ok">Свободен</span>') + "</td>" +
-        '<td class="text-muted">' + (used ? esc(k.usedBy) : "—") + "</td>" +
+        "<td>" + esc(planName) + "</td>" +
+        '<td class="mono text-dim">' + uses + " / " + max + "</td>" +
+        "<td>" + status + "</td>" +
+        '<td class="text-muted">' + (k.usedBy ? esc(k.usedBy) : "—") + "</td>" +
         '<td class="mono text-dim">' + S.fmtDateTime(k.createdAt) + "</td>" +
         '<td><div class="tbl-actions">' +
-        '<button class="btn btn--ghost btn--sm" data-key-copy="' + k.code + '" aria-label="Скопировать ключ"><svg class="i"><use href="#i-copy"></use></svg></button>' +
-        '<button class="btn btn--danger btn--sm" data-key-del="' + k.code + '" aria-label="Удалить ключ"><svg class="i"><use href="#i-close"></use></svg></button>' +
+        '<button class="btn btn--ghost btn--xs" data-key-copy="' + k.code + '" aria-label="Скопировать ключ"><svg class="i"><use href="#i-copy"></use></svg></button>' +
+        '<button class="btn btn--danger btn--xs" data-key-del="' + k.code + '" aria-label="Удалить ключ"><svg class="i"><use href="#i-close"></use></svg></button>' +
         "</div></td>" +
         "</tr>"
       );
@@ -254,6 +262,8 @@
           b.classList.toggle("is-on", on);
           b.setAttribute("aria-pressed", String(on));
         });
+        var daysField = $("#keyDaysField");
+        if (daysField) daysField.hidden = btn.dataset.value !== "custom";
       });
     }
 
@@ -265,10 +275,17 @@
         var plan = planBtn ? planBtn.dataset.value : "month";
         var count = parseInt($("#keyCount").value, 10) || 1;
         count = Math.max(1, Math.min(count, 50));
+        var maxUses = Math.max(1, Math.min(parseInt($("#keyMaxUses").value, 10) || 1, 100));
+        var days = 0;
+        if (plan === "custom") {
+          days = Math.max(1, Math.min(parseInt($("#keyDays").value, 10) || 0, 3650));
+          if (!days) { toast("Укажи срок в днях", "bad"); return; }
+        }
 
-        var made = await S.makeKeys(plan, count);
-        if (made.length) toast("Создано ключей: " + made.length + " («" + planLabel(plan) + "»)");
-        else toast("Не удалось создать ключи. Вы вошли как админ?", "bad");
+        var made = await S.makeKeys(plan, count, maxUses, days);
+        var planName = plan === "custom" ? "Своё · " + days + " дн." : planLabel(plan);
+        if (made.ok) toast("Создано ключей: " + made.codes.length + " («" + planName + "», " + maxUses + " акт.)");
+        else toast(made.error || "Не удалось создать ключи", "bad");
         await renderKeys();
         await renderStats();
       });
@@ -309,10 +326,12 @@
     if (tableEl) tableEl.hidden = promos.length === 0;
 
     body.innerHTML = promos.map(function (p) {
+      var limit = (p.maxUses || 0) === 0 ? "∞" : (p.uses || 0) + " / " + p.maxUses;
       return (
         "<tr>" +
         '<td class="mono">' + p.code + "</td>" +
         '<td><span class="badge badge--ok">−' + p.percent + "%</span></td>" +
+        '<td class="mono text-dim">' + limit + "</td>" +
         '<td class="mono text-dim">' + (p.uses || 0) + "</td>" +
         '<td class="mono text-dim">' + S.fmtDateTime(p.createdAt) + "</td>" +
         '<td><div class="tbl-actions">' +
@@ -332,9 +351,10 @@
         var percent = parseInt($("#promoPercent").value, 10) || 0;
         var count = parseInt($("#promoCount").value, 10) || 1;
         count = Math.max(1, Math.min(count, 50));
+        var maxUses = Math.max(0, Math.min(parseInt($("#promoMaxUses").value, 10) || 0, 1000));
 
-        var r = await S.makePromos(percent, count);
-        if (r.ok) toast("Создано промокодов: " + r.codes.length + " (−" + percent + "%)");
+        var r = await S.makePromos(percent, count, maxUses);
+        if (r.ok) toast("Создано промокодов: " + r.codes.length + " (−" + percent + "%, " + (maxUses || "∞") + " акт.)");
         else toast("Не удалось создать промокоды", "bad");
         await renderPromos();
       });

@@ -180,7 +180,7 @@
         maxUses: parseInt(maxUses, 10) || 1,
         days: parseInt(days, 10) || 0
       });
-      return r && r.ok ? r.codes : [];
+      return r && r.ok ? { ok: true, codes: r.codes } : { ok: false, error: (r && r.error) || "Ошибка" };
     },
     removeKey: async function (code) {
       var r = await api("/admin/keys/delete", { code: code });
