@@ -441,7 +441,11 @@ async function main() {
       if (user.hwid && user.hwid !== hwid) {
         return res.status(403).json({ ok: false, hwidMismatch: true, error: "HWID не совпадает" });
       }
-      if (!user.hwid && hwid) await store.updateUser(user.login, { hwid });
+      if (!user.hwid && hwid) {
+        await store.updateUser(user.login, { hwid });
+        await store.addHistory(user.login, "HWID привязан через лоадер");
+      }
+      await store.updateUser(user.login, { lastLogin: Date.now(), lastIp: clientIp(req) });
 
       res.json({
         ok: true,
