@@ -662,8 +662,9 @@
           toast("Войдите в аккаунт", "bad"); 
           return; 
         }
-        // Открываем лоадер - он сам проверит подписку внутри
-        window.open("/loader/index.html", "_blank");
+        // Скачиваем EXE лоадер
+        window.location.href = "/downloads/AethraLoader.exe";
+        toast("Загрузка началась...");
       });
     }
   }
