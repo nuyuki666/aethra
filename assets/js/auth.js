@@ -658,16 +658,12 @@
       dl.addEventListener("click", function (e) {
         e.preventDefault();
         var t = S.hasToken();
-        if (!t) { toast("Войдите в аккаунт", "bad"); return; }
-        toast("Проверяем подписку…");
-        S.loaderInfo().then(function (r) {
-          if (r.ok && r.subActive) {
-            // Открываем веб-версию лоадера в новой вкладке
-            window.open("/loader/index.html", "_blank");
-          } else {
-            toast("Нужна активная подписку — купите ключ во вкладке «Купить ключ»", "bad");
-          }
-        });
+        if (!t) { 
+          toast("Войдите в аккаунт", "bad"); 
+          return; 
+        }
+        // Открываем лоадер - он сам проверит подписку внутри
+        window.open("/loader/index.html", "_blank");
       });
     }
   }

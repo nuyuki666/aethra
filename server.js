@@ -704,7 +704,7 @@ async function main() {
   app.get("/main", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
   app.get("/index.html", (req, res) => res.redirect(301, "/main"));
 
-  // Лоадер доступен только авторизованным пользователям с подпиской
+  // Лоадер доступен всем авторизованным пользователям (проверка подписки внутри лоадера)
   app.use("/loader", async (req, res, next) => {
     try {
       // Проверяем токен из cookie или заголовка
@@ -730,17 +730,7 @@ async function main() {
         `);
       }
 
-      if (!subActive(user)) {
-        return res.status(403).send(`
-          <!DOCTYPE html>
-          <html lang="ru">
-          <head><meta charset="utf-8"><title>Нет подписки</title></head>
-          <body><h1>Нужна активная подписка</h1><p>Активируйте ключ в профиле для доступа к лоадеру.</p><a href="/profile.html#panel-subscription">Активировать ключ</a></body>
-          </html>
-        `);
-      }
-
-      // Пользователь авторизован и имеет подписку
+      // Пользователь авторизован - лоадер сам проверит подписку
       next();
     } catch (e) {
       console.error(e);
