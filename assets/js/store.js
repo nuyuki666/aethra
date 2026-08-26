@@ -173,8 +173,13 @@
       return api("/admin/unban", { login: login });
     },
 
-    makeKeys: async function (plan, count, maxUses) {
-      var r = await api("/admin/keys", { plan: plan, count: parseInt(count, 10), maxUses: parseInt(maxUses, 10) || 1 });
+    makeKeys: async function (plan, count, maxUses, days) {
+      var r = await api("/admin/keys", {
+        plan: plan,
+        count: parseInt(count, 10),
+        maxUses: parseInt(maxUses, 10) || 1,
+        days: parseInt(days, 10) || 0
+      });
       return r && r.ok ? r.codes : [];
     },
     removeKey: async function (code) {

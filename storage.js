@@ -121,7 +121,8 @@ class FileStore {
         usedBy: null,
         usedAt: null,
         maxUses: k.maxUses || 1,
-        uses: 0
+        uses: 0,
+        days: k.days == null ? null : k.days
       });
     }
     this.persist();
@@ -288,6 +289,7 @@ class PgStore {
     await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS hwid_resets INTEGER NOT NULL DEFAULT 0");
     await this.pool.query("ALTER TABLE keys ADD COLUMN IF NOT EXISTS max_uses INTEGER NOT NULL DEFAULT 1");
     await this.pool.query("ALTER TABLE keys ADD COLUMN IF NOT EXISTS uses INTEGER NOT NULL DEFAULT 0");
+    await this.pool.query("ALTER TABLE keys ADD COLUMN IF NOT EXISTS days INTEGER");
     await this.pool.query("ALTER TABLE promos ADD COLUMN IF NOT EXISTS max_uses INTEGER NOT NULL DEFAULT 0");
     return this;
   }
@@ -434,9 +436,9 @@ class PgStore {
   async upsertKeys(keys) {
     for (const k of keys) {
       await this.pool.query(
-        `INSERT INTO keys (code, plan, created_at, created_by, max_uses)
-         VALUES ($1,$2,$3,$4,$5) ON CONFLICT (code) DO NOTHING`,
-        [k.code, k.plan, k.createdAt, k.createdBy, k.maxUses || 1]
+        `INSERT INTO keys (code, plan, created_at, created_by, max_uses, days)
+         VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (code) DO NOTHING`,
+        [k.code, k.plan, k.createdAt, k.createdBy, k.maxUses || 1, k.days == null ? null : k.days]
       );
     }
   }
@@ -450,7 +452,8 @@ class PgStore {
       usedBy: r.used_by,
       usedAt: r.used_at == null ? null : Number(r.used_at),
       maxUses: r.max_uses == null ? 1 : Number(r.max_uses),
-      uses: r.uses == null ? 0 : Number(r.uses)
+      uses: r.uses == null ? 0 : Number(r.uses),
+      days: r.days == null ? null : Number(r.days)
     };
   }
 

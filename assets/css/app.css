@@ -1293,7 +1293,7 @@ select.input optgroup {
    -------------------------------------------------------------------------- */
 .seg {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--sp-2);
 }
 .seg__btn {

@@ -212,23 +212,34 @@ async function main() {
       if ((key.uses || 0) >= maxUses) return bad(res, "Лимит активаций ключа исчерпан");
       if (key.usedBy && maxUses === 1) return bad(res, "Ключ уже активирован");
 
-      const plan = PLANS[key.plan];
-      if (!plan) return bad(res, "Неизвестный тариф ключа");
+      let days = null;
+      let label = "";
+      if (key.plan === "custom") {
+        days = parseInt(key.days, 10);
+        if (!days || days < 1) return bad(res, "У ключа не указан срок");
+        label = "Своё (" + days + " дн.)";
+      } else {
+        const plan = PLANS[key.plan];
+        if (!plan) return bad(res, "Неизвестный тариф ключа");
+        days = plan.days;
+        label = plan.label;
+      }
 
       const consumed = await store.consumeKey(code, req.user.login);
       if (!consumed) return bad(res, "Ключ уже активирован");
 
-      if (plan.days == null) {
-        await store.updateUser(req.user.login, { lifetime: true, subUntil: null });
-        await store.addHistory(req.user.login, "Активирован ключ «Навсегда»");
+      const me = req.user;
+      if (days == null) {
+        await store.updateUser(me.login, { lifetime: true, subUntil: null });
+        await store.addHistory(me.login, "Активирован ключ «Навсегда»");
       } else {
-        const base = Math.max(req.user.subUntil || 0, Date.now());
-        await store.updateUser(req.user.login, { subUntil: base + plan.days * DAY });
-        await store.addHistory(req.user.login, `Активирован ключ «${plan.label}» (+${plan.days} дн.)`);
+        const base = Math.max(me.subUntil || 0, Date.now());
+        await store.updateUser(me.login, { subUntil: base + days * DAY });
+        await store.addHistory(me.login, "Активирован ключ «" + label + "» (+" + days + " дн.)");
       }
 
-      const user = await store.getUserByLogin(req.user.login);
-      res.json({ ok: true, plan, user });
+      const user = await store.getUserByLogin(me.login);
+      res.json({ ok: true, plan: { label, days }, user });
     } catch (e) {
       console.error(e);
       res.status(500).json({ ok: false, error: "Ошибка сервера" });
@@ -648,9 +659,15 @@ async function main() {
       const planCode = String((req.body && req.body.plan) || "");
       const count = parseInt((req.body && req.body.count), 10);
       const maxUses = parseInt((req.body && req.body.maxUses), 10) || 1;
-      if (!PLANS[planCode]) return bad(res, "Неизвестный тариф");
+      const days = parseInt((req.body && req.body.days), 10) || 0;
       if (!count || count < 1 || count > 50) return bad(res, "Количество: от 1 до 50");
       if (maxUses < 1 || maxUses > 100) return bad(res, "Активаций на ключ: от 1 до 100");
+
+      if (planCode === "custom") {
+        if (days < 1 || days > 3650) return bad(res, "Срок: от 1 до 3650 дней");
+      } else if (!PLANS[planCode]) {
+        return bad(res, "Неизвестный тариф");
+      }
 
       const codes = [];
       for (let i = 0; i < count; i++) codes.push(keyCode());
@@ -659,9 +676,10 @@ async function main() {
         plan: planCode,
         createdAt: Date.now(),
         createdBy: req.user.login,
-        maxUses
+        maxUses,
+        days: planCode === "custom" ? days : null
       })));
-      res.json({ ok: true, codes, plan: PLANS[planCode] });
+      res.json({ ok: true, codes, plan: planCode === "custom" ? { label: "Своё (" + days + " дн.)", days } : PLANS[planCode] });
     } catch (e) {
       console.error(e);
       res.status(500).json({ ok: false, error: "Ошибка сервера" });
