@@ -854,6 +854,20 @@
     });
   }
 
+  /* ---------------------------------------------------- покупка сброса HWID */
+  function initBuyHwidReset() {
+    $$("[data-buy-hwid-reset]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        if (!S.current()) {
+          toast("Войдите в аккаунт", "bad");
+          setTimeout(function () { location.href = "login.html"; }, 600);
+          return;
+        }
+        openBuyModal("hwid-reset");
+      });
+    });
+  }
+
   async function boot() {
     if (!S) return;
     window.addEventListener("aethra:offline", showOfflineBanner);
@@ -880,6 +894,7 @@
     refreshHwid();
     initLivePlayers();
     initBuyButtons(me);
+    initBuyHwidReset();
     initTurnstile();
     initLoginForm();
     initRegisterForm();
@@ -889,16 +904,3 @@
 
   boot();
 })();
-
-  /* ---------------------------------------------------- покупка сброса HWID */
-  function initBuyHwidReset() {
-    var btn = $("[data-buy-hwid-reset]");
-    if (!btn) return;
-    btn.addEventListener("click", function () {
-      var info = PLAN_INFO["hwid-reset"];
-      if (!info) return;
-      openBuyModal(info, "hwid-reset");
-    });
-  }
-  
-  initBuyHwidReset();
