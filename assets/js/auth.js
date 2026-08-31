@@ -28,7 +28,7 @@
   var METHODS = [
     { id: "support", name: "Через техподдержку", icon: "message-circle", desc: "Любой удобный способ", link: PAY.support, type: "key", format: "Ключ AETH-XXXX-XXXX" },
     { id: "playerok", name: "Playerok", icon: "gamepad", desc: "Игровая платёжная система", link: PAY.playerok, type: "key", format: "Ключ AETH-XXXX-XXXX" },
-    { id: "freekassa", name: "FreeKassa", icon: "wallet", desc: "Карты · Электронные кошельки", link: PAY.freekassa, type: "key", format: "Ключ AETH-XXXX-XXXX" }
+    { id: "freekassa", name: "FreeKassa", icon: "wallet", desc: "Карты · Электронные кошельки", link: PAY.freekassa, type: "auto", format: "Моментальная выдача" }
   ];
 
   var RULES = {

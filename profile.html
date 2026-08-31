@@ -12,14 +12,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/css/tokens.css?v=27">
-<link rel="stylesheet" href="assets/css/app.css?v=27">
+<link rel="stylesheet" href="assets/css/tokens.css?v=28">
+<link rel="stylesheet" href="assets/css/app.css?v=28">
 
-<script defer src="assets/js/icons.js?v=27"></script>
-<script defer src="assets/js/liquid.js?v=27"></script>
-<script defer src="assets/js/app.js?v=27"></script>
-<script defer src="assets/js/store.js?v=27"></script>
-<script defer src="assets/js/auth.js?v=27"></script>
+<script defer src="assets/js/icons.js?v=28"></script>
+<script defer src="assets/js/liquid.js?v=28"></script>
+<script defer src="assets/js/app.js?v=28"></script>
+<script defer src="assets/js/store.js?v=28"></script>
+<script defer src="assets/js/auth.js?v=28"></script>
 </head>
 <body data-auth-page="profile">
 
@@ -271,7 +271,7 @@
                 <div class="payment-method__content">
                   <div class="payment-method__name">FreeKassa</div>
                   <div class="payment-method__desc">Карты · Электронные кошельки</div>
-                  <div class="payment-method__format"><span class="badge">AETH-XXXX-XXXX</span></div>
+                  <div class="payment-method__format"><span class="badge badge--ok">Моментальная выдача</span></div>
                 </div>
               </div>
             </div>
@@ -401,15 +401,28 @@
 
             <article class="card">
               <div class="panel-head">
-                <h3>Деавторизация</h3>
-                <span class="eyebrow">Это устройство</span>
+                <h3>Активные сессии</h3>
+                <span class="eyebrow">Все устройства</span>
               </div>
-              <p class="text-muted" style="font-size:var(--fs-sm)">
-                Выйти из аккаунта и стереть «Запомнить меня» на этом устройстве.
-                Автоматический вход при следующем посещении отключится — понадобится пароль.
+              
+              <div data-sessions-list>
+                <div class="session-item session-item--current">
+                  <div class="session-item__icon">
+                    <svg class="i i--lg"><use href="#i-monitor"></use></svg>
+                  </div>
+                  <div class="session-item__content">
+                    <div class="session-item__name">Текущее устройство</div>
+                    <div class="session-item__meta">Windows · Chrome · Последний вход: только что</div>
+                  </div>
+                  <span class="badge badge--ok">Активна</span>
+                </div>
+              </div>
+
+              <p class="text-muted" style="font-size:var(--fs-sm);margin-top:var(--sp-4)">
+                Выход из аккаунта на этом устройстве. Автоматический вход отключится — понадобится пароль.
               </p>
-              <button class="btn btn--danger" type="button" data-deauth style="margin-top:var(--sp-5)">
-                <svg class="i"><use href="#i-logout"></use></svg> Деавторизоваться
+              <button class="btn btn--danger" type="button" data-deauth style="margin-top:var(--sp-4)">
+                <svg class="i"><use href="#i-logout"></use></svg> Выйти с этого устройства
               </button>
             </article>
           </div>
