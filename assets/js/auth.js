@@ -653,18 +653,16 @@
       });
     }
 
-    var dl = $("[data-download-loader]");
-    if (dl) {
-      dl.addEventListener("click", function (e) {
+    var openLoader = $("[data-open-loader]");
+    if (openLoader) {
+      openLoader.addEventListener("click", function (e) {
         e.preventDefault();
-        var t = S.hasToken();
-        if (!t) { 
-          toast("Войдите в аккаунт", "bad"); 
-          return; 
+        if (!S.hasToken()) {
+          toast("Войдите в аккаунт", "bad");
+          return;
         }
-        // Скачиваем EXE лоадер
-        window.location.href = "/downloads/AethraLoader.exe";
-        toast("Загрузка началась...");
+        // Открываем лоадер в браузере (страница сама проверит подписку)
+        window.location.href = "/loader";
       });
     }
   }
