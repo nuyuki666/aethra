@@ -22,7 +22,7 @@
   };
   var METHODS = [
     { id: "support", name: "Через техподдержку", icon: "message-circle", desc: "Любой удобный способ оплаты", link: PAY.support },
-    { id: "playerok", name: "PlayerOK", icon: "gamepad", desc: "Игровая платёжная система", link: PAY.playerok },
+    { id: "playerok", name: "Playerok", icon: "gamepad", desc: "Игровая платёжная система", link: PAY.playerok },
     { id: "freekassa", name: "FreeKassa", icon: "credit-card", desc: "Карты · Электронные кошельки", link: PAY.freekassa }
   ];
 
@@ -385,12 +385,14 @@
   /* ------------------------------------------------------- живой счётчик */
   function initLivePlayers() {
     var el = $("[data-live-players]");
-    if (!el) return;
+    var purchasesEl = $("[data-monthly-purchases]");
+    if (!el && !purchasesEl) return;
     async function tick() {
       try {
         var r = await fetch("/api/public-stats");
         var d = await r.json();
-        if (d && typeof d.players === "number") el.textContent = d.players;
+        if (d && typeof d.players === "number" && el) el.textContent = d.players;
+        if (d && typeof d.purchases === "number" && purchasesEl) purchasesEl.textContent = d.purchases;
       } catch (e) {}
     }
     tick();

@@ -316,11 +316,17 @@ async function main() {
   app.get("/api/public-stats", async (req, res) => {
     try {
       const users = await store.getAllUsers();
+      const keys = await store.getAllKeys();
       const players = users.filter(u => u.role !== "admin" && !u.banned && subActive(u)).length;
-      res.json({ ok: true, players });
+      
+      // Покупки за последние 30 дней
+      const monthAgo = Date.now() - 30 * DAY;
+      const purchases = keys.filter(k => k.redeemedAt && k.redeemedAt >= monthAgo).length;
+      
+      res.json({ ok: true, players, purchases });
     } catch (e) {
       console.error(e);
-      res.status(500).json({ ok: false, players: 0 });
+      res.status(500).json({ ok: false, players: 0, purchases: 0 });
     }
   });
 

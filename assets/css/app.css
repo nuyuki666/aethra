@@ -856,8 +856,16 @@
   margin-bottom: var(--sp-4);
 }
 .footer ul { list-style: none; padding: 0; display: grid; gap: var(--sp-3); }
-.footer a { font-size: var(--fs-sm); color: var(--fg-muted); transition: color var(--dur-base) var(--ease-out); }
+.footer a { 
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-sm); 
+  color: var(--fg-muted); 
+  transition: color var(--dur-base) var(--ease-out); 
+}
 .footer a:hover { color: var(--fg); }
+.footer a .i { flex-shrink: 0; }
 .footer__base {
   display: flex;
   flex-wrap: wrap;
