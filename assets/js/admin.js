@@ -253,6 +253,8 @@
 
   function bindKeys() {
     var seg = $("[data-plan-seg]");
+    var productSeg = $("[data-product-seg]");
+    
     if (seg) {
       seg.addEventListener("click", function (e) {
         var btn = e.target.closest(".seg__btn");
@@ -267,12 +269,26 @@
       });
     }
 
+    if (productSeg) {
+      productSeg.addEventListener("click", function (e) {
+        var btn = e.target.closest(".seg__btn");
+        if (!btn) return;
+        $$(".seg__btn", productSeg).forEach(function (b) {
+          var on = b === btn;
+          b.classList.toggle("is-on", on);
+          b.setAttribute("aria-pressed", String(on));
+        });
+      });
+    }
+
     var form = $('form[data-keys-generate]');
     if (form) {
       form.addEventListener("submit", async function (e) {
         e.preventDefault();
         var planBtn = $(".seg__btn.is-on", seg);
         var plan = planBtn ? planBtn.dataset.value : "month";
+        var productBtn = productSeg ? $(".seg__btn.is-on", productSeg) : null;
+        var product = productBtn ? productBtn.dataset.value : "cs2";
         var count = parseInt($("#keyCount").value, 10) || 1;
         count = Math.max(1, Math.min(count, 50));
         var maxUses = Math.max(1, Math.min(parseInt($("#keyMaxUses").value, 10) || 1, 100));
@@ -282,9 +298,9 @@
           if (!days) { toast("Укажи срок в днях", "bad"); return; }
         }
 
-        var made = await S.makeKeys(plan, count, maxUses, days);
+        var made = await S.makeKeys(plan, count, maxUses, days, product);
         var planName = plan === "custom" ? "Своё · " + days + " дн." : planLabel(plan);
-        if (made.ok) toast("Создано ключей: " + made.codes.length + " («" + planName + "», " + maxUses + " акт.)");
+        if (made.ok) toast("Создано ключей: " + made.codes.length + " («" + planName + "», " + product + ", " + maxUses + " акт.)");
         else toast(made.error || "Не удалось создать ключи", "bad");
         await renderKeys();
         await renderStats();
@@ -344,17 +360,34 @@
   }
 
   function bindPromos() {
+    var productSeg = $("[data-promo-product-seg]");
+    
+    if (productSeg) {
+      productSeg.addEventListener("click", function (e) {
+        var btn = e.target.closest(".seg__btn");
+        if (!btn) return;
+        $$(".seg__btn", productSeg).forEach(function (b) {
+          var on = b === btn;
+          b.classList.toggle("is-on", on);
+          b.setAttribute("aria-pressed", String(on));
+        });
+      });
+    }
+
     var form = $('form[data-promos-generate]');
     if (form) {
       form.addEventListener("submit", async function (e) {
         e.preventDefault();
+        var productBtn = productSeg ? $(".seg__btn.is-on", productSeg) : null;
+        var product = productBtn ? productBtn.dataset.value : "all";
         var percent = parseInt($("#promoPercent").value, 10) || 0;
         var count = parseInt($("#promoCount").value, 10) || 1;
         count = Math.max(1, Math.min(count, 50));
         var maxUses = Math.max(0, Math.min(parseInt($("#promoMaxUses").value, 10) || 0, 1000));
 
-        var r = await S.makePromos(percent, count, maxUses);
-        if (r.ok) toast("Создано промокодов: " + r.codes.length + " (−" + percent + "%, " + (maxUses || "∞") + " акт.)");
+        var r = await S.makePromos(percent, count, maxUses, product);
+        var productName = product === "all" ? "все товары" : product.toUpperCase();
+        if (r.ok) toast("Создано промокодов: " + r.codes.length + " (−" + percent + "%, " + productName + ", " + (maxUses || "∞") + " акт.)");
         else toast("Не удалось создать промокоды", "bad");
         await renderPromos();
       });
