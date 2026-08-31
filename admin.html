@@ -12,15 +12,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/css/tokens.css?v=33">
-<link rel="stylesheet" href="assets/css/app.css?v=33">
+<link rel="stylesheet" href="assets/css/tokens.css?v=34">
+<link rel="stylesheet" href="assets/css/app.css?v=34">
 
-<script defer src="assets/js/icons.js?v=33"></script>
-<script defer src="assets/js/liquid.js?v=33"></script>
-<script defer src="assets/js/app.js?v=33"></script>
-<script defer src="assets/js/store.js?v=33"></script>
-<script defer src="assets/js/auth.js?v=33"></script>
-<script defer src="assets/js/admin.js?v=33"></script>
+<script defer src="assets/js/icons.js?v=34"></script>
+<script defer src="assets/js/liquid.js?v=34"></script>
+<script defer src="assets/js/app.js?v=34"></script>
+<script defer src="assets/js/store.js?v=34"></script>
+<script defer src="assets/js/auth.js?v=34"></script>
+<script defer src="assets/js/admin.js?v=34"></script>
 </head>
 <body data-auth-page="admin">
 
@@ -191,6 +191,14 @@
                   <button type="button" class="seg__btn" data-value="custom" aria-pressed="false">Своё<small>любой срок</small></button>
                 </div>
               </div>
+              <div class="field" style="flex:1 1 100%">
+                <label class="field__label" id="productLabel">Товар</label>
+                <div class="seg" role="radiogroup" aria-labelledby="productLabel" data-product-seg>
+                  <button type="button" class="seg__btn is-on" data-value="cs2" aria-pressed="true">CS2</button>
+                  <button type="button" class="seg__btn" data-value="minecraft" aria-pressed="false">Minecraft</button>
+                  <button type="button" class="seg__btn" data-value="visual" aria-pressed="false">Visual</button>
+                </div>
+              </div>
               <div class="field" id="keyDaysField" hidden>
                 <label class="field__label" for="keyDays">Срок, дней (1–3650)</label>
                 <input class="input" id="keyDays" type="number" min="1" max="3650" value="14" inputmode="numeric">
@@ -253,6 +261,15 @@
             </div>
 
             <form class="form-row" data-promos-generate>
+              <div class="field" style="flex:1 1 100%">
+                <label class="field__label" id="promoProductLabel">Товар</label>
+                <div class="seg" role="radiogroup" aria-labelledby="promoProductLabel" data-promo-product-seg>
+                  <button type="button" class="seg__btn is-on" data-value="all" aria-pressed="true">Все товары</button>
+                  <button type="button" class="seg__btn" data-value="cs2" aria-pressed="false">CS2</button>
+                  <button type="button" class="seg__btn" data-value="minecraft" aria-pressed="false">Minecraft</button>
+                  <button type="button" class="seg__btn" data-value="visual" aria-pressed="false">Visual</button>
+                </div>
+              </div>
               <div class="field">
                 <label class="field__label" for="promoPercent">Скидка, %</label>
                 <input class="input" id="promoPercent" type="number" min="1" max="90" value="10" inputmode="numeric">

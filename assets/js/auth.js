@@ -25,6 +25,11 @@
     life: { name: "Навсегда", price: "450 ₽", term: "бессрочно" },
     "hwid-reset": { name: "Сброс HWID", price: "200 ₽", term: "разовая услуга" }
   };
+  var PRODUCTS = {
+    cs2: { name: "CS2 Cheat", desc: "Читы для Counter-Strike 2" },
+    minecraft: { name: "Minecraft Cheat", desc: "Читы для Minecraft" },
+    visual: { name: "Visual Cheat", desc: "Визуальные читы для PvP" }
+  };
   var METHODS = [
     { id: "support", name: "Через техподдержку", icon: "message-circle", desc: "Любой удобный способ", link: PAY.support, type: "key", format: "Ключ AETH-XXXX-XXXX" },
     { id: "playerok", name: "Playerok", icon: "gamepad", desc: "Игровая платёжная система", link: PAY.playerok, type: "key", format: "Ключ AETH-XXXX-XXXX" },
@@ -440,11 +445,14 @@
     return "AE-" + s;
   }
 
-  function openBuyModal(planCode) {
+  function openBuyModal(planCode, productCode) {
     var info = PLAN_INFO[planCode];
+    var product = PRODUCTS[productCode];
     if (!info) return;
     var m = ensureModal();
     var body = $("[data-modal-body]", m);
+
+    var productInfo = product ? "<p class='text-dim' style='font-size:var(--fs-sm);margin-top:var(--sp-2)'><b>" + esc(product.name) + "</b> — " + esc(product.desc) + "</p>" : "";
 
     var methods = METHODS.map(function (x, i) {
       return (
@@ -459,6 +467,7 @@
     body.innerHTML =
       '<span class="eyebrow">Покупка подписки</span>' +
       '<h3 style="font-size:var(--fs-xl);margin-top:var(--sp-2)">' + esc(info.name) + " · " + esc(info.price) + "</h3>" +
+      productInfo +
       '<p class="text-dim" style="font-size:var(--fs-sm);margin-top:var(--sp-1)">Срок: ' + esc(info.term) + ". Ключ приходит после подтверждения оплаты.</p>" +
       '<div class="promo-row">' +
       '<input class="input input--mono" data-promo-input placeholder="ПРОМОКОД" maxlength="24" autocomplete="off" style="text-transform:uppercase">' +
@@ -480,7 +489,7 @@
     $("[data-promo-apply]", body).addEventListener("click", async function () {
       var code = promoInput.value.trim().toUpperCase();
       if (!code) { status.textContent = "Введите промокод"; return; }
-      var r = await S.promoCheck(code);
+      var r = await S.promoCheck(code, productCode);
       if (!r.ok) {
         promo = { code: "", percent: 0 };
         status.innerHTML = '<span style="color:var(--bad)">' + esc(r.error) + "</span>";
@@ -493,14 +502,14 @@
 
     $$("[data-method]", body).forEach(function (btn) {
       btn.addEventListener("click", function () {
-        showInstructions(info, METHODS[parseInt(btn.dataset.method, 10)], promo);
+        showInstructions(info, METHODS[parseInt(btn.dataset.method, 10)], promo, productCode);
       });
     });
 
     m.hidden = false;
   }
 
-  function showInstructions(info, method, promo) {
+  function showInstructions(info, method, promo, productCode) {
     var m = $("[data-buy-modal]");
     var body = $("[data-modal-body]", m);
     var order = orderCode();
@@ -557,7 +566,8 @@
           setTimeout(function () { location.href = "login.html"; }, 600);
           return;
         }
-        openBuyModal(btn.dataset.buy);
+        var productCode = btn.dataset.product || null;
+        openBuyModal(btn.dataset.buy, productCode);
       });
     });
   }

@@ -15,14 +15,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/css/tokens.css?v=33">
-<link rel="stylesheet" href="assets/css/app.css?v=33">
+<link rel="stylesheet" href="assets/css/tokens.css?v=34">
+<link rel="stylesheet" href="assets/css/app.css?v=34">
 
-<script defer src="assets/js/icons.js?v=33"></script>
-<script defer src="assets/js/liquid.js?v=33"></script>
-<script defer src="assets/js/app.js?v=33"></script>
-<script defer src="assets/js/store.js?v=33"></script>
-<script defer src="assets/js/auth.js?v=33"></script>
+<script defer src="assets/js/icons.js?v=34"></script>
+<script defer src="assets/js/liquid.js?v=34"></script>
+<script defer src="assets/js/app.js?v=34"></script>
+<script defer src="assets/js/store.js?v=34"></script>
+<script defer src="assets/js/auth.js?v=34"></script>
 </head>
 <body data-auth-page="profile">
 
@@ -219,7 +219,11 @@
                 <li><svg class="i"><use href="#i-check"></use></svg> Регулярные обновления чита</li>
                 <li class="is-off"><svg class="i"><use href="#i-close"></use></svg> Приоритетная поддержка</li>
               </ul>
-              <button class="btn btn--ghost btn--block plan__cta" type="button" data-buy="week">Оплатить</button>
+              <div style="display: flex; flex-direction: column; gap: var(--sp-2); margin-top: var(--sp-4);">
+                <button class="btn btn--ghost btn--block plan__cta" type="button" data-buy="week" data-product="cs2">CS2 Cheat</button>
+                <button class="btn btn--ghost btn--block plan__cta" type="button" data-buy="week" data-product="minecraft">Minecraft Cheat</button>
+                <button class="btn btn--ghost btn--block plan__cta" type="button" data-buy="week" data-product="visual">Visual Cheat</button>
+              </div>
             </article>
 
             <article class="card plan plan--featured">
@@ -233,7 +237,11 @@
                 <li><svg class="i"><use href="#i-check"></use></svg> Ранний доступ к новым обновлениям</li>
                 <li><svg class="i"><use href="#i-check"></use></svg> Эксклюзивные конфигурации</li>
               </ul>
-              <button class="btn btn--primary btn--block plan__cta" type="button" data-buy="month">Оплатить</button>
+              <div style="display: flex; flex-direction: column; gap: var(--sp-2); margin-top: var(--sp-4);">
+                <button class="btn btn--primary btn--block plan__cta" type="button" data-buy="month" data-product="cs2">CS2 Cheat</button>
+                <button class="btn btn--primary btn--block plan__cta" type="button" data-buy="month" data-product="minecraft">Minecraft Cheat</button>
+                <button class="btn btn--primary btn--block plan__cta" type="button" data-buy="month" data-product="visual">Visual Cheat</button>
+              </div>
             </article>
 
             <article class="card plan">
@@ -246,7 +254,11 @@
                 <li><svg class="i"><use href="#i-check"></use></svg> Все будущие обновления бесплатно</li>
                 <li><svg class="i"><use href="#i-check"></use></svg> Цена зафиксирована навсегда</li>
               </ul>
-              <button class="btn btn--ghost btn--block plan__cta" type="button" data-buy="life">Оплатить</button>
+              <div style="display: flex; flex-direction: column; gap: var(--sp-2); margin-top: var(--sp-4);">
+                <button class="btn btn--ghost btn--block plan__cta" type="button" data-buy="life" data-product="cs2">CS2 Cheat</button>
+                <button class="btn btn--ghost btn--block plan__cta" type="button" data-buy="life" data-product="minecraft">Minecraft Cheat</button>
+                <button class="btn btn--ghost btn--block plan__cta" type="button" data-buy="life" data-product="visual">Visual Cheat</button>
+              </div>
             </article>
           </div>
 
