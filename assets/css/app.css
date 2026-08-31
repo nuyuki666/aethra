@@ -1402,11 +1402,12 @@ body.auth-ready .nav__actions { visibility: visible; }
   border-radius: var(--r-sm);
   background: var(--w-06);
   font-family: var(--font-display);
-  font-size: var(--fs-sm);
+  font-size: 1.4rem;
   font-weight: 700;
+  line-height: 1;
 }
-.pay__name { display: block; font-weight: 600; font-size: var(--fs-sm); }
-.pay__desc { display: block; font-size: var(--fs-xs); color: var(--fg-dim); }
+.pay__name { display: block; font-weight: 600; font-size: var(--fs-sm); line-height: 1.4; }
+.pay__desc { display: block; font-size: var(--fs-xs); color: var(--fg-dim); margin-top: 2px; }
 
 .steps {
   margin: var(--sp-4) 0 0;
@@ -1464,9 +1465,9 @@ body.auth-ready .nav__actions { visibility: visible; }
   filter: blur(12px);
   pointer-events: none;
 }
-.activity-card--cs { --activity-glow: rgba(169, 194, 255, 0.18); }
-.activity-card--minecraft { --activity-glow: rgba(95, 227, 161, 0.14); }
-.activity-card--visual { --activity-glow: rgba(244, 193, 92, 0.16); }
+.activity-card--cs { --activity-glow: rgba(255, 255, 255, 0.12); }
+.activity-card--minecraft { --activity-glow: rgba(255, 255, 255, 0.12); }
+.activity-card--visual { --activity-glow: rgba(255, 255, 255, 0.12); }
 .activity-card__top {
   display: flex;
   align-items: flex-start;

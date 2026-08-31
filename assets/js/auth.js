@@ -11,9 +11,9 @@
   var PAY = {
     tg: "https://t.me/aethra_helper",
     channel: "https://t.me/aethra_cl1ent",
-    funpay: "",
-    yookassa: "",
-    skinback: ""
+    support: "https://t.me/aethra_helper",
+    playerok: "",
+    freekassa: ""
   };
   var PLAN_INFO = {
     week: { name: "Неделя", price: "100 ₽", term: "7 дней" },
@@ -21,9 +21,9 @@
     life: { name: "Навсегда", price: "450 ₽", term: "бессрочно" }
   };
   var METHODS = [
-    { id: "funpay", name: "FunPay", desc: "Карта · СБП · баланс площадки", link: PAY.funpay },
-    { id: "yookassa", name: "ЮKassa", desc: "МИР · Visa · Mastercard · СБП", link: PAY.yookassa },
-    { id: "skinback", name: "SkinBack", desc: "Оплата скинами из Steam", link: PAY.skinback }
+    { id: "support", name: "💬 Через техподдержку", desc: "Любой удобный способ оплаты", link: PAY.support },
+    { id: "playerok", name: "🎮 PlayerOK", desc: "Игровая платёжная система", link: PAY.playerok },
+    { id: "freekassa", name: "💳 FreeKassa", desc: "Карты · Электронные кошельки", link: PAY.freekassa }
   ];
 
   var RULES = {
@@ -235,6 +235,7 @@
 
     $$("[data-guest-only]").forEach(function (el) { el.hidden = true; });
     $$("[data-auth-only]").forEach(function (el) { el.hidden = false; });
+    $$("[data-auth-hide]").forEach(function (el) { el.hidden = true; });
 
     var actions = $(".nav__actions");
     if (actions && ($('a[href="login.html"]', actions) || $('a[href="register.html"]', actions))) {
@@ -439,10 +440,14 @@
     var body = $("[data-modal-body]", m);
 
     var methods = METHODS.map(function (x, i) {
+      var emoji = x.name.match(/^([\uD800-\uDBFF][\uDC00-\uDFFF]|[\u2600-\u27BF\uD83C-\uDBFF\uDC00-\uDFFF]+)\s*/);
+      var nameWithoutEmoji = emoji ? x.name.replace(emoji[0], '').trim() : x.name;
+      var displayEmoji = emoji ? emoji[1] : x.name.slice(0, 2).toUpperCase();
+      
       return (
         '<button class="pay__btn" type="button" data-method="' + i + '">' +
-        '<span class="pay__logo">' + esc(x.name.slice(0, 2).toUpperCase()) + "</span>" +
-        "<span><span class='pay__name'>" + esc(x.name) + "</span>" +
+        '<span class="pay__logo">' + displayEmoji + "</span>" +
+        "<span><span class='pay__name'>" + esc(nameWithoutEmoji) + "</span>" +
         "<span class='pay__desc'>" + esc(x.desc) + "</span></span>" +
         '<svg class="i"><use href="#i-chevron-right"></use></svg></button>'
       );
