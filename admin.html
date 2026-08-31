@@ -12,15 +12,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/css/tokens.css?v=29">
-<link rel="stylesheet" href="assets/css/app.css?v=29">
+<link rel="stylesheet" href="assets/css/tokens.css?v=30">
+<link rel="stylesheet" href="assets/css/app.css?v=30">
 
-<script defer src="assets/js/icons.js?v=29"></script>
-<script defer src="assets/js/liquid.js?v=29"></script>
-<script defer src="assets/js/app.js?v=29"></script>
-<script defer src="assets/js/store.js?v=29"></script>
-<script defer src="assets/js/auth.js?v=29"></script>
-<script defer src="assets/js/admin.js?v=29"></script>
+<script defer src="assets/js/icons.js?v=30"></script>
+<script defer src="assets/js/liquid.js?v=30"></script>
+<script defer src="assets/js/app.js?v=30"></script>
+<script defer src="assets/js/store.js?v=30"></script>
+<script defer src="assets/js/auth.js?v=30"></script>
+<script defer src="assets/js/admin.js?v=30"></script>
 </head>
 <body data-auth-page="admin">
 
@@ -83,6 +83,9 @@
         </button>
         <button class="dash__tab" role="tab" id="tab-promos" aria-controls="panel-promos" aria-selected="false" tabindex="-1">
           <svg class="i"><use href="#i-spark"></use></svg> Промокоды
+        </button>
+        <button class="dash__tab" role="tab" id="tab-logs" aria-controls="panel-logs" aria-selected="false" tabindex="-1">
+          <svg class="i"><use href="#i-activity"></use></svg> Логи
         </button>
       </nav>
 
@@ -291,6 +294,43 @@
                 </thead>
                 <tbody data-promos-body></tbody>
               </table>
+            </div>
+          </article>
+        </section>
+
+        <!-- ================================================== panel: logs -->
+        <section class="dash__panel" id="panel-logs" role="tabpanel" aria-labelledby="tab-logs" tabindex="0" hidden>
+          <div class="page-head">
+            <div>
+              <h1>Логи активаций</h1>
+              <p>История активации ключей и подписок</p>
+            </div>
+          </div>
+
+          <article class="card">
+            <div class="panel-head">
+              <h3>Последние активации</h3>
+              <span class="eyebrow" data-logs-count>0 записей</span>
+            </div>
+
+            <div class="tbl-scroll" data-logs-table hidden>
+              <table class="tbl">
+                <thead>
+                  <tr>
+                    <th>Дата</th>
+                    <th>Пользователь</th>
+                    <th>Ключ</th>
+                    <th>Тариф</th>
+                    <th>IP</th>
+                  </tr>
+                </thead>
+                <tbody data-logs-body></tbody>
+              </table>
+            </div>
+
+            <div data-logs-empty class="empty">
+              <svg class="i"><use href="#i-inbox"></use></svg>
+              <p>Логов пока нет. Когда кто-то активирует ключ, записи появятся здесь.</p>
             </div>
           </article>
         </section>

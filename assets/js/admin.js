@@ -390,6 +390,40 @@
     });
   }
 
+  /* ------------------------------------------------------------------ logs */
+  async function loadLogs() {
+    var body = $("[data-logs-body]");
+    var empty = $("[data-logs-empty]");
+    var table = $("[data-logs-table]");
+    var count = $("[data-logs-count]");
+    if (!body) return;
+
+    var r = await S.adminGet("/api/admin/logs");
+    if (!r.ok) { toast(r.error || "Не удалось загрузить логи", "bad"); return; }
+
+    var logs = r.logs || [];
+    if (count) count.textContent = logs.length + " записей";
+
+    if (!logs.length) {
+      if (empty) empty.hidden = false;
+      if (table) table.hidden = true;
+      return;
+    }
+
+    if (empty) empty.hidden = true;
+    if (table) table.hidden = false;
+
+    body.innerHTML = logs.map(function (log) {
+      return '<tr>' +
+        '<td class="mono">' + S.fmtDateTime(log.at) + "</td>" +
+        '<td><b>' + esc(log.login) + "</b> <span class='text-dim'>ID " + log.userId + "</span></td>" +
+        '<td class="mono">' + esc(log.key) + "</td>" +
+        '<td>' + esc(log.plan) + " <span class='text-dim'>(" + (log.days === null ? "навсегда" : log.days + " дн.") + ")</span></td>" +
+        '<td class="mono text-dim">' + esc(log.ip || "—") + "</td>" +
+        "</tr>";
+    }).join("");
+  }
+
   async function boot() {
     if (!S) return;
     var me = await guard();
@@ -399,6 +433,7 @@
     bindKeys();
     bindPromos();
     bindLogout();
+    loadLogs();
   }
 
   boot();

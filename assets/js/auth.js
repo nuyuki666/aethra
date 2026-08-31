@@ -691,6 +691,40 @@
     if (resetBtn) resetBtn.disabled = !r.hwid || r.resetsLeft <= 0;
   }
 
+  function detectDeviceType() {
+    var ua = navigator.userAgent || "";
+    if (/Android/i.test(ua)) return "smartphone";
+    if (/iPhone|iPad|iPod/i.test(ua)) return "smartphone";
+    return "desktop";
+  }
+
+  function updateSessionIcon() {
+    var icon = $("[data-session-icon]");
+    var meta = $("[data-session-meta]");
+    if (!icon || !meta) return;
+    
+    var deviceType = detectDeviceType();
+    var ua = navigator.userAgent || "";
+    var browser = "Browser";
+    if (ua.indexOf("Chrome") > -1 && ua.indexOf("Edg") === -1) browser = "Chrome";
+    else if (ua.indexOf("Safari") > -1 && ua.indexOf("Chrome") === -1) browser = "Safari";
+    else if (ua.indexOf("Firefox") > -1) browser = "Firefox";
+    else if (ua.indexOf("Edg") > -1) browser = "Edge";
+    
+    var os = "Unknown";
+    if (ua.indexOf("Windows") > -1) os = "Windows";
+    else if (ua.indexOf("Mac") > -1) os = "macOS";
+    else if (ua.indexOf("Linux") > -1) os = "Linux";
+    else if (ua.indexOf("Android") > -1) os = "Android";
+    else if (ua.indexOf("iPhone") > -1 || ua.indexOf("iPad") > -1) os = "iOS";
+    
+    var iconName = deviceType === "smartphone" ? "smartphone" : "monitor";
+    icon.innerHTML = '<svg class="i i--lg"><use href="#i-' + iconName + '"></use></svg>';
+    icon.setAttribute("data-session-icon", deviceType);
+    
+    meta.textContent = os + " · " + browser + " · Последний вход: только что";
+  }
+
   function initHwid() {
     var resetBtn = $("[data-hwid-reset]");
     if (resetBtn) {
@@ -716,6 +750,8 @@
         toast("Загрузка началась...");
       });
     }
+    
+    updateSessionIcon();
   }
 
   /* ----------------------------------------------------------------- forms */

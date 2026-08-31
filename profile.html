@@ -12,14 +12,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="assets/css/tokens.css?v=29">
-<link rel="stylesheet" href="assets/css/app.css?v=29">
+<link rel="stylesheet" href="assets/css/tokens.css?v=30">
+<link rel="stylesheet" href="assets/css/app.css?v=30">
 
-<script defer src="assets/js/icons.js?v=29"></script>
-<script defer src="assets/js/liquid.js?v=29"></script>
-<script defer src="assets/js/app.js?v=29"></script>
-<script defer src="assets/js/store.js?v=29"></script>
-<script defer src="assets/js/auth.js?v=29"></script>
+<script defer src="assets/js/icons.js?v=30"></script>
+<script defer src="assets/js/liquid.js?v=30"></script>
+<script defer src="assets/js/app.js?v=30"></script>
+<script defer src="assets/js/store.js?v=30"></script>
+<script defer src="assets/js/auth.js?v=30"></script>
 </head>
 <body data-auth-page="profile">
 
@@ -409,12 +409,12 @@
               
               <div data-sessions-list>
                 <div class="session-item session-item--current">
-                  <div class="session-item__icon">
+                  <div class="session-item__icon" data-session-icon="desktop">
                     <svg class="i i--lg"><use href="#i-monitor"></use></svg>
                   </div>
                   <div class="session-item__content">
                     <div class="session-item__name">Текущее устройство</div>
-                    <div class="session-item__meta">Windows · Chrome · Последний вход: только что</div>
+                    <div class="session-item__meta" data-session-meta>Windows · Chrome · Последний вход: только что</div>
                   </div>
                   <span class="badge badge--ok">Активна</span>
                 </div>
