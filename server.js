@@ -508,6 +508,15 @@ async function main() {
       await store.updateUser(user.login, { lastLogin: Date.now(), lastIp: clientIp(req) });
       const token = crypto.randomBytes(32).toString("hex");
       await store.createSession(token, user.login);
+      
+      // Проверяем активные подписки на продукты
+      const now = Date.now();
+      const products = {
+        cs2: user.lifetime || (user.subCs2 && user.subCs2 > now),
+        minecraft: user.lifetime || (user.subMinecraft && user.subMinecraft > now),
+        visual: user.lifetime || (user.subVisual && user.subVisual > now)
+      };
+      
       res.json({
         ok: true,
         token,
@@ -515,7 +524,21 @@ async function main() {
         avatar: user.avatar || "",
         lifetime: !!user.lifetime,
         subUntil: user.subUntil,
-        till: user.lifetime ? "Lifetime" : S_fmtShort(user.subUntil)
+        till: user.lifetime ? "Lifetime" : S_fmtShort(user.subUntil),
+        products: {
+          cs2: {
+            active: products.cs2,
+            till: user.lifetime ? "Lifetime" : (products.cs2 ? S_fmtShort(user.subCs2) : "No access")
+          },
+          minecraft: {
+            active: products.minecraft,
+            till: user.lifetime ? "Lifetime" : (products.minecraft ? S_fmtShort(user.subMinecraft) : "No access")
+          },
+          visual: {
+            active: products.visual,
+            till: user.lifetime ? "Lifetime" : (products.visual ? S_fmtShort(user.subVisual) : "No access")
+          }
+        }
       });
     } catch (e) {
       console.error(e);
