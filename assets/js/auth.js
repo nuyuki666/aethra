@@ -21,9 +21,9 @@
     life: { name: "Навсегда", price: "450 ₽", term: "бессрочно" }
   };
   var METHODS = [
-    { id: "support", name: "💬 Через техподдержку", desc: "Любой удобный способ оплаты", link: PAY.support },
-    { id: "playerok", name: "🎮 PlayerOK", desc: "Игровая платёжная система", link: PAY.playerok },
-    { id: "freekassa", name: "💳 FreeKassa", desc: "Карты · Электронные кошельки", link: PAY.freekassa }
+    { id: "support", name: "Через техподдержку", icon: "message-circle", desc: "Любой удобный способ оплаты", link: PAY.support },
+    { id: "playerok", name: "PlayerOK", icon: "gamepad", desc: "Игровая платёжная система", link: PAY.playerok },
+    { id: "freekassa", name: "FreeKassa", icon: "credit-card", desc: "Карты · Электронные кошельки", link: PAY.freekassa }
   ];
 
   var RULES = {
@@ -440,14 +440,10 @@
     var body = $("[data-modal-body]", m);
 
     var methods = METHODS.map(function (x, i) {
-      var emoji = x.name.match(/^([\uD800-\uDBFF][\uDC00-\uDFFF]|[\u2600-\u27BF\uD83C-\uDBFF\uDC00-\uDFFF]+)\s*/);
-      var nameWithoutEmoji = emoji ? x.name.replace(emoji[0], '').trim() : x.name;
-      var displayEmoji = emoji ? emoji[1] : x.name.slice(0, 2).toUpperCase();
-      
       return (
         '<button class="pay__btn" type="button" data-method="' + i + '">' +
-        '<span class="pay__logo">' + displayEmoji + "</span>" +
-        "<span><span class='pay__name'>" + esc(nameWithoutEmoji) + "</span>" +
+        '<span class="pay__logo"><svg class="i"><use href="#i-' + x.icon + '"></use></svg></span>' +
+        "<span><span class='pay__name'>" + esc(x.name) + "</span>" +
         "<span class='pay__desc'>" + esc(x.desc) + "</span></span>" +
         '<svg class="i"><use href="#i-chevron-right"></use></svg></button>'
       );

@@ -788,15 +788,31 @@
   font-weight: 550;
   cursor: pointer;
   list-style: none;
+  transition: background var(--dur-base) var(--ease-out);
 }
+.faq__q:hover { background: var(--w-06); }
 .faq__q::-webkit-details-marker { display: none; }
-.faq__q .i { color: var(--fg-faint); transition: transform var(--dur-base) var(--ease-out); }
-.faq__item[open] .faq__q .i { transform: rotate(45deg); }
+.faq__q .i { 
+  color: var(--fg-faint); 
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), color var(--dur-base) var(--ease-out);
+}
+.faq__item[open] .faq__q .i { transform: rotate(45deg); color: var(--fg); }
 .faq__a {
   padding: 0 var(--sp-5) var(--sp-5);
   color: var(--fg-muted);
   font-size: var(--fs-sm);
   max-width: 42rem;
+  animation: fadeInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -1401,11 +1417,10 @@ body.auth-ready .nav__actions { visibility: visible; }
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
   background: var(--w-06);
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 700;
-  line-height: 1;
+  color: var(--fg);
+  font-size: 1.1rem;
 }
+.pay__logo .i { width: 20px; height: 20px; }
 .pay__name { display: block; font-weight: 600; font-size: var(--fs-sm); line-height: 1.4; }
 .pay__desc { display: block; font-size: var(--fs-xs); color: var(--fg-dim); margin-top: 2px; }
 
@@ -1452,6 +1467,25 @@ body.auth-ready .nav__actions { visibility: visible; }
   flex-direction: column;
   min-height: 250px;
   background: linear-gradient(145deg, rgba(30, 36, 44, 0.72), rgba(14, 17, 21, 0.78));
+  overflow: hidden;
+}
+.activity-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 120%,
+    var(--activity-glow, rgba(255, 255, 255, 0.08)) 0%,
+    transparent 50%
+  );
+  opacity: 0.6;
+  animation: floatingGlow 8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes floatingGlow {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+  33% { transform: translate(-15px, -20px) scale(1.1); opacity: 0.8; }
+  66% { transform: translate(15px, -15px) scale(0.95); opacity: 0.5; }
 }
 .activity-card::after {
   content: "";
@@ -1461,9 +1495,14 @@ body.auth-ready .nav__actions { visibility: visible; }
   right: -70px;
   bottom: -100px;
   border-radius: 50%;
-  background: var(--activity-glow, rgba(169, 194, 255, 0.14));
-  filter: blur(12px);
+  background: var(--activity-glow, rgba(255, 255, 255, 0.1));
+  filter: blur(40px);
   pointer-events: none;
+  animation: pulse 4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.2); opacity: 0.7; }
 }
 .activity-card--cs { --activity-glow: rgba(255, 255, 255, 0.12); }
 .activity-card--minecraft { --activity-glow: rgba(255, 255, 255, 0.12); }
