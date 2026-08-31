@@ -2,6 +2,8 @@ node_modules/
 data/
 .env
 *.log
+preview*.log
+server-preview.log
 site-clone/
 .claude/
 peroxidehook-loader-main/
