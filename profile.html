@@ -360,14 +360,16 @@
               </div>
               <dl class="kv">
                 <div class="kv__row"><dt>Текущий HWID</dt><dd data-kv="hwid">Не привязан</dd></div>
-                <div class="kv__row"><dt>Сбросов доступно</dt><dd><span data-hwid-resets>0 / 2</span></dd></div>
+                <div class="kv__row"><dt>Сбросов выполнено</dt><dd><span data-hwid-used>0</span></dd></div>
                 <div class="kv__row" style="border-bottom:0"><dt>Последний вход</dt><dd data-kv="last">—</dd></div>
               </dl>
               <div style="display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-5)">
-                <button class="btn btn--ghost btn--sm" type="button" data-copy="25">
+                <button class="btn btn--ghost btn--sm" type="button" data-copy="hwid">
                   <svg class="i"><use href="#i-copy"></use></svg> Скопировать ID
                 </button>
-                <button class="btn btn--danger btn--sm" type="button" data-hwid-reset>Сбросить HWID</button>
+                <button class="btn btn--primary btn--sm" type="button" data-buy-hwid-reset>
+                  <svg class="i"><use href="#i-refresh"></use></svg> Купить сброс HWID (200 ₽)
+                </button>
               </div>
             </article>
 

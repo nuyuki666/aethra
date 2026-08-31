@@ -19,7 +19,8 @@
   var PLAN_INFO = {
     week: { name: "Неделя", price: "100 ₽", term: "7 дней" },
     month: { name: "Месяц", price: "300 ₽", term: "30 дней" },
-    life: { name: "Навсегда", price: "450 ₽", term: "бессрочно" }
+    life: { name: "Навсегда", price: "450 ₽", term: "бессрочно" },
+    "hwid-reset": { name: "Сброс HWID", price: "200 ₽", term: "разовая услуга" }
   };
   var METHODS = [
     { id: "support", name: "Через техподдержку", icon: "message-circle", desc: "Любой удобный способ · Ключ AETH-XXXX-XXXX", link: PAY.support, type: "key" },
@@ -894,3 +895,16 @@
 
   boot();
 })();
+
+  /* ---------------------------------------------------- покупка сброса HWID */
+  function initBuyHwidReset() {
+    var btn = $("[data-buy-hwid-reset]");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      var info = PLAN_INFO["hwid-reset"];
+      if (!info) return;
+      openBuyModal(info, "hwid-reset");
+    });
+  }
+  
+  initBuyHwidReset();

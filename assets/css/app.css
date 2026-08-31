@@ -721,6 +721,14 @@
   gap: var(--sp-4);
   align-items: stretch;
 }
+@media (min-width: 900px) {
+  .plans {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .plans > *:nth-child(4) {
+    grid-column: 2;
+  }
+}
 .plan { display: flex; flex-direction: column; }
 .plan--featured {
   border-color: var(--w-18);
