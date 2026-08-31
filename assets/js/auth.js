@@ -1,5 +1,6 @@
 /* ==========================================================================
    Aethra — auth & account behaviour (login / register / profile pages)
+   v1.0.4 - Updated payment methods and footer icons
    ========================================================================== */
 (function () {
   "use strict";
