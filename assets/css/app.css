@@ -1192,8 +1192,19 @@
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: var(--sp-4);
 }
-.form-row { display: flex; gap: var(--sp-2); align-items: flex-end; flex-wrap: wrap; }
-.form-row .field { flex: 1 1 200px; }
+.form-row { 
+  display: flex; 
+  gap: var(--sp-3); 
+  align-items: flex-end; 
+  flex-wrap: wrap; 
+}
+.form-row .field { 
+  flex: 1 1 280px; 
+}
+.form-row .btn {
+  flex-shrink: 0;
+  margin-bottom: calc(var(--sp-1) + 1px);
+}
 
 /* Chat */
 .chat { display: flex; flex-direction: column; min-height: 340px; }
