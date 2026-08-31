@@ -250,13 +250,22 @@ async function main() {
       if (!code) return bad(res, "Введите ключ");
 
       if (req.user.banned) return bad(res, "Аккаунт заблокирован");
-      if (req.user.lifetime) return bad(res, "У вас уже пожизненный доступ");
 
       const key = await store.getKey(code);
       if (!key) return bad(res, "Ключ не найден");
+      
+      const product = key.product || "cs2";
       const maxUses = key.maxUses || 1;
       if ((key.uses || 0) >= maxUses) return bad(res, "Лимит активаций ключа исчерпан");
       if (key.usedBy && maxUses === 1) return bad(res, "Ключ уже активирован");
+
+      // Проверка что у пользователя ещё нет lifetime для этого товара
+      const me = req.user;
+      if (me.lifetime) {
+        // Если у пользователя есть старая lifetime подписка, разрешаем только если ключ на другой товар
+        // Но мы не знаем на какой товар была старая lifetime, поэтому просто запрещаем
+        return bad(res, "У вас уже пожизненный доступ");
+      }
 
       let days = null;
       let label = "";
@@ -271,17 +280,32 @@ async function main() {
         label = plan.label;
       }
 
-      const consumed = await store.consumeKey(code, req.user.login);
+      const consumed = await store.consumeKey(code, me.login);
       if (!consumed) return bad(res, "Ключ уже активирован");
 
-      const me = req.user;
+      const productNames = { cs2: "CS2", minecraft: "Minecraft", visual: "Visual" };
+      const productLabel = productNames[product] || product;
+
       if (days == null) {
+        // Lifetime для конкретного товара - пока ставим старую lifetime (TODO: можно сделать отдельно)
         await store.updateUser(me.login, { lifetime: true, subUntil: null });
-        await store.addHistory(me.login, "Активирован ключ «Навсегда»");
+        await store.addHistory(me.login, "Активирован ключ «Навсегда» (" + productLabel + ")");
       } else {
-        const base = Math.max(me.subUntil || 0, Date.now());
-        await store.updateUser(me.login, { subUntil: base + days * DAY });
-        await store.addHistory(me.login, "Активирован ключ «" + label + "» (+" + days + " дн.)");
+        // Продлеваем подписку на конкретный товар
+        const subField = "sub_" + product;
+        let currentSub = 0;
+        if (product === "cs2") currentSub = me.subCs2 || 0;
+        else if (product === "minecraft") currentSub = me.subMinecraft || 0;
+        else if (product === "visual") currentSub = me.subVisual || 0;
+        
+        const base = Math.max(currentSub, Date.now());
+        const newSub = base + days * DAY;
+        
+        const updates = {};
+        updates[subField] = newSub;
+        
+        await store.updateUser(me.login, updates);
+        await store.addHistory(me.login, "Активирован ключ «" + label + "» (" + productLabel + ", +" + days + " дн.)");
       }
 
       const user = await store.getUserByLogin(me.login);
@@ -376,8 +400,16 @@ async function main() {
   /* ------------------------------------------------------------- промокоды */
   app.post("/api/promo/check", requireAuth(async (req, res) => {
     try {
-      const p = await store.getPromo(String((req.body && req.body.code) || ""));
+      const code = String((req.body && req.body.code) || "");
+      const product = String((req.body && req.body.product) || "");
+      const p = await store.getPromo(code);
       if (!p) return bad(res, "Промокод не найден или больше не активен");
+      
+      // Проверка что промокод подходит для этого товара
+      if (p.product && p.product !== "all" && p.product !== product) {
+        return bad(res, "Этот промокод не действует на выбранный товар");
+      }
+      
       res.json({ ok: true, percent: p.percent });
     } catch (e) {
       console.error(e);
@@ -404,9 +436,11 @@ async function main() {
       const percent = parseInt((req.body && req.body.percent), 10);
       const count = parseInt((req.body && req.body.count), 10);
       const maxUses = parseInt((req.body && req.body.maxUses), 10) || 0;
+      const product = String((req.body && req.body.product) || "all");
       if (!percent || percent < 1 || percent > 90) return bad(res, "Скидка: от 1 до 90%");
       if (!count || count < 1 || count > 50) return bad(res, "Количество: от 1 до 50");
       if (maxUses < 0 || maxUses > 1000) return bad(res, "Лимит активаций: 0 (безлимит) или 1–1000");
+      if (!["all", "cs2", "minecraft", "visual"].includes(product)) return bad(res, "Неизвестный товар");
 
       const codes = [];
       for (let i = 0; i < count; i++) codes.push(promoCode());
@@ -414,6 +448,7 @@ async function main() {
         code,
         percent,
         maxUses,
+        product,
         createdAt: Date.now(),
         createdBy: req.user.login
       })));
@@ -713,11 +748,13 @@ async function main() {
   app.post("/api/admin/keys", requireAdmin(async (req, res) => {
     try {
       const planCode = String((req.body && req.body.plan) || "");
+      const product = String((req.body && req.body.product) || "cs2");
       const count = parseInt((req.body && req.body.count), 10);
       const maxUses = parseInt((req.body && req.body.maxUses), 10) || 1;
       const days = parseInt((req.body && req.body.days), 10) || 0;
       if (!count || count < 1 || count > 50) return bad(res, "Количество: от 1 до 50");
       if (maxUses < 1 || maxUses > 100) return bad(res, "Активаций на ключ: от 1 до 100");
+      if (!["cs2", "minecraft", "visual"].includes(product)) return bad(res, "Неизвестный товар");
 
       if (planCode === "custom") {
         if (days < 1 || days > 3650) return bad(res, "Срок: от 1 до 3650 дней");
@@ -730,6 +767,7 @@ async function main() {
       await store.upsertKeys(codes.map(code => ({
         code,
         plan: planCode,
+        product,
         createdAt: Date.now(),
         createdBy: req.user.login,
         maxUses,

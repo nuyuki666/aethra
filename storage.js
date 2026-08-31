@@ -291,6 +291,16 @@ class PgStore {
     await this.pool.query("ALTER TABLE keys ADD COLUMN IF NOT EXISTS uses INTEGER NOT NULL DEFAULT 0");
     await this.pool.query("ALTER TABLE keys ADD COLUMN IF NOT EXISTS days INTEGER");
     await this.pool.query("ALTER TABLE promos ADD COLUMN IF NOT EXISTS max_uses INTEGER NOT NULL DEFAULT 0");
+    
+    // Добавляем product для ключей и промокодов
+    await this.pool.query("ALTER TABLE keys ADD COLUMN IF NOT EXISTS product TEXT DEFAULT 'cs2'");
+    await this.pool.query("ALTER TABLE promos ADD COLUMN IF NOT EXISTS product TEXT DEFAULT 'all'");
+    
+    // Добавляем поддержку множественных подписок на товары
+    await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS sub_cs2 BIGINT");
+    await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS sub_minecraft BIGINT");
+    await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS sub_visual BIGINT");
+    
     return this;
   }
 
@@ -304,6 +314,9 @@ class PgStore {
       banReason: r.ban_reason || "",
       lifetime: r.lifetime,
       subUntil: r.sub_until == null ? null : Number(r.sub_until),
+      subCs2: r.sub_cs2 == null ? null : Number(r.sub_cs2),
+      subMinecraft: r.sub_minecraft == null ? null : Number(r.sub_minecraft),
+      subVisual: r.sub_visual == null ? null : Number(r.sub_visual),
       regAt: Number(r.reg_at),
       lastLogin: r.last_login == null ? null : Number(r.last_login),
       lastIp: r.last_ip || "",
@@ -385,7 +398,8 @@ class PgStore {
       lifetime: "lifetime", subUntil: "sub_until", lastLogin: "last_login",
       lastIp: "last_ip", email: "email", passHash: "pass_hash",
       avatar: "avatar", totpSecret: "totp_secret", totpEnabled: "totp_enabled",
-      hwid: "hwid", hwidResets: "hwid_resets"
+      hwid: "hwid", hwidResets: "hwid_resets",
+      sub_cs2: "sub_cs2", sub_minecraft: "sub_minecraft", sub_visual: "sub_visual"
     };
     const sets = [];
     const params = [];
@@ -447,6 +461,7 @@ class PgStore {
     return {
       code: r.code,
       plan: r.plan,
+      product: r.product || "cs2",
       createdAt: Number(r.created_at),
       createdBy: r.created_by,
       usedBy: r.used_by,
@@ -518,6 +533,7 @@ class PgStore {
     return res.rows.map(r => ({
       code: r.code,
       percent: r.percent,
+      product: r.product || "all",
       active: r.active,
       uses: r.uses,
       maxUses: r.max_uses == null ? 0 : Number(r.max_uses),
@@ -528,10 +544,10 @@ class PgStore {
 
   async getPromo(code) {
     const res = await this.pool.query(
-      "SELECT code, percent FROM promos WHERE UPPER(code) = UPPER($1) AND active = TRUE AND (max_uses = 0 OR uses < max_uses)",
+      "SELECT code, percent, product FROM promos WHERE UPPER(code) = UPPER($1) AND active = TRUE AND (max_uses = 0 OR uses < max_uses)",
       [String(code || "")]
     );
-    return res.rows[0] ? { code: res.rows[0].code, percent: res.rows[0].percent } : null;
+    return res.rows[0] ? { code: res.rows[0].code, percent: res.rows[0].percent, product: res.rows[0].product || "all" } : null;
   }
 
   async incrPromoUse(code) {
