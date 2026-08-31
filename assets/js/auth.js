@@ -22,9 +22,10 @@
     life: { name: "Навсегда", price: "450 ₽", term: "бессрочно" }
   };
   var METHODS = [
-    { id: "support", name: "Через техподдержку", icon: "message-circle", desc: "Любой удобный способ оплаты", link: PAY.support },
-    { id: "playerok", name: "Playerok", icon: "gamepad", desc: "Игровая платёжная система", link: PAY.playerok },
-    { id: "freekassa", name: "FreeKassa", icon: "credit-card", desc: "Карты · Электронные кошельки", link: PAY.freekassa }
+    { id: "support", name: "Через техподдержку", icon: "message-circle", desc: "Любой удобный способ · Ключ AETH-XXXX-XXXX", link: PAY.support, type: "key" },
+    { id: "funpay", name: "FunPay", icon: "card", desc: "Карта · СБП · баланс · Ключ AETH-XXXX-XXXX", link: PAY.support, type: "key" },
+    { id: "yookassa", name: "ЮКасса", icon: "credit-card", desc: "МИР · Visa · Mastercard · СБП · Авто", link: PAY.support, type: "auto" },
+    { id: "skinback", name: "SkinBack", icon: "wallet", desc: "Оплата скинами Steam · Ключ AETH-XXXX-XXXX", link: PAY.support, type: "key" }
   ];
 
   var RULES = {
@@ -504,28 +505,46 @@
     promo = promo || { code: "", percent: 0 };
     var base = parseInt(info.price, 10) || 0;
     var total = promo.percent > 0 ? Math.round(base * (100 - promo.percent) / 100) : base;
+    var isAuto = method.type === "auto";
 
     var promoLine = promo.percent > 0
       ? '<p style="margin-top:var(--sp-3);font-size:var(--fs-sm)">К оплате: <b style="font-size:var(--fs-lg);color:var(--ok)">' + total +
         " ₽</b> <s class='text-dim'>" + base + " ₽</s> <span class='badge badge--ok'>−" + promo.percent + "% по " + esc(promo.code) + "</span></p>"
       : '<p style="margin-top:var(--sp-3);font-size:var(--fs-sm)">К оплате: <b style="font-size:var(--fs-lg)">' + base + " ₽</b></p>";
 
+    var paymentInfo = isAuto
+      ? "<span class='badge badge--ok'>Выдача автоматическая</span>"
+      : "<span class='badge'>Ключ формата AETH-XXXX-XXXX</span>";
+
+    var steps = isAuto
+      ? '<ol class="steps">' +
+        "<li>Оплатите заказ <b class='mono'>" + esc(order) + "</b> через " + esc(method.name) + ".</li>" +
+        "<li>Подписка активируется автоматически в течение 1 минуты.</li>" +
+        "<li>Доступ появится в вашем профиле — можно сразу скачивать лоадер.</li>" +
+        "</ol>"
+      : '<ol class="steps">' +
+        "<li>Оплатите заказ <b class='mono'>" + esc(order) + "</b> через " + esc(method.name) + ".</li>" +
+        "<li>Напишите в поддержку: номер заказа и ваш логин.</li>" +
+        "<li>Получите ключ AETH-XXXX-XXXX и активируйте его во вкладке «Подписка».</li>" +
+        "</ol>";
+
     body.innerHTML =
       '<span class="eyebrow">' + esc(method.name) + "</span>" +
       '<h3 style="font-size:var(--fs-xl);margin-top:var(--sp-2)">' + esc(info.name) + " · " + esc(info.term) + "</h3>" +
       promoLine +
-      '<ol class="steps">' +
-      "<li>Оплатите заказ <b class='mono'>" + esc(order) + "</b> через " + esc(method.name) + ".</li>" +
-      "<li>Напишите в поддержку: номер заказа и ваш логин.</li>" +
-      "<li>Получите ключ AETH-XXXX-XXXX и активируйте его во вкладке «Подписка».</li>" +
-      "</ol>" +
+      '<div style="margin-top:var(--sp-3)">' + paymentInfo + '</div>' +
+      steps +
       '<div style="display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-5)">' +
       '<a class="btn btn--primary" href="' + esc(link) + '" target="_blank" rel="noopener" data-pay-go>' +
       '<svg class="i"><use href="#i-zap"></use></svg> Перейти к оплате</a>' +
       '<a class="btn btn--ghost" href="' + esc(PAY.tg) + '" target="_blank" rel="noopener">' +
       '<svg class="i"><use href="#i-send"></use></svg> Поддержка</a>' +
       "</div>" +
-      '<p class="text-dim" style="font-size:var(--fs-xs);margin-top:var(--sp-4)">Зачисление до 5 минут. Ключ активируется во вкладке «Подписка» — срок пойдёт с момента активации.</p>';
+      '<p class="text-dim" style="font-size:var(--fs-xs);margin-top:var(--sp-4)">' +
+      (isAuto
+        ? 'Подписка активируется автоматически. Срок начнёт отсчёт сразу после подтверждения платежа.'
+        : 'Зачисление до 5 минут. Ключ активируется во вкладке «Подписка» — срок пойдёт с момента активации.') +
+      '</p>';
 
     var go = $("[data-pay-go]", body);
     if (go && promo.code) {

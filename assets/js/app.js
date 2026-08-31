@@ -597,3 +597,24 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();
 })();
+
+  /* ------------------------------------------------------- screenshots carousel */
+  function initScreenshots() {
+    var imgs = $$("[data-screenshot]");
+    var btns = $$("[data-screenshot-btn]");
+    if (!imgs.length || !btns.length) return;
+    
+    btns.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var idx = parseInt(btn.dataset.screenshotBtn, 10);
+        imgs.forEach(function (img, i) {
+          img.hidden = i !== idx;
+        });
+        btns.forEach(function (b, i) {
+          b.classList.toggle("screenshots__dot--active", i === idx);
+        });
+      });
+    });
+  }
+  
+  initScreenshots();

@@ -1,0 +1,14 @@
+<svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e14;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1e24;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg3)"/>
+  <text x="960" y="500" font-family="Arial, sans-serif" font-size="48" fill="#ffffff" text-anchor="middle" opacity="0.7">Aethra Visual GUI</text>
+  <text x="960" y="560" font-family="Arial, sans-serif" font-size="24" fill="#f4c15c" text-anchor="middle" opacity="0.5">Замените на скриншот интерфейса</text>
+  <path d="M 860 640 Q 960 580, 1060 640" fill="none" stroke="#f4c15c" stroke-width="2" opacity="0.3"/>
+  <circle cx="860" cy="640" r="10" fill="#f4c15c" opacity="0.3"/>
+  <circle cx="1060" cy="640" r="10" fill="#f4c15c" opacity="0.3"/>
+</svg>

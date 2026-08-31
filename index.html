@@ -217,10 +217,9 @@
     <div class="shell">
       <div class="section__head" data-reveal>
         <span class="eyebrow">Активность</span>
-        <h2 class="section__title">Статистика платформы</h2>
+        <h2 class="section__title">Популярные продукты</h2>
         <p class="section__lede">
-          Три игровых направления в одном месте: актуальные статусы, удобный доступ и понятная
-          статистика без лишнего шума.
+          Три направления для разных целей — выбирайте нужный функционал и получайте доступ мгновенно.
         </p>
       </div>
 
@@ -228,38 +227,67 @@
         <article class="card activity-card activity-card--cs" data-reveal>
           <div class="activity-card__top">
             <div class="activity-card__icon"><svg class="i"><use href="#i-crosshair"></use></svg></div>
-            <span class="badge badge--ok"><span class="pulse"></span> Онлайн</span>
+            <span class="badge badge--ok"><span class="pulse"></span> Доступно</span>
           </div>
           <div>
-            <span class="eyebrow">01 · Rage & Legit</span>
-            <h3 class="activity-card__title">Aethra Counter-Strike 2 Cheat</h3>
+            <span class="eyebrow">CS2</span>
+            <h3 class="activity-card__title">Aethra CS2</h3>
             <p class="activity-card__text">Мощный функционал для рейджа и точная настройка для легита — доминируйте в каждом матче.</p>
           </div>
+          <div class="activity-card__meta"><span>Куплено за месяц</span><strong data-product-sales="cs2">0</strong></div>
         </article>
 
         <article class="card activity-card activity-card--minecraft" data-reveal>
           <div class="activity-card__top">
             <div class="activity-card__icon"><svg class="i"><use href="#i-shield"></use></svg></div>
-            <span class="badge badge--ok"><span class="pulse"></span> Онлайн</span>
+            <span class="badge badge--ok"><span class="pulse"></span> Доступно</span>
           </div>
           <div>
-            <span class="eyebrow">02 · Premium</span>
+            <span class="eyebrow">Minecraft</span>
             <h3 class="activity-card__title">Aethra Cheat</h3>
             <p class="activity-card__text">Лучший чит для Minecraft с превосходной килл-аурой для версии 1.16.5 — полное доминирование на серверах.</p>
           </div>
+          <div class="activity-card__meta"><span>Куплено за месяц</span><strong data-product-sales="minecraft">0</strong></div>
         </article>
 
         <article class="card activity-card activity-card--visual" data-reveal>
           <div class="activity-card__top">
             <div class="activity-card__icon"><svg class="i"><use href="#i-eye"></use></svg></div>
-            <span class="badge badge--ok"><span class="pulse"></span> Онлайн</span>
+            <span class="badge badge--ok"><span class="pulse"></span> Доступно</span>
           </div>
           <div>
-            <span class="eyebrow">03 · Safe</span>
+            <span class="eyebrow">Minecraft Visual</span>
             <h3 class="activity-card__title">Aethra Visual</h3>
             <p class="activity-card__text">Лучшие визуалы для PvP — чистое преимущество без риска бана, идеально для безопасной игры.</p>
           </div>
+          <div class="activity-card__meta"><span>Куплено за месяц</span><strong data-product-sales="visual">0</strong></div>
         </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================== screenshots -->
+  <section class="section section--tight" id="screenshots">
+    <div class="shell">
+      <div class="section__head" data-reveal>
+        <span class="eyebrow">Интерфейс</span>
+        <h2 class="section__title">Удобное управление</h2>
+        <p class="section__lede">
+          Интуитивный интерфейс с быстрым доступом ко всем функциям — всё под рукой.
+        </p>
+      </div>
+
+      <div class="screenshots" data-reveal>
+        <div class="screenshots__viewer">
+          <img class="screenshots__img" data-screenshot="0" src="/assets/images/gui-cs2.jpg" alt="Интерфейс Aethra CS2">
+          <img class="screenshots__img" data-screenshot="1" src="/assets/images/gui-minecraft.jpg" alt="Интерфейс Aethra Minecraft" hidden>
+          <img class="screenshots__img" data-screenshot="2" src="/assets/images/gui-visual.jpg" alt="Интерфейс Aethra Visual" hidden>
+        </div>
+        <div class="screenshots__dots">
+          <button class="screenshots__dot screenshots__dot--active" data-screenshot-btn="0" aria-label="CS2"></button>
+          <button class="screenshots__dot" data-screenshot-btn="1" aria-label="Minecraft"></button>
+          <button class="screenshots__dot" data-screenshot-btn="2" aria-label="Visual"></button>
+        </div>
       </div>
     </div>
   </section>

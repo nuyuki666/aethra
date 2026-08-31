@@ -1,0 +1,13 @@
+<svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e14;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1e24;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg2)"/>
+  <text x="960" y="500" font-family="Arial, sans-serif" font-size="48" fill="#ffffff" text-anchor="middle" opacity="0.7">Aethra Minecraft GUI</text>
+  <text x="960" y="560" font-family="Arial, sans-serif" font-size="24" fill="#5fe3a1" text-anchor="middle" opacity="0.5">Замените на скриншот интерфейса</text>
+  <rect x="900" y="600" width="120" height="120" fill="none" stroke="#5fe3a1" stroke-width="2" opacity="0.3"/>
+  <circle cx="960" cy="660" r="40" fill="none" stroke="#5fe3a1" stroke-width="2" opacity="0.3"/>
+</svg>
