@@ -27,11 +27,8 @@
   };
   var METHODS = [
     { id: "support", name: "Через техподдержку", icon: "message-circle", desc: "Любой удобный способ", link: PAY.support, type: "key", format: "Ключ AETH-XXXX-XXXX" },
-    { id: "funpay", name: "FunPay", icon: "card", desc: "Карта · СБП · баланс площадки", link: PAY.funpay, type: "key", format: "Ключ AETH-XXXX-XXXX" },
-    { id: "iokassa", name: "ЮКасса", icon: "credit-card", desc: "МИР · Visa · Mastercard · СБП", link: PAY.iokassa, type: "auto", format: "Автоматическая выдача" },
     { id: "playerok", name: "Playerok", icon: "gamepad", desc: "Игровая платёжная система", link: PAY.playerok, type: "key", format: "Ключ AETH-XXXX-XXXX" },
-    { id: "freekassa", name: "FreeKassa", icon: "wallet", desc: "Карты · Электронные кошельки", link: PAY.freekassa, type: "auto", format: "Автоматическая выдача" },
-    { id: "skinback", name: "SkinBack", icon: "wallet", desc: "Оплата скинами Steam", link: PAY.skinback, type: "key", format: "Ключ AETH-XXXX-XXXX" }
+    { id: "freekassa", name: "FreeKassa", icon: "wallet", desc: "Карты · Электронные кошельки", link: PAY.freekassa, type: "key", format: "Ключ AETH-XXXX-XXXX" }
   ];
 
   var RULES = {
@@ -511,7 +508,6 @@
     promo = promo || { code: "", percent: 0 };
     var base = parseInt(info.price, 10) || 0;
     var total = promo.percent > 0 ? Math.round(base * (100 - promo.percent) / 100) : base;
-    var isAuto = method.type === "auto";
 
     var promoLine = promo.percent > 0
       ? '<p style="margin-top:var(--sp-3);font-size:var(--fs-sm)">К оплате: <b style="font-size:var(--fs-lg);color:var(--ok)">' + total +
@@ -519,23 +515,15 @@
       : '<p style="margin-top:var(--sp-3);font-size:var(--fs-sm)">К оплате: <b style="font-size:var(--fs-lg)">' + base + " ₽</b></p>";
 
     var paymentInfo = '<div style="margin-top:var(--sp-3);display:flex;align-items:center;gap:var(--sp-2)">' +
-      (isAuto 
-        ? '<span class="badge badge--ok">Автоматическая выдача</span>'
-        : '<span class="badge">Формат: AETH-XXXX-XXXX</span>') +
+      '<span class="badge">Формат: AETH-XXXX-XXXX</span>' +
       '<span class="text-dim" style="font-size:var(--fs-xs)">Зачисление до 5 минут</span>' +
       '</div>';
 
-    var steps = isAuto
-      ? '<ol class="steps">' +
-        "<li>Оплатите заказ <b class='mono'>" + esc(order) + "</b> через " + esc(method.name) + ".</li>" +
-        "<li>Подписка активируется <b>автоматически</b> в течение 1 минуты.</li>" +
-        "<li>Доступ появится в вашем профиле — можно сразу скачивать лоадер.</li>" +
-        "</ol>"
-      : '<ol class="steps">' +
-        "<li>Оплатите заказ <b class='mono'>" + esc(order) + "</b> через " + esc(method.name) + ".</li>" +
-        "<li>Напишите в поддержку: номер заказа и ваш логин.</li>" +
-        "<li>Получите ключ формата <b class='mono'>AETH-XXXX-XXXX</b> и активируйте его во вкладке «Подписка».</li>" +
-        "</ol>";
+    var steps = '<ol class="steps">' +
+      "<li>Оплатите заказ <b class='mono'>" + esc(order) + "</b> через " + esc(method.name) + ".</li>" +
+      "<li>Напишите в поддержку: номер заказа и ваш логин.</li>" +
+      "<li>Получите ключ формата <b class='mono'>AETH-XXXX-XXXX</b> и активируйте его во вкладке «Подписка».</li>" +
+      "</ol>";
 
     body.innerHTML =
       '<span class="eyebrow">' + esc(method.name) + "</span>" +
@@ -550,9 +538,7 @@
       '<svg class="i"><use href="#i-send"></use></svg> Поддержка</a>' +
       "</div>" +
       '<p class="text-dim" style="font-size:var(--fs-xs);margin-top:var(--sp-4)">' +
-      (isAuto
-        ? 'Подписка активируется автоматически. Срок начнёт отсчёт сразу после подтверждения платежа.'
-        : 'После получения ключа активируйте его во вкладке «Подписка» — срок пойдёт с момента активации.') +
+      'После получения ключа активируйте его во вкладке «Подписка» — срок пойдёт с момента активации.' +
       '</p>';
 
     var go = $("[data-pay-go]", body);
