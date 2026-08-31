@@ -26,9 +26,9 @@
     "hwid-reset": { name: "Сброс HWID", price: "200 ₽", term: "разовая услуга" }
   };
   var PRODUCTS = {
-    cs2: { name: "Aethra CS2", desc: "Читы для Counter-Strike 2", icon: "CS" },
-    minecraft: { name: "Aethra Cheat", desc: "Читы для Minecraft", icon: "MC" },
-    visual: { name: "Aethra Visual", desc: "Визуальные читы для PvP", icon: "VS" }
+    cs2: { name: "Aethra CS2", desc: "Читы для Counter-Strike 2", img: "/cs.png" },
+    minecraft: { name: "Aethra Cheat", desc: "Читы для Minecraft", img: "/minecraft.png" },
+    visual: { name: "Aethra Visual", desc: "Визуальные читы для PvP", img: "/minecraft.png" }
   };
   var METHODS = [
     { id: "support", name: "Через техподдержку", icon: "message-circle", desc: "Любой удобный способ", link: PAY.support, type: "key", format: "Ключ AETH-XXXX-XXXX" },
@@ -454,11 +454,12 @@
     // Сначала показываем выбор товара
     var productBtns = Object.keys(PRODUCTS).map(function(code) {
       var p = PRODUCTS[code];
-      return '<button class="server" type="button" data-select-product="' + code + '" style="cursor:pointer;border:none;background:none;padding:var(--sp-3);border-radius:var(--radius);transition:background .15s;width:100%;text-align:left;margin-bottom:var(--sp-2);background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08)">' +
-        '<span class="server__logo" style="background:rgba(255,255,255,0.08)">' + esc(p.icon) + '</span>' +
-        '<div style="flex:1"><div class="server__name">' + esc(p.name) + '</div>' +
+      return '<button class="server" type="button" data-select-product="' + code + '" style="cursor:pointer;border:none;background:none;padding:var(--sp-3);border-radius:12px;transition:all .2s;width:100%;text-align:left;margin-bottom:var(--sp-2);background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:var(--sp-3)">' +
+        '<div style="width:48px;height:48px;border-radius:8px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">' +
+        '<img src="' + esc(p.img) + '" alt="" style="width:100%;height:100%;object-fit:cover;display:block" /></div>' +
+        '<div style="flex:1;min-width:0"><div class="server__name">' + esc(p.name) + '</div>' +
         '<div class="server__meta">' + esc(p.desc) + '</div></div>' +
-        '<svg class="i" style="opacity:0.4"><use href="#i-chevron-right"></use></svg>' +
+        '<svg class="i" style="opacity:0.4;flex-shrink:0"><use href="#i-chevron-right"></use></svg>' +
         '</button>';
     }).join("");
 
