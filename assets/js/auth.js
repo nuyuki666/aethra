@@ -591,37 +591,69 @@
   /* ------------------------------------------------- Cloudflare Turnstile */
   var tsToken = "";
   var tsWidget = null;
+  var captchaId = "";
+  var captchaReload = null;
 
   function initTurnstile() {
     var form = $('form[data-auth="register"]');
-    if (!form) return;
+    if (!form || $("[data-captcha-field]", form)) return;
 
     var wrap = document.createElement("div");
-    wrap.className = "field";
-    wrap.hidden = true;
+    wrap.className = "field captcha-field";
+    wrap.setAttribute("data-captcha-field", "");
     wrap.innerHTML =
-      '<label class="field__label">Подтвердите, что вы не робот</label>' +
-      '<div data-turnstile></div>';
+      '<label class="field__label" for="captchaAnswer">Проверка безопасности</label>' +
+      '<div class="captcha-box" data-local-captcha>' +
+        '<span class="captcha-question" data-captcha-question>Загрузка…</span>' +
+        '<span class="captcha-equals">=</span>' +
+        '<input class="input captcha-answer" id="captchaAnswer" name="captchaAnswer" type="text" inputmode="numeric" autocomplete="off" placeholder="Ответ" aria-describedby="captchaHint">' +
+      '</div>' +
+      '<p class="field__hint" id="captchaHint">Решите пример, чтобы продолжить регистрацию.</p>' +
+      '<div class="turnstile-slot" data-turnstile></div>' +
+      '<p class="field__error" role="alert"></p>';
     var submitBtn = $('button[type="submit"]', form);
     submitBtn.parentNode.insertBefore(wrap, submitBtn);
 
-    fetch("/api/config").then(function (r) { return r.json(); }).then(function (cfg) {
-      if (!cfg.ok || !cfg.turnstileSiteKey) return;
-      var s = document.createElement("script");
-      s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-      s.async = true;
-      s.onload = function () {
-        try {
-          tsWidget = window.turnstile.render($("[data-turnstile]", wrap), {
-            sitekey: cfg.turnstileSiteKey,
-            callback: function (t) { tsToken = t; },
-            "expired-callback": function () { tsToken = ""; }
-          });
-          wrap.hidden = false;
-        } catch (e) {}
-      };
-      document.head.appendChild(s);
-    }).catch(function () {});
+    var answer = $("#captchaAnswer", wrap);
+    var localBox = $("[data-local-captcha]", wrap);
+    var hint = $("#captchaHint", wrap);
+    var question = $("[data-captcha-question]", wrap);
+
+    captchaReload = function () {
+      fetch("/api/config").then(function (r) { return r.json(); }).then(function (cfg) {
+        if (cfg.captcha) {
+          captchaId = cfg.captcha.id;
+          question.textContent = cfg.captcha.question;
+          answer.value = "";
+          answer.disabled = false;
+          localBox.hidden = false;
+          hint.textContent = "Решите пример, чтобы продолжить регистрацию.";
+          return;
+        }
+        captchaId = "";
+        answer.value = "";
+        answer.disabled = true;
+        localBox.hidden = true;
+        hint.textContent = "Подтвердите, что вы не робот.";
+        if (!cfg.ok || !cfg.turnstileSiteKey) return;
+        var s = document.createElement("script");
+        s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+        s.async = true;
+        s.onload = function () {
+          try {
+            tsWidget = window.turnstile.render($("[data-turnstile]", wrap), {
+              sitekey: cfg.turnstileSiteKey,
+              callback: function (t) { tsToken = t; },
+              "expired-callback": function () { tsToken = ""; }
+            });
+          } catch (e) {}
+        };
+        document.head.appendChild(s);
+      }).catch(function () {
+        hint.textContent = "Не удалось загрузить проверку. Обновите страницу.";
+      });
+    };
+    captchaReload();
   }
 
   /* --------------------------------------------------- HWID и лоадер */
@@ -653,16 +685,17 @@
       });
     }
 
-    var openLoader = $("[data-open-loader]");
-    if (openLoader) {
-      openLoader.addEventListener("click", function (e) {
+    var downloadLoader = $("[data-download-loader]");
+    if (downloadLoader) {
+      downloadLoader.addEventListener("click", function (e) {
         e.preventDefault();
-        if (!S.hasToken()) {
+        var t = S.hasToken();
+        if (!t) {
           toast("Войдите в аккаунт", "bad");
           return;
         }
-        // Открываем лоадер в браузере (страница сама проверит подписку)
-        window.location.href = "/loader";
+        window.location.href = "/api/download/loader?t=" + encodeURIComponent(t);
+        toast("Загрузка началась...");
       });
     }
   }
@@ -725,17 +758,22 @@
         $("#regLogin").value.trim(),
         $("#regEmail").value.trim(),
         $("#regPw").value,
-        tsToken
+        tsToken,
+        captchaId,
+        $("#captchaAnswer", form) ? $("#captchaAnswer", form).value : ""
       );
       busy(form, false);
 
       if (!res.ok) {
-        if (res.error.indexOf("Cloudflare") > -1 && tsWidget !== null && window.turnstile) {
+        if (res.error && res.error.indexOf("Cloudflare") > -1 && tsWidget !== null && window.turnstile) {
           window.turnstile.reset(tsWidget);
           tsToken = "";
         }
-        var isLoginErr = res.error.indexOf("логин") > -1;
-        var isEmailErr = res.error.indexOf("e-mail") > -1;
+        if (res.error && res.error.indexOf("капчи") > -1) {
+          if (captchaReload) captchaReload();
+        }
+        var isLoginErr = res.error && res.error.indexOf("логин") > -1;
+        var isEmailErr = res.error && res.error.indexOf("e-mail") > -1;
         fieldError($("#regLogin"), isLoginErr ? res.error : "");
         fieldError($("#regEmail"), isEmailErr ? res.error : "");
         if (!isLoginErr && !isEmailErr) toast(res.error || "Ошибка регистрации", "bad");

@@ -79,7 +79,7 @@
   <section class="hero">
     <div class="shell">
       <span class="hero__badge" data-reveal>
-        <span class="pulse"></span> Aethra Legit · сборка 2.4.1
+        <span class="pulse"></span> Aethra Legit · сборка 1.0.0
       </span>
 
       <h1 class="hero__title" data-reveal>
@@ -93,8 +93,8 @@
       </p>
 
       <div class="hero__cta" data-reveal>
-        <a class="btn btn--primary" href="#" data-open-loader data-auth-only hidden>
-          Открыть лоадер <svg class="i"><use href="#i-arrow-right"></use></svg>
+        <a class="btn btn--primary" href="#" data-download-loader data-auth-only hidden>
+          Скачать лоадер <svg class="i"><use href="#i-download"></use></svg>
         </a>
         <a class="btn btn--ghost" href="profile.html" data-auth-only hidden>
           Личный кабинет
@@ -159,12 +159,11 @@
           <div class="card__icon"><svg class="i"><use href="#i-download"></use></svg></div>
           <h3 class="card__title">Лоадер в один клик</h3>
           <p class="card__text">
-            Актуальная сборка всегда на странице профиля. Версия, хеш и дата публикации
+            Актуальная сборка всегда на странице профиля. Версия и дата публикации
             видны до скачивания — вы точно знаете, что запускаете.
           </p>
           <div class="kv" style="margin-top:var(--sp-5)">
-            <div class="kv__row"><dt>Версия</dt><dd>2.4.1</dd></div>
-            <div class="kv__row" style="border-bottom:0"><dt>SHA-256</dt><dd>a91f…7c2d</dd></div>
+            <div class="kv__row" style="border-bottom:0"><dt>Версия</dt><dd>1.0.0</dd></div>
           </div>
         </article>
 
@@ -224,18 +223,51 @@
         <span class="eyebrow">Активность</span>
         <h2 class="section__title">Статистика платформы</h2>
         <p class="section__lede">
-          Онлайн, распределение по серверам и топ по наигранности появятся здесь автоматически,
-          как только игроки начнут использовать лоадер.
+          Три игровых направления в одном месте: актуальные статусы, удобный доступ и понятная
+          статистика без лишнего шума.
         </p>
       </div>
 
-      <article class="card" data-reveal>
-        <div class="empty" style="padding-block:var(--sp-6)">
-          <svg class="i"><use href="#i-activity"></use></svg>
-          <p>Пока никто не играет — статистика пустая. Никаких накрученных цифр: только реальные данные.</p>
-          <a class="btn btn--ghost btn--sm" href="/main#pricing">Стать первым</a>
-        </div>
-      </article>
+      <div class="activity-grid" data-reveal-group>
+        <article class="card activity-card activity-card--cs" data-reveal>
+          <div class="activity-card__top">
+            <div class="activity-card__icon"><svg class="i"><use href="#i-gamepad"></use></svg></div>
+            <span class="badge badge--ok"><span class="pulse"></span> Онлайн</span>
+          </div>
+          <div>
+            <span class="eyebrow">01 · Competitive</span>
+            <h3 class="activity-card__title">CS 2</h3>
+            <p class="activity-card__text">Стабильный доступ для матчей и рейтинговой игры.</p>
+          </div>
+          <div class="activity-card__meta"><span>Активные игроки</span><strong>24</strong></div>
+        </article>
+
+        <article class="card activity-card activity-card--minecraft" data-reveal>
+          <div class="activity-card__top">
+            <div class="activity-card__icon"><svg class="i"><use href="#i-cube"></use></svg></div>
+            <span class="badge badge--ok"><span class="pulse"></span> Онлайн</span>
+          </div>
+          <div>
+            <span class="eyebrow">02 · Sandbox</span>
+            <h3 class="activity-card__title">Minecraft Cheat</h3>
+            <p class="activity-card__text">Инструменты для комфортной игры на любимых серверах.</p>
+          </div>
+          <div class="activity-card__meta"><span>Активные игроки</span><strong>18</strong></div>
+        </article>
+
+        <article class="card activity-card activity-card--visual" data-reveal>
+          <div class="activity-card__top">
+            <div class="activity-card__icon"><svg class="i"><use href="#i-spark"></use></svg></div>
+            <span class="badge badge--ok"><span class="pulse"></span> Онлайн</span>
+          </div>
+          <div>
+            <span class="eyebrow">03 · Visual</span>
+            <h3 class="activity-card__title">Minecraft Visual</h3>
+            <p class="activity-card__text">Чистый визуальный слой с акцентом на читаемость.</p>
+          </div>
+          <div class="activity-card__meta"><span>Активные игроки</span><strong>12</strong></div>
+        </article>
+      </div>
     </div>
   </section>
 
@@ -395,7 +427,6 @@
 
     <div class="footer__base">
       <span>© <span data-year>2026</span> aethra-wf3v.onrender.com</span>
-      <span class="mono">Все данные на странице — демонстрационные</span>
     </div>
   </div>
 </footer>

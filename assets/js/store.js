@@ -90,8 +90,15 @@
     fmtShort: fmtShort,
     hasToken: getToken,
 
-    register: async function (login, email, pass, turnstile) {
-      var r = await api("/register", { login: login, email: email, password: pass, turnstile: turnstile || "" });
+    register: async function (login, email, pass, turnstile, captchaId, captchaAnswer) {
+      var r = await api("/register", {
+        login: login,
+        email: email,
+        password: pass,
+        turnstile: turnstile || "",
+        captchaId: captchaId || "",
+        captchaAnswer: captchaAnswer || ""
+      });
       if (r.ok && r.token) setToken(r.token, true);
       return r;
     },

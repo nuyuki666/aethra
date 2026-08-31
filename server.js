@@ -18,6 +18,45 @@ const PLANS = {
 const KEY_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 const LOGIN_RE = /^[a-zA-Z0-9_.-]{3,32}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const CAPTCHA_TTL = 10 * 60 * 1000;
+const captchaChallenges = new Map();
+
+function cleanupCaptchaChallenges() {
+  const now = Date.now();
+  for (const [id, challenge] of captchaChallenges) {
+    if (challenge.expiresAt <= now) captchaChallenges.delete(id);
+  }
+  while (captchaChallenges.size > 5000) {
+    const first = captchaChallenges.keys().next();
+    if (first.done) break;
+    captchaChallenges.delete(first.value);
+  }
+}
+
+function createCaptchaChallenge() {
+  cleanupCaptchaChallenges();
+  const a = crypto.randomInt(2, 10);
+  const b = crypto.randomInt(2, 10);
+  const multiply = crypto.randomInt(0, 3) === 0;
+  const answer = multiply ? a * b : a + b;
+  const id = crypto.randomBytes(18).toString("hex");
+  captchaChallenges.set(id, { answer, expiresAt: Date.now() + CAPTCHA_TTL });
+  return { id, question: a + (multiply ? " × " : " + ") + b + " = ?" };
+}
+
+function verifyCaptchaChallenge(id, answer) {
+  cleanupCaptchaChallenges();
+  const challenge = captchaChallenges.get(String(id || ""));
+  captchaChallenges.delete(String(id || ""));
+  if (!challenge || challenge.expiresAt <= Date.now()) return false;
+  const expected = Buffer.from(String(challenge.answer));
+  const actual = Buffer.from(String(answer || "").trim());
+  return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
+}
+
+function turnstileConfigured() {
+  return Boolean(process.env.TURNSTILE_SECRET && process.env.TURNSTILE_SITEKEY);
+}
 
 function hashPass(pass) {
   const salt = crypto.randomBytes(16).toString("hex");
@@ -136,8 +175,13 @@ async function main() {
       if (!EMAIL_RE.test(email)) return bad(res, "Введите корректный e-mail");
       if (password.length < 8 || password.length > 128) return bad(res, "Пароль: минимум 8 символов");
 
-      const human = await verifyTurnstile(String((req.body && req.body.turnstile) || ""), clientIp(req));
-      if (!human) return bad(res, "Пройдите проверку Cloudflare");
+      const human = turnstileConfigured()
+        ? await verifyTurnstile(String((req.body && req.body.turnstile) || ""), clientIp(req))
+        : verifyCaptchaChallenge(
+            String((req.body && req.body.captchaId) || ""),
+            String((req.body && req.body.captchaAnswer) || "")
+          );
+      if (!human) return bad(res, turnstileConfigured() ? "Пройдите проверку Cloudflare" : "Введите правильный ответ капчи");
 
       if (await store.getUserByLoginOrEmail(login)) return bad(res, "Такой логин уже занят");
       if ((await store.getAllUsers()).some(u => u.email.toLowerCase() === email.toLowerCase()))
@@ -300,7 +344,11 @@ async function main() {
   }
 
   app.get("/api/config", (req, res) => {
-    res.json({ ok: true, turnstileSiteKey: process.env.TURNSTILE_SITEKEY || "" });
+    res.json({
+      ok: true,
+      turnstileSiteKey: process.env.TURNSTILE_SITEKEY || "",
+      captcha: !turnstileConfigured() ? createCaptchaChallenge() : null
+    });
   });
 
   /* ----------------------------------------------------- avatar & misc */
