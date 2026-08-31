@@ -447,12 +447,39 @@
 
   function openBuyModal(planCode, productCode) {
     var info = PLAN_INFO[planCode];
-    var product = PRODUCTS[productCode];
     if (!info) return;
     var m = ensureModal();
     var body = $("[data-modal-body]", m);
 
-    var productInfo = product ? "<p class='text-dim' style='font-size:var(--fs-sm);margin-top:var(--sp-2)'><b>" + esc(product.name) + "</b> — " + esc(product.desc) + "</p>" : "";
+    // Сначала показываем выбор товара
+    var productBtns = Object.keys(PRODUCTS).map(function(code) {
+      var p = PRODUCTS[code];
+      return '<button class="btn btn--ghost btn--block" type="button" data-select-product="' + code + '" style="margin-bottom:var(--sp-2)">' +
+        esc(p.name) + '</button>';
+    }).join("");
+
+    body.innerHTML =
+      '<span class="eyebrow">Покупка подписки</span>' +
+      '<h3 style="font-size:var(--fs-xl);margin-top:var(--sp-2)">' + esc(info.name) + " · " + esc(info.price) + "</h3>" +
+      '<p class="text-dim" style="font-size:var(--fs-sm);margin-top:var(--sp-2)">Выберите товар:</p>' +
+      '<div style="margin-top:var(--sp-3)">' + productBtns + '</div>';
+
+    $$("[data-select-product]", body).forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var selectedProduct = btn.dataset.selectProduct;
+        showPaymentMethods(planCode, selectedProduct, m, body);
+      });
+    });
+
+    m.hidden = false;
+  }
+
+  function showPaymentMethods(planCode, productCode, m, body) {
+    var info = PLAN_INFO[planCode];
+    var product = PRODUCTS[productCode];
+    if (!info || !product) return;
+
+    var productInfo = "<p class='text-dim' style='font-size:var(--fs-sm);margin-top:var(--sp-2)'><b>" + esc(product.name) + "</b> — " + esc(product.desc) + "</p>";
 
     var methods = METHODS.map(function (x, i) {
       return (
@@ -505,8 +532,6 @@
         showInstructions(info, METHODS[parseInt(btn.dataset.method, 10)], promo, productCode);
       });
     });
-
-    m.hidden = false;
   }
 
   function showInstructions(info, method, promo, productCode) {
@@ -566,8 +591,7 @@
           setTimeout(function () { location.href = "login.html"; }, 600);
           return;
         }
-        var productCode = btn.dataset.product || null;
-        openBuyModal(btn.dataset.buy, productCode);
+        openBuyModal(btn.dataset.buy, null);
       });
     });
   }
