@@ -97,6 +97,10 @@
   letter-spacing: -0.01em;
   white-space: nowrap;
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   transition:
     background var(--dur-base) var(--ease-out),
     border-color var(--dur-base) var(--ease-out),
@@ -798,6 +802,10 @@
   cursor: pointer;
   list-style: none;
   outline: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   transition: background var(--dur-base) var(--ease-out);
 }
 .faq__q:hover { background: var(--w-06); }
@@ -1509,6 +1517,10 @@ body.auth-ready .nav__actions { visibility: visible; }
   background: var(--bg-solid);
   box-shadow: var(--sh-lg);
   animation: toast-in var(--dur-slow) var(--ease-out) both;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 .modal__x {
   position: absolute;
