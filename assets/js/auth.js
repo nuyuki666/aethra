@@ -26,9 +26,9 @@
     "hwid-reset": { name: "Сброс HWID", price: "200 ₽", term: "разовая услуга" }
   };
   var PRODUCTS = {
-    cs2: { name: "Aethra CS2", desc: "Читы для Counter-Strike 2", img: "/cs.png" },
-    minecraft: { name: "Aethra Cheat", desc: "Читы для Minecraft", img: "/minecraft.png" },
-    visual: { name: "Aethra Visual", desc: "Визуальные читы для PvP", img: "/minecraft.png" }
+    cs2: { name: "Aethra CS2", desc: "DLC для Counter-Strike 2", img: "/cs.png" },
+    minecraft: { name: "Aethra DLC", desc: "DLC для Minecraft", img: "/minecraft.png" },
+    visual: { name: "Aethra Visual", desc: "Визуальное DLC для PvP", img: "/minecraft.png" }
   };
   var METHODS = [
     { id: "support", name: "Через техподдержку", icon: "message-circle", desc: "Любой удобный способ", link: PAY.support, type: "key", format: "Ключ AETH-XXXX-XXXX" },
