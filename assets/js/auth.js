@@ -11,7 +11,7 @@
 
   var PAY = {
     tg: "https://t.me/aethra_helper",
-    channel: "https://t.me/aethra_cl1ent",
+    channel: "https://t.me/aethra_dlc",
     support: "https://t.me/aethra_helper",
     funpay: "",
     iokassa: "",
