@@ -815,52 +815,6 @@ async function main() {
     }
   }));
 
-  app.post("/api/admin/create-user", requireAdmin(async (req, res) => {
-    try {
-      const login = String((req.body && req.body.login) || "").trim();
-      const email = String((req.body && req.body.email) || "").trim();
-      const password = String((req.body && req.body.password) || "");
-
-      if (!login || login.length < 3 || login.length > 20) {
-        return bad(res, "Логин: от 3 до 20 символов");
-      }
-      if (!/^[a-zA-Z0-9_-]+$/.test(login)) {
-        return bad(res, "Логин может содержать только латиницу, цифры, _ и -");
-      }
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        return bad(res, "Некорректный e-mail");
-      }
-      if (!password || password.length < 6) {
-        return bad(res, "Пароль: минимум 6 символов");
-      }
-
-      const exists = await store.getUserByLoginOrEmail(login, email);
-      if (exists) {
-        return bad(res, "Логин или e-mail уже занят");
-      }
-
-      const passHash = hashPass(password);
-      const user = {
-        login,
-        email,
-        passHash,
-        role: "default",
-        banned: false,
-        banReason: "",
-        lifetime: false,
-        subUntil: null,
-        regAt: Date.now(),
-        lastLogin: null
-      };
-
-      await store.createUser(user);
-      res.json({ ok: true, login });
-    } catch (e) {
-      console.error(e);
-      res.status(500).json({ ok: false, error: "Ошибка сервера" });
-    }
-  }));
-
   /* ---------------------------------------------------------------- static */
   app.get("/main", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
   app.get("/index.html", (req, res) => res.redirect(301, "/main"));
