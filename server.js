@@ -839,7 +839,7 @@ async function main() {
         return bad(res, "Логин или e-mail уже занят");
       }
 
-      const passHash = hashPassword(password);
+      const passHash = hashPass(password);
       const user = {
         login,
         email,
