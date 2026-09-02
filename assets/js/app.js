@@ -370,6 +370,22 @@
   function initScrollspy() {
     var links = $$(".toc__link");
     if (!links.length || !("IntersectionObserver" in window)) return;
+    
+    // Обработка кликов для плавной прокрутки
+    links.forEach(function (link) {
+      link.addEventListener("click", function (e) {
+        e.preventDefault();
+        var id = link.getAttribute("href").slice(1);
+        var target = document.getElementById(id);
+        if (target) {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+          // Обновляем активную ссылку
+          links.forEach(function (l) { l.classList.remove("is-active"); });
+          link.classList.add("is-active");
+        }
+      });
+    });
+    
     var map = {};
     var targets = links
       .map(function (l) {
