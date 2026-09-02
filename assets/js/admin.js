@@ -168,6 +168,34 @@
       });
     }
 
+    /* создание тестового аккаунта */
+    var createTestForm = $('form[data-create-test-user]');
+    if (createTestForm) {
+      createTestForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        var login = $("#testLogin").value.trim();
+        var email = $("#testEmail").value.trim();
+        var password = $("#testPassword").value;
+
+        if (!login || !email || !password) {
+          toast("Заполни все поля", "bad");
+          return;
+        }
+
+        var res = await S.adminPost("/api/admin/create-user", { login: login, email: email, password: password });
+        
+        if (res.ok) {
+          toast("Аккаунт создан: " + login);
+          $("#testLogin").value = "";
+          $("#testEmail").value = "";
+          $("#testPassword").value = "";
+          await renderAll();
+        } else {
+          toast(res.error || "Не удалось создать аккаунт", "bad");
+        }
+      });
+    }
+
     var body = $("[data-users-body]");
     if (!body) return;
     body.addEventListener("click", async function (e) {

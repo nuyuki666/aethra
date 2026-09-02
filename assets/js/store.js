@@ -207,6 +207,13 @@
       return r && r.ok
         ? r.stats
         : { users: 0, subs: 0, bans: 0, keys: 0 };
+    },
+
+    adminGet: async function (path) {
+      return api(path);
+    },
+    adminPost: async function (path, body) {
+      return api(path, body);
     }
   };
 })();

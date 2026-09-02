@@ -138,6 +138,31 @@
           </div>
 
           <article class="card">
+            <div class="panel-head">
+              <h3>Создать тестовый аккаунт</h3>
+              <span class="eyebrow">Для демонстрации и тестирования</span>
+            </div>
+
+            <form class="form-row" data-create-test-user>
+              <div class="field">
+                <label class="field__label" for="testLogin">Логин</label>
+                <input class="input" id="testLogin" type="text" placeholder="testuser" required autocomplete="off">
+              </div>
+              <div class="field">
+                <label class="field__label" for="testEmail">E-mail</label>
+                <input class="input" id="testEmail" type="email" placeholder="test@example.com" required autocomplete="off">
+              </div>
+              <div class="field">
+                <label class="field__label" for="testPassword">Пароль</label>
+                <input class="input" id="testPassword" type="text" placeholder="password123" required autocomplete="off">
+              </div>
+              <button class="btn btn--primary" type="submit">
+                <svg class="i"><use href="#i-user-plus"></use></svg> Создать аккаунт
+              </button>
+            </form>
+          </article>
+
+          <article class="card">
             <form class="form-row" data-users-search onsubmit="return false" style="margin-bottom:var(--sp-4)">
               <div class="field">
                 <label class="field__label" for="userSearch">Поиск</label>
