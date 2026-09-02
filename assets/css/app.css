@@ -952,14 +952,14 @@
 .prose ol, .prose ul { margin-top: var(--sp-4); padding-left: 0; list-style: none; display: grid; gap: var(--sp-4); }
 .prose li { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr); gap: var(--sp-2); }
 .prose li b { font-family: var(--font-mono); font-size: var(--fs-sm); font-weight: 500; color: var(--fg-dim); }
-.prose li > span > ul,
-.prose li > ul { display: inline; margin: 0; padding: 0; }
-.prose li > span > ul > li,
-.prose li > ul > li { display: inline; grid-template-columns: none; list-style: none; margin: 0; }
-.prose li > span > ul > li::after,
-.prose li > ul > li::after { content: "; "; }
-.prose li > span > ul > li:last-child::after,
-.prose li > ul > li:last-child::after { content: "."; }
+.prose li span ul,
+.prose li ul { display: inline; margin: 0; padding: 0; }
+.prose li span ul li,
+.prose li ul li { display: inline; grid-template-columns: none; list-style: none; margin: 0; }
+.prose li span ul li::after,
+.prose li ul li::after { content: "; "; }
+.prose li span ul li:last-child::after,
+.prose li ul li:last-child::after { content: "."; }
 .prose a { color: var(--a-400); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
 .prose a:hover { color: var(--fg); }
 
