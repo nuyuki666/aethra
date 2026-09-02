@@ -952,6 +952,9 @@
 .prose ol, .prose ul { margin-top: var(--sp-4); padding-left: 0; list-style: none; display: grid; gap: var(--sp-4); }
 .prose li { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr); gap: var(--sp-2); }
 .prose li b { font-family: var(--font-mono); font-size: var(--fs-sm); font-weight: 500; color: var(--fg-dim); }
+.prose li ul { display: block; margin-top: var(--sp-3); padding-left: var(--sp-5); }
+.prose li ul li { display: list-item; grid-template-columns: none; list-style: disc; margin-top: var(--sp-2); }
+.prose li ul li::marker { color: var(--fg-dim); }
 .prose a { color: var(--a-400); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
 .prose a:hover { color: var(--fg); }
 
