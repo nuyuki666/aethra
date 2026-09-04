@@ -504,23 +504,24 @@
       }).join("");
 
       body.innerHTML =
-        '<h2 style="font-size:var(--fs-xl);font-weight:800;color:#dce4ef;margin:0 0 var(--sp-4) 0">' + esc(product.name) + '</h2>' +
+        '<h2 style="font-size:20px;font-weight:800;color:#dce4ef;margin:0 0 16px 0;line-height:1.2">' + esc(product.name) + '</h2>' +
         '<div class="pay-product">' +
           '<div class="pay-product__info">' +
             '<div class="pay-product__name">' + esc(product.name) + '</div>' +
             '<div class="pay-product__desc">' + esc(info.name) + ' · ' + esc(info.term) + '</div>' +
           '</div>' +
-          '<div class="pay-product__price">' + esc(info.price) +
+          '<div class="pay-product__price">' +
+            '<div class="pay-product__amount">' + esc(info.price) + '</div>' +
             '<span class="pay-product__badge">РАЗОВЫЙ ПЛАТЕЖ</span>' +
           '</div>' +
         '</div>' +
-        '<p class="eyebrow" style="margin-top:var(--sp-5);color:rgba(184,213,255,0.49);font-weight:600;font-size:var(--fs-xs);letter-spacing:0.06em">СПОСОБ ОПЛАТЫ</p>' +
+        '<p style="margin:20px 0 8px;font-size:11px;font-weight:600;color:rgba(184,213,255,0.4);letter-spacing:0.08em;text-transform:uppercase">СПОСОБ ОПЛАТЫ</p>' +
         '<div class="pay-list">' + methods + '</div>' +
-        '<p class="eyebrow" style="margin-top:var(--sp-5);color:rgba(184,213,255,0.49);font-weight:600;font-size:var(--fs-xs);letter-spacing:0.06em">ПРОМОКОД</p>' +
+        '<p style="margin:20px 0 8px;font-size:11px;font-weight:600;color:rgba(184,213,255,0.4);letter-spacing:0.08em;text-transform:uppercase">ПРОМОКОД</p>' +
         '<div class="promo-row">' +
         '<input class="input" data-promo-input placeholder="Введите код, например RAIN20" maxlength="24" autocomplete="off">' +
         '</div>' +
-        '<p class="text-dim" data-promo-status style="font-size:var(--fs-sm);min-height:1.2em;margin-top:var(--sp-2)"></p>' +
+        '<p data-promo-status style="font-size:12px;min-height:16px;margin-top:6px;color:rgba(184,213,255,0.5)"></p>' +
         '<button class="pay-submit" type="button" data-pay-submit disabled>' +
         'Оплатить ' + esc(finalPrice()) + '</button>';
 
