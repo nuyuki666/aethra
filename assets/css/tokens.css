@@ -24,10 +24,10 @@
   --n-050: #f4f6f8;
 
   /* Cold "aether" accent — used sparingly: focus, active, data */
-  --a-400: #a9c2ff;
-  --a-500: #8aabff;
-  --a-600: #6b8ff2;
-  --a-700: #4f6fd4;
+  --a-400: #ffffff;
+  --a-500: #ffffff;
+  --a-600: #e0e0e0;
+  --a-700: #c0c0c0;
 
   /* Signals */
   --ok-400: #5fe3a1;
@@ -116,7 +116,7 @@
   --border-focus: var(--a-500);
 
   --accent: var(--a-500);
-  --accent-soft: rgba(138, 171, 255, 0.14);
+  --accent-soft: rgba(255, 255, 255, 0.12);
 
   --ok: var(--ok-400);
   --warn: var(--warn-400);
@@ -197,7 +197,7 @@ p { text-wrap: pretty; }
 
 hr { border: 0; border-top: 1px solid var(--border); }
 
-::selection { background: rgba(138, 171, 255, 0.28); color: #fff; }
+::selection { background: rgba(255, 255, 255, 0.2); color: #fff; }
 
 /* Visible, consistent focus for keyboard users */
 :focus-visible {

@@ -1710,7 +1710,7 @@ body.auth-ready .nav__actions { visibility: visible; }
   padding: var(--sp-3) var(--sp-4);
   border: none;
   border-radius: var(--r-md);
-  background: var(--accent);
+  background: #ffd400;
   color: #000;
   font-size: var(--fs-base);
   font-weight: 700;
