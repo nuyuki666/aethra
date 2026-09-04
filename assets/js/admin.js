@@ -384,8 +384,9 @@
         var count = parseInt($("#promoCount").value, 10) || 1;
         count = Math.max(1, Math.min(count, 50));
         var maxUses = Math.max(0, Math.min(parseInt($("#promoMaxUses").value, 10) || 0, 1000));
+        var customCode = ($("#promoCustomCode").value || "").trim().toUpperCase();
 
-        var r = await S.makePromos(percent, count, maxUses, product);
+        var r = await S.makePromos(percent, count, maxUses, product, customCode);
         var productName = product === "all" ? "все товары" : product.toUpperCase();
         if (r.ok) toast("Создано промокодов: " + r.codes.length + " (−" + percent + "%, " + productName + ", " + (maxUses || "∞") + " акт.)");
         else toast("Не удалось создать промокоды", "bad");

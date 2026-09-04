@@ -553,13 +553,21 @@ async function main() {
       const count = parseInt((req.body && req.body.count), 10);
       const maxUses = parseInt((req.body && req.body.maxUses), 10) || 0;
       const product = String((req.body && req.body.product) || "all");
+      const customCode = String((req.body && req.body.customCode) || "").trim().toUpperCase();
       if (!percent || percent < 1 || percent > 90) return bad(res, "Скидка: от 1 до 90%");
       if (!count || count < 1 || count > 50) return bad(res, "Количество: от 1 до 50");
       if (maxUses < 0 || maxUses > 1000) return bad(res, "Лимит активаций: 0 (безлимит) или 1–1000");
       if (!["all", "cs2", "minecraft", "visual"].includes(product)) return bad(res, "Неизвестный товар");
 
+      if (customCode) {
+        if (count > 1) return bad(res, "При вводе имени можно создать только 1 промокод");
+        if (!/^[A-Z0-9_-]{1,20}$/.test(customCode)) return bad(res, "Имя: только латиница, цифры, _ - (до 20 символов)");
+        const existing = await store.getPromo(customCode);
+        if (existing) return bad(res, "Промокод «" + customCode + "» уже существует");
+      }
+
       const codes = [];
-      for (let i = 0; i < count; i++) codes.push(promoCode());
+      for (let i = 0; i < count; i++) codes.push(customCode || promoCode());
       await store.upsertPromos(codes.map(code => ({
         code,
         percent,

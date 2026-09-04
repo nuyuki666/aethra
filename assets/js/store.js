@@ -158,8 +158,8 @@
       var r = await api("/admin/promos");
       return r && r.ok ? r.promos : [];
     },
-    makePromos: async function (percent, count, maxUses) {
-      var r = await api("/admin/promos", { percent: percent, count: parseInt(count, 10), maxUses: parseInt(maxUses, 10) || 0 });
+    makePromos: async function (percent, count, maxUses, product, customCode) {
+      var r = await api("/admin/promos", { percent: percent, count: parseInt(count, 10), maxUses: parseInt(maxUses, 10) || 0, product: product || "all", customCode: customCode || "" });
       return r && r.ok ? r : { ok: false, codes: [] };
     },
     removePromo: async function (code) {
