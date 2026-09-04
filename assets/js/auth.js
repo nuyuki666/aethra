@@ -493,7 +493,7 @@
     function render() {
       var methods = PAYMENT_METHODS.map(function (x) {
         var iconHtml = x.icon.indexOf("img:") === 0
-          ? '<img src="' + esc(x.icon.slice(4)) + '" alt="" style="width:22px;height:22px;border-radius:4px;object-fit:contain">'
+          ? '<img src="' + esc(x.icon.slice(4)) + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:8px">'
           : '<svg class="i"><use href="#i-' + x.icon + '"></use></svg>';
         return '<button class="pay-row' + (selectedMethod === x.id ? " pay-row--active" : "") +
           '" type="button" data-pay-method="' + x.id + '">' +
