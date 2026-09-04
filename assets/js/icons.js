@@ -56,7 +56,14 @@
     crypto:
       '<circle cx="12" cy="12" r="9.5" fill="none"/><path d="M9 8h4.5a2 2 0 0 1 0 4H9V8z" fill="none"/><path d="M9 12h5a2 2 0 0 1 0 4H9v-4z" fill="none"/><path d="M14 7v2M14 15v2M8 10v4"/>',
     sbp:
-      '<rect x="2" y="4" width="20" height="16" rx="3" fill="none"/><path d="M7 12h10M12 7v10"/>'
+      '<rect x="2" y="4" width="20" height="16" rx="3" fill="none"/><path d="M7 12h10M12 7v10"/>',
+    tether:
+      '<circle cx="12" cy="12" r="10" fill="#26A17B"/><path d="M14.5 7h-5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5H12v3h-3.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5H11v-3h3.5a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5z" fill="#fff"/><path d="M12 6.5v-1M12 18.5v-1" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>',
+    sbp_icon:
+      '<path d="M6 6h5v5H6zM13 6h5v5h-5zM6 13h5v5H6zM13 13h5v5h-5z" fill="none" stroke="currentColor" stroke-width="0"/>' +
+      '<path d="M7.5 7.5L10 10M16.5 7.5L14 10M7.5 16.5L10 14M16.5 16.5L14 14" stroke="#E53935" stroke-width="1.8" stroke-linecap="round"/>' +
+      '<path d="M10 10L14 14M14 10L10 14" stroke="#FFC107" stroke-width="1.8" stroke-linecap="round"/>' +
+      '<path d="M12 4v16M4 12h16" stroke="#1565C0" stroke-width="0" fill="none"/>'
   };
 
   var solid = {};

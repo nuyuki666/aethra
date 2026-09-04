@@ -26,32 +26,11 @@
     minecraft: { name: "Aethra DLC", desc: "DLC для Minecraft", img: "/minecraft.png" },
     visual: { name: "Aethra Visual", desc: "Визуальное DLC для PvP", img: "/minecraft.png" }
   };
-  var PAYMENT_TABS = [
-    { id: "cards", name: "Карты", icon: "credit-card" },
-    { id: "crypto", name: "Crypto", icon: "crypto" },
-    { id: "support", name: "Техподдержка", icon: "message-circle" }
+  var PAYMENT_METHODS = [
+    { id: "sbp", name: "Система быстрых платежей", icon: "sbp_icon" },
+    { id: "crypto", name: "Криптовалюта", icon: "tether" },
+    { id: "support", name: "Через техподдержку", icon: "message-circle" }
   ];
-  var PAYMENT_METHODS = {
-    cards: [
-      { id: "sbp", name: "СБП QR", desc: "Быстрый платёж", icon: "sbp" },
-      { id: "sber", name: "Сбер Карты", desc: "Visa · Mastercard · МИР", icon: "credit-card" },
-      { id: "mir", name: "МИР", desc: "Карты МИР", icon: "credit-card" },
-      { id: "gpay", name: "Google Pay", desc: "Apple Pay · Google Pay", icon: "smartphone" }
-    ],
-    crypto: [
-      { id: "usdt-trc", name: "USDT TRC20", desc: "Tether (Tron)", icon: "crypto" },
-      { id: "usdt-bep", name: "USDT BEP20", desc: "Tether (BSC)", icon: "crypto" },
-      { id: "usdt-ton", name: "USDT TON", desc: "Tether (Toncoin)", icon: "crypto" },
-      { id: "usdt-erc", name: "USDT ERC20", desc: "Tether (Ethereum)", icon: "crypto" },
-      { id: "btc", name: "BTC", desc: "Bitcoin", icon: "crypto" },
-      { id: "eth", name: "ETH", desc: "Ethereum", icon: "crypto" },
-      { id: "ton", name: "TON", desc: "Toncoin", icon: "crypto" },
-      { id: "sol", name: "SOL", desc: "Solana", icon: "crypto" }
-    ],
-    support: [
-      { id: "tg-support", name: "Telegram", desc: "Напишите в поддержку", icon: "telegram" }
-    ]
-  };
 
   var RULES = {
     login: function (v) {
@@ -502,7 +481,6 @@
     if (!info || !product) return;
 
     var base = parseInt(info.price, 10) || 0;
-    var activeTab = "cards";
     var selectedMethod = null;
     var promo = { code: "", percent: 0 };
 
@@ -513,53 +491,44 @@
     }
 
     function render() {
-      var tabs = PAYMENT_TABS.map(function (t) {
-        return '<button class="pay-tab' + (t.id === activeTab ? " pay-tab--active" : "") +
-          '" type="button" data-pay-tab="' + t.id + '">' +
-          '<svg class="i"><use href="#i-' + t.icon + '"></use></svg> ' + esc(t.name) + '</button>';
-      }).join("");
-
-      var methods = PAYMENT_METHODS[activeTab].map(function (x) {
-        return '<button class="pay-card' + (selectedMethod === x.id ? " pay-card--active" : "") +
+      var methods = PAYMENT_METHODS.map(function (x) {
+        return '<button class="pay-row' + (selectedMethod === x.id ? " pay-row--active" : "") +
           '" type="button" data-pay-method="' + x.id + '">' +
-          '<div class="pay-card__icon"><svg class="i"><use href="#i-' + x.icon + '"></use></svg></div>' +
-          '<div class="pay-card__name">' + esc(x.name) + '</div>' +
+          '<div class="pay-row__icon"><svg class="i"><use href="#i-' + x.icon + '"></use></svg></div>' +
+          '<span class="pay-row__name">' + esc(x.name) + '</span>' +
+          '<svg class="i pay-row__chevron"><use href="#i-chevron-right"></use></svg>' +
           '</button>';
       }).join("");
 
       body.innerHTML =
-        '<span class="eyebrow">Покупка подписки</span>' +
-        '<h3 style="font-size:var(--fs-xl);margin-top:var(--sp-2)">' + esc(product.name) + " · " + esc(info.term) + "</h3>" +
-        '<div class="pay-tabs">' + tabs + '</div>' +
-        '<div class="pay-grid" data-pay-grid>' + methods + '</div>' +
-        '<div class="promo-row" style="margin-top:var(--sp-4)">' +
-        '<input class="input input--mono" data-promo-input placeholder="Промокод" maxlength="24" autocomplete="off">' +
-        '<button class="btn btn--ghost" type="button" data-promo-apply>' +
-        '<svg class="i"><use href="#i-check"></use></svg></button>' +
+        '<div class="pay-product">' +
+          '<div class="pay-product__info">' +
+            '<div class="pay-product__name">' + esc(product.name) + '</div>' +
+            '<div class="pay-product__desc">' + esc(info.name) + ' · ' + esc(info.term) + '</div>' +
+          '</div>' +
+          '<div class="pay-product__price">' + esc(info.price) +
+            '<span class="pay-product__badge">РАЗОВЫЙ ПЛАТЕЖ</span>' +
+          '</div>' +
+        '</div>' +
+        '<p class="eyebrow" style="margin-top:var(--sp-5)">Способ оплаты</p>' +
+        '<div class="pay-list">' + methods + '</div>' +
+        '<p class="eyebrow" style="margin-top:var(--sp-5)">Промокод</p>' +
+        '<div class="promo-row">' +
+        '<input class="input" data-promo-input placeholder="Введите код, например RAIN20" maxlength="24" autocomplete="off">' +
         '</div>' +
         '<p class="text-dim" data-promo-status style="font-size:var(--fs-sm);min-height:1.2em;margin-top:var(--sp-2)"></p>' +
         '<button class="pay-submit" type="button" data-pay-submit disabled>' +
-        'Оплатить ' + finalPrice() + ' <svg class="i" style="width:16px;height:16px"><use href="#i-zap"></use></svg></button>' +
-        '<p class="text-dim" style="font-size:var(--fs-xs);margin-top:var(--sp-4);text-align:center">' +
-        'Если после оплаты прошло более 30 минут, а ключ не пришёл, напишите нам в техподдержку.</p>';
+        'Оплатить ' + esc(finalPrice()) + '</button>';
 
       bindEvents();
     }
 
     function bindEvents() {
-      $$("[data-pay-tab]", body).forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          activeTab = btn.dataset.payTab;
-          selectedMethod = null;
-          render();
-        });
-      });
-
       $$("[data-pay-method]", body).forEach(function (btn) {
         btn.addEventListener("click", function () {
           selectedMethod = btn.dataset.payMethod;
-          $$(".pay-card", body).forEach(function (c) { c.classList.remove("pay-card--active"); });
-          btn.classList.add("pay-card--active");
+          $$(".pay-row", body).forEach(function (c) { c.classList.remove("pay-row--active"); });
+          btn.classList.add("pay-row--active");
           updateSubmit();
         });
       });
@@ -577,7 +546,7 @@
           return;
         }
         promo = { code: code, percent: r.percent };
-        status.innerHTML = '<span style="color:var(--ok)">Промокод применён: −' + r.percent +
+        status.innerHTML = '<span style="color:var(--ok)">Применено: −' + r.percent +
           "% → " + finalPrice() + "</span>";
         updateSubmit();
       });
@@ -590,8 +559,7 @@
       if (!btn) return;
       var disabled = !selectedMethod;
       btn.disabled = disabled;
-      btn.innerHTML = "Оплатить " + esc(finalPrice()) +
-        ' <svg class="i" style="width:16px;height:16px"><use href="#i-zap"></use></svg>';
+      btn.textContent = "Оплатить " + finalPrice();
       btn.onclick = disabled ? null : function () {
         showInstructions(info, selectedMethod, promo, productCode, base);
       };
@@ -608,10 +576,8 @@
     var total = amount || parseInt(info.price, 10) || 0;
 
     var methodInfo = null;
-    Object.keys(PAYMENT_METHODS).forEach(function (tab) {
-      PAYMENT_METHODS[tab].forEach(function (x) {
-        if (x.id === methodId) methodInfo = x;
-      });
+    PAYMENT_METHODS.forEach(function (x) {
+      if (x.id === methodId) methodInfo = x;
     });
     if (!methodInfo) methodInfo = { name: methodId, icon: "credit-card" };
 
