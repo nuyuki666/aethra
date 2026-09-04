@@ -28,7 +28,7 @@
   };
   var PAYMENT_METHODS = [
     { id: "sbp", name: "Система быстрых платежей", icon: "img:assets/images/spb.png" },
-    { id: "crypto", name: "Криптовалюта", icon: "img:assets/images/usdt.png" },
+    { id: "crypto", name: "Криптовалюта", icon: "crypto" },
     { id: "support", name: "Через техподдержку", icon: "img:assets/images/tech.png" }
   ];
 
