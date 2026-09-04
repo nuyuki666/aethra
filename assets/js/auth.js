@@ -506,13 +506,6 @@
     var selectedMethod = null;
     var promo = { code: "", percent: 0 };
 
-    function getAmounts() {
-      if (planCode === "hwid-reset") return [200, 500, 1000, 2000];
-      if (planCode === "week") return [100, 200, 300, 500];
-      if (planCode === "month") return [300, 500, 1000, 2000];
-      return [450, 500, 1000, 2000];
-    }
-
     function finalPrice() {
       var amt = base;
       if (promo.percent > 0) amt = Math.round(amt * (100 - promo.percent) / 100);
@@ -534,20 +527,11 @@
           '</button>';
       }).join("");
 
-      var amounts = getAmounts().map(function (a) {
-        return '<button class="amount-btn' + (a === base ? " amount-btn--active" : "") +
-          '" type="button" data-amount="' + a + '">' + a + " ₽</button>";
-      }).join("");
-
       body.innerHTML =
-        '<span class="eyebrow">Пополнение баланса</span>' +
+        '<span class="eyebrow">Покупка подписки</span>' +
         '<h3 style="font-size:var(--fs-xl);margin-top:var(--sp-2)">' + esc(product.name) + " · " + esc(info.term) + "</h3>" +
         '<div class="pay-tabs">' + tabs + '</div>' +
         '<div class="pay-grid" data-pay-grid>' + methods + '</div>' +
-        '<p class="text-dim" style="font-size:var(--fs-sm);margin-top:var(--sp-4)">Сумма пополнения</p>' +
-        '<div class="amount-row">' + amounts +
-        '<div class="amount-custom"><input class="input input--mono" data-amount-input type="number" min="50" placeholder="' + base + ' ₽" style="width:100%"></div>' +
-        '</div>' +
         '<div class="promo-row" style="margin-top:var(--sp-4)">' +
         '<input class="input input--mono" data-promo-input placeholder="Промокод" maxlength="24" autocomplete="off">' +
         '<button class="btn btn--ghost" type="button" data-promo-apply>' +
@@ -555,9 +539,9 @@
         '</div>' +
         '<p class="text-dim" data-promo-status style="font-size:var(--fs-sm);min-height:1.2em;margin-top:var(--sp-2)"></p>' +
         '<button class="pay-submit" type="button" data-pay-submit disabled>' +
-        'Пополнить ' + finalPrice() + ' <svg class="i" style="width:16px;height:16px"><use href="#i-zap"></use></svg></button>' +
+        'Оплатить ' + finalPrice() + ' <svg class="i" style="width:16px;height:16px"><use href="#i-zap"></use></svg></button>' +
         '<p class="text-dim" style="font-size:var(--fs-xs);margin-top:var(--sp-4);text-align:center">' +
-        'Если после оплаты прошло более 30 минут, а баланс на сайте не пополнился, то напишите нам в техподдержку.</p>';
+        'Если после оплаты прошло более 30 минут, а ключ не пришёл, напишите нам в техподдержку.</p>';
 
       bindEvents();
     }
@@ -579,29 +563,6 @@
           updateSubmit();
         });
       });
-
-      $$("[data-amount]", body).forEach(function (btn) {
-        btn.addEventListener("click", function () {
-          base = parseInt(btn.dataset.amount, 10) || base;
-          $$(".amount-btn", body).forEach(function (b) { b.classList.remove("amount-btn--active"); });
-          btn.classList.add("amount-btn--active");
-          var inp = $("[data-amount-input]", body);
-          if (inp) inp.value = "";
-          updateSubmit();
-        });
-      });
-
-      var amtInput = $("[data-amount-input]", body);
-      if (amtInput) {
-        amtInput.addEventListener("input", function () {
-          var v = parseInt(amtInput.value, 10);
-          if (v >= 50) {
-            base = v;
-            $$(".amount-btn", body).forEach(function (b) { b.classList.remove("amount-btn--active"); });
-          }
-          updateSubmit();
-        });
-      }
 
       var promoInput = $("[data-promo-input]", body);
       var status = $("[data-promo-status]", body);
@@ -627,9 +588,9 @@
     function updateSubmit() {
       var btn = $("[data-pay-submit]", body);
       if (!btn) return;
-      var disabled = !selectedMethod || base < 50;
+      var disabled = !selectedMethod;
       btn.disabled = disabled;
-      btn.innerHTML = "Пополнить " + esc(finalPrice()) +
+      btn.innerHTML = "Оплатить " + esc(finalPrice()) +
         ' <svg class="i" style="width:16px;height:16px"><use href="#i-zap"></use></svg>';
       btn.onclick = disabled ? null : function () {
         showInstructions(info, selectedMethod, promo, productCode, base);
