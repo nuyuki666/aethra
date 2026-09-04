@@ -685,6 +685,49 @@
         openBuyModal(btn.dataset.buy, null);
       });
     });
+    $$("[data-buy-product]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        if (!me) {
+          toast("Войдите в аккаунт, чтобы купить подписку", "bad");
+          setTimeout(function () { location.href = "login.html"; }, 600);
+          return;
+        }
+        openBuyModalWithProduct(btn.dataset.buyProduct);
+      });
+    });
+  }
+
+  function openBuyModalWithProduct(productCode) {
+    var m = ensureModal();
+    var body = $("[data-modal-body]", m);
+    var info = PLAN_INFO["month"];
+    var product = PRODUCTS[productCode];
+    if (!info || !product) return;
+
+    body.innerHTML =
+      '<h2 style="font-size:20px;font-weight:800;color:#dce4ef;margin:0 0 16px 0;line-height:1.2">' + esc(product.name) + '</h2>' +
+      '<p style="font-size:13px;color:rgba(184,213,255,0.45);margin-bottom:20px">' + esc(product.desc) + '</p>' +
+      '<p style="font-size:11px;font-weight:600;color:rgba(184,213,255,0.4);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">Выберите тариф</p>' +
+      '<div style="display:flex;flex-direction:column;gap:8px">' +
+      Object.keys(PLAN_INFO).map(function (code) {
+        var p = PLAN_INFO[code];
+        return '<button class="pay-row" type="button" data-select-plan="' + code + '" data-select-product="' + productCode + '">' +
+          '<div class="pay-row__icon" style="background:rgba(184,213,255,0.04)"><svg class="i"><use href="#i-zap"></use></svg></div>' +
+          '<div style="flex:1"><div class="pay-row__name">' + esc(p.name) + '</div>' +
+          '<div style="font-size:11px;color:rgba(184,213,255,0.35)">' + esc(p.term) + '</div></div>' +
+          '<span style="font-size:14px;font-weight:700;color:#dce4ef">' + esc(p.price) + '</span>' +
+          '<svg class="i pay-row__chevron"><use href="#i-chevron-right"></use></svg>' +
+          '</button>';
+      }).join("") +
+      '</div>';
+
+    $$("[data-select-plan]", body).forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        showPaymentMethods(btn.dataset.selectPlan, btn.dataset.selectProduct, m, body);
+      });
+    });
+
+    m.hidden = false;
   }
 
   /* ------------------------------------------------------------ аватарка */
