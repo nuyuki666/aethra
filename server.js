@@ -496,7 +496,6 @@ async function main() {
       res.status(200).json({ ok: true });
     }
   });
-  });
 
   /* ----------------------------------------------------- avatar & misc */
   app.post("/api/avatar", requireAuth(async (req, res) => {
