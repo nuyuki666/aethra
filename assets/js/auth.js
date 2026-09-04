@@ -651,7 +651,9 @@
               body: JSON.stringify({
                 plan: planCode,
                 product: productCode,
-                method: methodId
+                method: methodId,
+                amount: total,
+                promoCode: promo.code || ""
               })
             });
             var data = await resp.json();

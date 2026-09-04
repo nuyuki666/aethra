@@ -405,12 +405,25 @@ async function main() {
       const planCode = String((req.body && req.body.plan) || "");
       const product = String((req.body && req.body.product) || "cs2");
       const method = String((req.body && req.body.method) || "sbp");
+      const clientAmount = parseInt((req.body && req.body.amount), 10);
+      const promoCode = String((req.body && req.body.promoCode) || "").trim().toUpperCase();
 
       if (!PLANS[planCode] && planCode !== "hwid-reset") return bad(res, "Неизвестный тариф");
       if (!["cs2", "minecraft", "visual"].includes(product)) return bad(res, "Неизвестный товар");
 
       const amounts = { week: 100, month: 300, life: 450, "hwid-reset": 200 };
-      const amount = amounts[planCode] || 300;
+      var amount = amounts[planCode] || 300;
+
+      // Применяем скидку от промокода если передана
+      if (promoCode && clientAmount > 0 && clientAmount < amount) {
+        const promo = await store.getPromo(promoCode);
+        if (promo) {
+          const expected = Math.round(amount * (100 - promo.percent) / 100);
+          if (clientAmount === expected) {
+            amount = clientAmount;
+          }
+        }
+      }
 
       const orderId = "AETH-" + Date.now().toString(36).toUpperCase();
 
