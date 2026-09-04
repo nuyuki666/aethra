@@ -13,11 +13,7 @@
     tg: "https://t.me/aethra_helper",
     channel: "https://t.me/aethra_dlc",
     support: "https://t.me/aethra_helper",
-    funpay: "",
-    iokassa: "",
-    skinback: "",
-    playerok: "",
-    freekassa: ""
+    platega: "https://my.platega.io/"
   };
   var PLAN_INFO = {
     week: { name: "Неделя", price: "100 ₽", term: "7 дней" },
@@ -30,11 +26,32 @@
     minecraft: { name: "Aethra DLC", desc: "DLC для Minecraft", img: "/minecraft.png" },
     visual: { name: "Aethra Visual", desc: "Визуальное DLC для PvP", img: "/minecraft.png" }
   };
-  var METHODS = [
-    { id: "support", name: "Через техподдержку", icon: "message-circle", desc: "Любой удобный способ", link: PAY.support, type: "key", format: "Ключ AETH-XXXX-XXXX" },
-    { id: "playerok", name: "Playerok", icon: "gamepad", desc: "Игровая платёжная система", link: PAY.playerok, type: "key", format: "Ключ AETH-XXXX-XXXX" },
-    { id: "freekassa", name: "FreeKassa", icon: "wallet", desc: "Карты · Электронные кошельки", link: PAY.freekassa, type: "auto", format: "Моментальная выдача" }
+  var PAYMENT_TABS = [
+    { id: "cards", name: "Карты", icon: "credit-card" },
+    { id: "crypto", name: "Crypto", icon: "crypto" },
+    { id: "support", name: "Техподдержка", icon: "message-circle" }
   ];
+  var PAYMENT_METHODS = {
+    cards: [
+      { id: "sbp", name: "СБП QR", desc: "Быстрый платёж", icon: "sbp" },
+      { id: "sber", name: "Сбер Карты", desc: "Visa · Mastercard · МИР", icon: "credit-card" },
+      { id: "mir", name: "МИР", desc: "Карты МИР", icon: "credit-card" },
+      { id: "gpay", name: "Google Pay", desc: "Apple Pay · Google Pay", icon: "smartphone" }
+    ],
+    crypto: [
+      { id: "usdt-trc", name: "USDT TRC20", desc: "Tether (Tron)", icon: "crypto" },
+      { id: "usdt-bep", name: "USDT BEP20", desc: "Tether (BSC)", icon: "crypto" },
+      { id: "usdt-ton", name: "USDT TON", desc: "Tether (Toncoin)", icon: "crypto" },
+      { id: "usdt-erc", name: "USDT ERC20", desc: "Tether (Ethereum)", icon: "crypto" },
+      { id: "btc", name: "BTC", desc: "Bitcoin", icon: "crypto" },
+      { id: "eth", name: "ETH", desc: "Ethereum", icon: "crypto" },
+      { id: "ton", name: "TON", desc: "Toncoin", icon: "crypto" },
+      { id: "sol", name: "SOL", desc: "Solana", icon: "crypto" }
+    ],
+    support: [
+      { id: "tg-support", name: "Telegram", desc: "Напишите в поддержку", icon: "telegram" }
+    ]
+  };
 
   var RULES = {
     login: function (v) {
@@ -484,94 +501,193 @@
     var product = PRODUCTS[productCode];
     if (!info || !product) return;
 
-    var productInfo = "<p class='text-dim' style='font-size:var(--fs-sm);margin-top:var(--sp-2)'><b>" + esc(product.name) + "</b> — " + esc(product.desc) + "</p>";
-
-    var methods = METHODS.map(function (x, i) {
-      return (
-        '<button class="pay__btn" type="button" data-method="' + i + '">' +
-        '<span class="pay__logo"><svg class="i"><use href="#i-' + x.icon + '"></use></svg></span>' +
-        "<span><span class='pay__name'>" + esc(x.name) + "</span>" +
-        "<span class='pay__desc'>" + esc(x.desc) + "</span></span>" +
-        '<svg class="i"><use href="#i-chevron-right"></use></svg></button>'
-      );
-    }).join("");
-
-    body.innerHTML =
-      '<span class="eyebrow">Покупка подписки</span>' +
-      '<h3 style="font-size:var(--fs-xl);margin-top:var(--sp-2)">' + esc(info.name) + " · " + esc(info.price) + "</h3>" +
-      productInfo +
-      '<p class="text-dim" style="font-size:var(--fs-sm);margin-top:var(--sp-1)">Срок: ' + esc(info.term) + ". Ключ приходит после подтверждения оплаты.</p>" +
-      '<div class="promo-row">' +
-      '<input class="input input--mono" data-promo-input placeholder="ПРОМОКОД" maxlength="24" autocomplete="off" style="text-transform:uppercase">' +
-      '<button class="btn btn--ghost" type="button" data-promo-apply>Применить</button>' +
-      "</div>" +
-      '<p class="text-dim" data-promo-status style="font-size:var(--fs-sm);min-height:1.2em;margin-top:var(--sp-2)"></p>' +
-      '<div class="pay">' + methods + "</div>";
-
-    var promoInput = $("[data-promo-input]", body);
-    var status = $("[data-promo-status]", body);
+    var base = parseInt(info.price, 10) || 0;
+    var activeTab = "cards";
+    var selectedMethod = null;
     var promo = { code: "", percent: 0 };
 
-    function finalPrice() {
-      var base = parseInt(info.price, 10) || 0;
-      var val = promo.percent > 0 ? Math.round(base * (100 - promo.percent) / 100) : base;
-      return val + " ₽";
+    function getAmounts() {
+      if (planCode === "hwid-reset") return [200, 500, 1000, 2000];
+      if (planCode === "week") return [100, 200, 300, 500];
+      if (planCode === "month") return [300, 500, 1000, 2000];
+      return [450, 500, 1000, 2000];
     }
 
-    $("[data-promo-apply]", body).addEventListener("click", async function () {
-      var code = promoInput.value.trim().toUpperCase();
-      if (!code) { status.textContent = "Введите промокод"; return; }
-      var r = await S.promoCheck(code, productCode);
-      if (!r.ok) {
-        promo = { code: "", percent: 0 };
-        status.innerHTML = '<span style="color:var(--bad)">' + esc(r.error) + "</span>";
-        return;
-      }
-      promo = { code: code, percent: r.percent };
-      status.innerHTML = '<span style="color:var(--ok)">Промокод применён: −' + r.percent +
-        "% → " + finalPrice() + " вместо " + esc(info.price) + "</span>";
-    });
+    function finalPrice() {
+      var amt = base;
+      if (promo.percent > 0) amt = Math.round(amt * (100 - promo.percent) / 100);
+      return amt + " ₽";
+    }
 
-    $$("[data-method]", body).forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        showInstructions(info, METHODS[parseInt(btn.dataset.method, 10)], promo, productCode);
+    function render() {
+      var tabs = PAYMENT_TABS.map(function (t) {
+        return '<button class="pay-tab' + (t.id === activeTab ? " pay-tab--active" : "") +
+          '" type="button" data-pay-tab="' + t.id + '">' +
+          '<svg class="i"><use href="#i-' + t.icon + '"></use></svg> ' + esc(t.name) + '</button>';
+      }).join("");
+
+      var methods = PAYMENT_METHODS[activeTab].map(function (x) {
+        return '<button class="pay-card' + (selectedMethod === x.id ? " pay-card--active" : "") +
+          '" type="button" data-pay-method="' + x.id + '">' +
+          '<div class="pay-card__icon"><svg class="i"><use href="#i-' + x.icon + '"></use></svg></div>' +
+          '<div class="pay-card__name">' + esc(x.name) + '</div>' +
+          '</button>';
+      }).join("");
+
+      var amounts = getAmounts().map(function (a) {
+        return '<button class="amount-btn' + (a === base ? " amount-btn--active" : "") +
+          '" type="button" data-amount="' + a + '">' + a + " ₽</button>";
+      }).join("");
+
+      body.innerHTML =
+        '<span class="eyebrow">Пополнение баланса</span>' +
+        '<h3 style="font-size:var(--fs-xl);margin-top:var(--sp-2)">' + esc(product.name) + " · " + esc(info.term) + "</h3>" +
+        '<div class="pay-tabs">' + tabs + '</div>' +
+        '<div class="pay-grid" data-pay-grid>' + methods + '</div>' +
+        '<p class="text-dim" style="font-size:var(--fs-sm);margin-top:var(--sp-4)">Сумма пополнения</p>' +
+        '<div class="amount-row">' + amounts +
+        '<div class="amount-custom"><input class="input input--mono" data-amount-input type="number" min="50" placeholder="' + base + ' ₽" style="width:100%"></div>' +
+        '</div>' +
+        '<div class="promo-row" style="margin-top:var(--sp-4)">' +
+        '<input class="input input--mono" data-promo-input placeholder="Промокод" maxlength="24" autocomplete="off">' +
+        '<button class="btn btn--ghost" type="button" data-promo-apply>' +
+        '<svg class="i"><use href="#i-check"></use></svg></button>' +
+        '</div>' +
+        '<p class="text-dim" data-promo-status style="font-size:var(--fs-sm);min-height:1.2em;margin-top:var(--sp-2)"></p>' +
+        '<button class="pay-submit" type="button" data-pay-submit disabled>' +
+        'Пополнить ' + finalPrice() + ' <svg class="i" style="width:16px;height:16px"><use href="#i-zap"></use></svg></button>' +
+        '<p class="text-dim" style="font-size:var(--fs-xs);margin-top:var(--sp-4);text-align:center">' +
+        'Если после оплаты прошло более 30 минут, а баланс на сайте не пополнился, то напишите нам в техподдержку.</p>';
+
+      bindEvents();
+    }
+
+    function bindEvents() {
+      $$("[data-pay-tab]", body).forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          activeTab = btn.dataset.payTab;
+          selectedMethod = null;
+          render();
+        });
       });
-    });
+
+      $$("[data-pay-method]", body).forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          selectedMethod = btn.dataset.payMethod;
+          $$(".pay-card", body).forEach(function (c) { c.classList.remove("pay-card--active"); });
+          btn.classList.add("pay-card--active");
+          updateSubmit();
+        });
+      });
+
+      $$("[data-amount]", body).forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          base = parseInt(btn.dataset.amount, 10) || base;
+          $$(".amount-btn", body).forEach(function (b) { b.classList.remove("amount-btn--active"); });
+          btn.classList.add("amount-btn--active");
+          var inp = $("[data-amount-input]", body);
+          if (inp) inp.value = "";
+          updateSubmit();
+        });
+      });
+
+      var amtInput = $("[data-amount-input]", body);
+      if (amtInput) {
+        amtInput.addEventListener("input", function () {
+          var v = parseInt(amtInput.value, 10);
+          if (v >= 50) {
+            base = v;
+            $$(".amount-btn", body).forEach(function (b) { b.classList.remove("amount-btn--active"); });
+          }
+          updateSubmit();
+        });
+      }
+
+      var promoInput = $("[data-promo-input]", body);
+      var status = $("[data-promo-status]", body);
+
+      $("[data-promo-apply]", body).addEventListener("click", async function () {
+        var code = promoInput.value.trim().toUpperCase();
+        if (!code) { status.textContent = "Введите промокод"; return; }
+        var r = await S.promoCheck(code, productCode);
+        if (!r.ok) {
+          promo = { code: "", percent: 0 };
+          status.innerHTML = '<span style="color:var(--bad)">' + esc(r.error) + "</span>";
+          return;
+        }
+        promo = { code: code, percent: r.percent };
+        status.innerHTML = '<span style="color:var(--ok)">Промокод применён: −' + r.percent +
+          "% → " + finalPrice() + "</span>";
+        updateSubmit();
+      });
+
+      updateSubmit();
+    }
+
+    function updateSubmit() {
+      var btn = $("[data-pay-submit]", body);
+      if (!btn) return;
+      var disabled = !selectedMethod || base < 50;
+      btn.disabled = disabled;
+      btn.innerHTML = "Пополнить " + esc(finalPrice()) +
+        ' <svg class="i" style="width:16px;height:16px"><use href="#i-zap"></use></svg>';
+      btn.onclick = disabled ? null : function () {
+        showInstructions(info, selectedMethod, promo, productCode, base);
+      };
+    }
+
+    render();
   }
 
-  function showInstructions(info, method, promo, productCode) {
+  function showInstructions(info, methodId, promo, productCode, amount) {
     var m = $("[data-buy-modal]");
     var body = $("[data-modal-body]", m);
     var order = orderCode();
-    var link = method.link || PAY.tg;
     promo = promo || { code: "", percent: 0 };
-    var base = parseInt(info.price, 10) || 0;
-    var total = promo.percent > 0 ? Math.round(base * (100 - promo.percent) / 100) : base;
+    var total = amount || parseInt(info.price, 10) || 0;
+
+    var methodInfo = null;
+    Object.keys(PAYMENT_METHODS).forEach(function (tab) {
+      PAYMENT_METHODS[tab].forEach(function (x) {
+        if (x.id === methodId) methodInfo = x;
+      });
+    });
+    if (!methodInfo) methodInfo = { name: methodId, icon: "credit-card" };
+
+    var isSupport = methodId === "tg-support";
+    var payLink = isSupport ? PAY.tg : PAY.platega;
 
     var promoLine = promo.percent > 0
       ? '<p style="margin-top:var(--sp-3);font-size:var(--fs-sm)">К оплате: <b style="font-size:var(--fs-lg);color:var(--ok)">' + total +
-        " ₽</b> <s class='text-dim'>" + base + " ₽</s> <span class='badge badge--ok'>−" + promo.percent + "% по " + esc(promo.code) + "</span></p>"
-      : '<p style="margin-top:var(--sp-3);font-size:var(--fs-sm)">К оплате: <b style="font-size:var(--fs-lg)">' + base + " ₽</b></p>";
+        " ₽</b> <s class='text-dim'>" + parseInt(info.price, 10) + " ₽</s> <span class='badge badge--ok'>−" + promo.percent + "% по " + esc(promo.code) + "</span></p>"
+      : '<p style="margin-top:var(--sp-3);font-size:var(--fs-sm)">К оплате: <b style="font-size:var(--fs-lg)">' + total + " ₽</b></p>";
 
-    var paymentInfo = '<div style="margin-top:var(--sp-3);display:flex;align-items:center;gap:var(--sp-2)">' +
-      '<span class="badge">Формат: AETH-XXXX-XXXX</span>' +
-      '<span class="text-dim" style="font-size:var(--fs-xs)">Зачисление до 5 минут</span>' +
-      '</div>';
-
-    var steps = '<ol class="steps">' +
-      "<li>Оплатите заказ <b class='mono'>" + esc(order) + "</b> через " + esc(method.name) + ".</li>" +
-      "<li>Напишите в поддержку: номер заказа и ваш логин.</li>" +
-      "<li>Получите ключ формата <b class='mono'>AETH-XXXX-XXXX</b> и активируйте его во вкладке «Подписка».</li>" +
-      "</ol>";
+    var steps;
+    if (isSupport) {
+      steps = '<ol class="steps">' +
+        "<li>Напишите в поддержку: укажите товар, сумму и способ оплаты.</li>" +
+        "<li>Получите ключ формата <b class='mono'>AETH-XXXX-XXXX</b>.</li>" +
+        "<li>Активируйте ключ во вкладке «Подписка».</li>" +
+        "</ol>";
+    } else {
+      steps = '<ol class="steps">' +
+        "<li>Вы будете перенаправлены на страницу оплаты.</li>" +
+        "<li>Оплатите заказ <b class='mono'>" + esc(order) + "</b> через " + esc(methodInfo.name) + ".</li>" +
+        "<li>Получите ключ формата <b class='mono'>AETH-XXXX-XXXX</b> и активируйте его во вкладке «Подписка».</li>" +
+        "</ol>";
+    }
 
     body.innerHTML =
-      '<span class="eyebrow">' + esc(method.name) + "</span>" +
+      '<span class="eyebrow">' + esc(methodInfo.name) + "</span>" +
       '<h3 style="font-size:var(--fs-xl);margin-top:var(--sp-2)">' + esc(info.name) + " · " + esc(info.term) + "</h3>" +
       promoLine +
-      paymentInfo +
+      '<div style="margin-top:var(--sp-3);display:flex;align-items:center;gap:var(--sp-2)">' +
+      '<span class="badge">Формат: AETH-XXXX-XXXX</span>' +
+      '<span class="text-dim" style="font-size:var(--fs-xs)">Зачисление до 5 минут</span>' +
+      '</div>' +
       steps +
       '<div style="display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-5)">' +
-      '<a class="btn btn--primary" href="' + esc(link) + '" target="_blank" rel="noopener" data-pay-go>' +
+      '<a class="btn btn--primary" href="' + esc(payLink) + '" target="_blank" rel="noopener" data-pay-go>' +
       '<svg class="i"><use href="#i-zap"></use></svg> Перейти к оплате</a>' +
       '<a class="btn btn--ghost" href="' + esc(PAY.tg) + '" target="_blank" rel="noopener">' +
       '<svg class="i"><use href="#i-send"></use></svg> Поддержка</a>' +

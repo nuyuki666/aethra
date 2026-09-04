@@ -52,7 +52,11 @@
     smartphone: '<rect x="7" y="2" width="10" height="20" rx="2.5"/><path d="M12 18h.01"/>',
     logo: '<path d="M12 2.5 2.5 21h19z" fill="none"/><path d="M8.4 15h7.2"/>',
     telegram:
-      '<path d="M21.6 4.1 3.4 11.2c-1 .4-1 1.7.1 2l4.5 1.4 1.7 5.2c.3.8 1.2 1 1.8.4l2.4-2.4 4.6 3.4c.7.5 1.6.1 1.8-.7l3-14.2c.2-.9-.7-1.5-1.7-1.2z" fill="none"/><path d="M8 14.6 19.5 6.2" fill="none"/>'
+      '<path d="M21.6 4.1 3.4 11.2c-1 .4-1 1.7.1 2l4.5 1.4 1.7 5.2c.3.8 1.2 1 1.8.4l2.4-2.4 4.6 3.4c.7.5 1.6.1 1.8-.7l3-14.2c.2-.9-.7-1.5-1.7-1.2z" fill="none"/><path d="M8 14.6 19.5 6.2" fill="none"/>',
+    crypto:
+      '<circle cx="12" cy="12" r="9.5" fill="none"/><path d="M9 8h4.5a2 2 0 0 1 0 4H9V8z" fill="none"/><path d="M9 12h5a2 2 0 0 1 0 4H9v-4z" fill="none"/><path d="M14 7v2M14 15v2M8 10v4"/>',
+    sbp:
+      '<rect x="2" y="4" width="20" height="16" rx="3" fill="none"/><path d="M7 12h10M12 7v10"/>'
   };
 
   var solid = {};
