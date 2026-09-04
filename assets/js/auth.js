@@ -586,13 +586,12 @@
     });
     if (!methodInfo) methodInfo = { name: methodId, icon: "credit-card" };
 
-    var isSupport = methodId === "tg-support";
-    var payLink = isSupport ? PAY.tg : PAY.platega;
+    var isSupport = methodId === "support";
 
     var promoLine = promo.percent > 0
-      ? '<p style="margin-top:var(--sp-3);font-size:var(--fs-sm)">К оплате: <b style="font-size:var(--fs-lg);color:var(--ok)">' + total +
-        " ₽</b> <s class='text-dim'>" + parseInt(info.price, 10) + " ₽</s> <span class='badge badge--ok'>−" + promo.percent + "% по " + esc(promo.code) + "</span></p>"
-      : '<p style="margin-top:var(--sp-3);font-size:var(--fs-sm)">К оплате: <b style="font-size:var(--fs-lg)">' + total + " ₽</b></p>";
+      ? '<p style="margin-top:12px;font-size:13px">К оплате: <b style="font-size:18px;color:#74ff89">' + total +
+        " ₽</b> <s style='color:rgba(184,213,255,0.3)'>" + parseInt(info.price, 10) + " ₽</s></p>"
+      : '<p style="margin-top:12px;font-size:13px">К оплате: <b style="font-size:18px;color:#dce4ef">' + total + " ₽</b></p>";
 
     var steps;
     if (isSupport) {
@@ -604,33 +603,72 @@
     } else {
       steps = '<ol class="steps">' +
         "<li>Вы будете перенаправлены на страницу оплаты.</li>" +
-        "<li>Оплатите заказ <b class='mono'>" + esc(order) + "</b> через " + esc(methodInfo.name) + ".</li>" +
-        "<li>Получите ключ формата <b class='mono'>AETH-XXXX-XXXX</b> и активируйте его во вкладке «Подписка».</li>" +
+        "<li>Оплатите заказ <b class='mono'>" + esc(order) + "</b>.</li>" +
+        "<li>Ключ придёт автоматически после подтверждения оплаты.</li>" +
         "</ol>";
     }
 
+    var payBtn;
+    if (isSupport) {
+      payBtn = '<a class="pay-submit" href="' + esc(PAY.tg) + '" target="_blank" rel="noopener" style="text-decoration:none;display:flex;align-items:center;justify-content:center">' +
+        'Написать в поддержку</a>';
+    } else {
+      payBtn = '<button class="pay-submit" type="button" data-pay-go>Перейти к оплате</button>';
+    }
+
     body.innerHTML =
-      '<span class="eyebrow">' + esc(methodInfo.name) + "</span>" +
-      '<h3 style="font-size:var(--fs-xl);margin-top:var(--sp-2)">' + esc(info.name) + " · " + esc(info.term) + "</h3>" +
-      promoLine +
-      '<div style="margin-top:var(--sp-3);display:flex;align-items:center;gap:var(--sp-2)">' +
-      '<span class="badge">Формат: AETH-XXXX-XXXX</span>' +
-      '<span class="text-dim" style="font-size:var(--fs-xs)">Зачисление до 5 минут</span>' +
+      '<h2 style="font-size:20px;font-weight:800;color:#dce4ef;margin:0 0 16px 0;line-height:1.2">' + esc(productCode ? PRODUCTS[productCode].name : "") + '</h2>' +
+      '<div class="pay-product">' +
+        '<div class="pay-product__info">' +
+          '<div class="pay-product__name">' + esc(info.name) + '</div>' +
+          '<div class="pay-product__desc">' + esc(info.term) + '</div>' +
+        '</div>' +
+        '<div class="pay-product__price">' +
+          '<div class="pay-product__amount">' + esc(info.price) + '</div>' +
+          '<span class="pay-product__badge">ОПЛАТА</span>' +
+        '</div>' +
       '</div>' +
+      '<p style="margin:20px 0 8px;font-size:11px;font-weight:600;color:rgba(184,213,255,0.4);letter-spacing:0.08em;text-transform:uppercase">' + esc(methodInfo.name) + '</p>' +
+      promoLine +
       steps +
-      '<div style="display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-5)">' +
-      '<a class="btn btn--primary" href="' + esc(payLink) + '" target="_blank" rel="noopener" data-pay-go>' +
-      '<svg class="i"><use href="#i-zap"></use></svg> Перейти к оплате</a>' +
-      '<a class="btn btn--ghost" href="' + esc(PAY.tg) + '" target="_blank" rel="noopener">' +
-      '<svg class="i"><use href="#i-send"></use></svg> Поддержка</a>' +
-      "</div>" +
-      '<p class="text-dim" style="font-size:var(--fs-xs);margin-top:var(--sp-4)">' +
-      'После получения ключа активируйте его во вкладке «Подписка» — срок пойдёт с момента активации.' +
+      payBtn +
+      '<p style="font-size:11px;color:rgba(184,213,255,0.3);margin-top:16px;text-align:center">' +
+      'Если после оплаты прошло более 30 минут, а ключ не пришёл — напишите в техподдержку.' +
       '</p>';
 
-    var go = $("[data-pay-go]", body);
-    if (go && promo.code) {
-      go.addEventListener("click", function () { S.promoUse(promo.code); });
+    if (!isSupport) {
+      var go = $("[data-pay-go]", body);
+      if (go) {
+        go.addEventListener("click", async function () {
+          go.disabled = true;
+          go.textContent = "Создаём платёж…";
+          try {
+            var planCode = Object.keys(PLAN_INFO).find(function (k) { return PLAN_INFO[k].name === info.name; }) || "month";
+            var resp = await fetch("/api/platega/create", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                plan: planCode,
+                product: productCode,
+                method: methodId
+              })
+            });
+            var data = await resp.json();
+            if (data.ok && data.payment_url) {
+              if (promo.code) S.promoUse(promo.code);
+              window.location.href = data.payment_url;
+            } else {
+              go.disabled = false;
+              go.textContent = "Перейти к оплате";
+              toast(data.error || "Ошибка создания платежа", "bad");
+            }
+          } catch (e) {
+            go.disabled = false;
+            go.textContent = "Перейти к оплате";
+            toast("Ошибка сети", "bad");
+          }
+        });
+      }
     }
 
     m.hidden = false;

@@ -381,6 +381,123 @@ async function main() {
     });
   });
 
+  /* --------------------------------------------------- platega.io payments */
+  const PLATEGA_API = process.env.PLATEGA_API_URL || "https://api.my.platega.io";
+  const PLATEGA_KEY = process.env.PLATEGA_API_KEY || "";
+  const PLATEGA_MERCHANT = process.env.PLATEGA_MERCHANT_ID || "";
+
+  async function plategaRequest(path, body) {
+    const resp = await fetch(PLATEGA_API + path, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + PLATEGA_KEY
+      },
+      body: JSON.stringify(body)
+    });
+    return resp.json();
+  }
+
+  app.post("/api/platega/create", requireAuth(async (req, res) => {
+    try {
+      if (!PLATEGA_KEY) return bad(res, "Платёжная система не настроена");
+
+      const planCode = String((req.body && req.body.plan) || "");
+      const product = String((req.body && req.body.product) || "cs2");
+      const method = String((req.body && req.body.method) || "sbp");
+
+      if (!PLANS[planCode] && planCode !== "hwid-reset") return bad(res, "Неизвестный тариф");
+      if (!["cs2", "minecraft", "visual"].includes(product)) return bad(res, "Неизвестный товар");
+
+      const amounts = { week: 100, month: 300, life: 450, "hwid-reset": 200 };
+      const amount = amounts[planCode] || 300;
+
+      const orderId = "AETH-" + Date.now().toString(36).toUpperCase();
+
+      // Сохраняем информацию о заказе в.pending
+      await store.upsertPendingPayment({
+        orderId,
+        login: req.user.login,
+        plan: planCode,
+        product,
+        amount,
+        method,
+        createdAt: Date.now()
+      });
+
+      const payData = await plategaRequest("/payments", {
+        amount: amount * 100,
+        currency: "RUB",
+        order_id: orderId,
+        description: "Aethra " + (PLANS[planCode] ? PLANS[planCode].label : "Сброс HWID") + " · " + product,
+        return_url: (req.headers.origin || "https://aethra.site") + "/profile.html",
+        payment_method: method,
+        metadata: {
+          login: req.user.login,
+          plan: planCode,
+          product
+        }
+      });
+
+      if (payData.payment_url) {
+        res.json({ ok: true, payment_url: payData.payment_url, order_id: orderId });
+      } else if (payData.data && payData.data.payment_url) {
+        res.json({ ok: true, payment_url: payData.data.payment_url, order_id: orderId });
+      } else {
+        console.error("platega create error:", payData);
+        bad(res, "Ошибка создания платежа");
+      }
+    } catch (e) {
+      console.error("platega create:", e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  }));
+
+  app.post("/api/platega/webhook", express.json(), async (req, res) => {
+    try {
+      const data = req.body;
+      const orderId = data.order_id || (data.payment && data.payment.order_id);
+      const status = data.status || (data.payment && data.payment.status);
+
+      console.log("platega webhook:", orderId, status);
+
+      if (status === "succeeded" || status === "paid" || status === "completed") {
+        const pending = await store.getPendingPayment(orderId);
+        if (pending && !pending.completed) {
+          // Генерируем ключ
+          const key = keyCode();
+          const days = PLANS[pending.plan] ? PLANS[pending.plan].days : null;
+
+          await store.upsertKeys([{
+            code: key,
+            plan: pending.plan,
+            product: pending.product,
+            createdAt: Date.now(),
+            createdBy: "platega",
+            maxUses: 1,
+            days
+          }]);
+
+          // Привязываем к пользователю
+          await store.updateUser(pending.login, {
+            pendingKey: key
+          });
+
+          // Помечаем платёж как завершённый
+          await store.completePendingPayment(orderId);
+
+          console.log("platega: key generated for", pending.login, key);
+        }
+      }
+
+      res.status(200).json({ ok: true });
+    } catch (e) {
+      console.error("platega webhook error:", e);
+      res.status(200).json({ ok: true });
+    }
+  });
+  });
+
   /* ----------------------------------------------------- avatar & misc */
   app.post("/api/avatar", requireAuth(async (req, res) => {
     try {

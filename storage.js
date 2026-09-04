@@ -12,7 +12,7 @@ const HISTORY_LIMIT = 30;
 class FileStore {
   constructor(filePath) {
     this.filePath = filePath;
-    this.data = { users: [], keys: [], sessions: [], history: {} };
+    this.data = { users: [], keys: [], sessions: [], history: {}, pendingPayments: [] };
   }
 
   async init() {
@@ -28,6 +28,7 @@ class FileStore {
     if (!Array.isArray(this.data.messages)) this.data.messages = [];
     if (!Array.isArray(this.data.promos)) this.data.promos = [];
     if (!this.data.history || typeof this.data.history !== "object") this.data.history = {};
+    if (!Array.isArray(this.data.pendingPayments)) this.data.pendingPayments = [];
     this.persist();
     return this;
   }
@@ -222,6 +223,20 @@ class FileStore {
     if (removed) this.persist();
     return removed;
   }
+
+  async upsertPendingPayment(order) {
+    this.data.pendingPayments.push(order);
+    this.persist();
+  }
+
+  async getPendingPayment(orderId) {
+    return this.data.pendingPayments.find(p => p.orderId === orderId) || null;
+  }
+
+  async completePendingPayment(orderId) {
+    const p = this.data.pendingPayments.find(x => x.orderId === orderId);
+    if (p) { p.completed = true; this.persist(); }
+  }
 }
 
 /* ==========================================================================
@@ -300,6 +315,18 @@ class PgStore {
     await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS sub_cs2 BIGINT");
     await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS sub_minecraft BIGINT");
     await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS sub_visual BIGINT");
+    await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS pending_key TEXT DEFAULT ''");
+    
+    await this.pool.query(`CREATE TABLE IF NOT EXISTS pending_payments (
+      order_id TEXT PRIMARY KEY,
+      login TEXT NOT NULL,
+      plan TEXT NOT NULL,
+      product TEXT NOT NULL,
+      amount INTEGER NOT NULL,
+      method TEXT NOT NULL DEFAULT '',
+      created_at BIGINT NOT NULL,
+      completed BOOLEAN NOT NULL DEFAULT FALSE
+    )`);
     
     return this;
   }
@@ -561,6 +588,22 @@ class PgStore {
   async deletePromo(code) {
     const res = await this.pool.query("DELETE FROM promos WHERE UPPER(code) = UPPER($1)", [String(code)]);
     return res.rowCount > 0;
+  }
+
+  async upsertPendingPayment(order) {
+    await this.pool.query(
+      "INSERT INTO pending_payments (order_id, login, plan, product, amount, method, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)",
+      [order.orderId, order.login, order.plan, order.product, order.amount, order.method || "", order.createdAt]
+    );
+  }
+
+  async getPendingPayment(orderId) {
+    const res = await this.pool.query("SELECT * FROM pending_payments WHERE order_id = $1", [orderId]);
+    return res.rows[0] || null;
+  }
+
+  async completePendingPayment(orderId) {
+    await this.pool.query("UPDATE pending_payments SET completed = TRUE WHERE order_id = $1", [orderId]);
   }
 }
 
