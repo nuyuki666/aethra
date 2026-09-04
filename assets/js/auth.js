@@ -565,9 +565,11 @@
       if (!btn) return;
       var disabled = !selectedMethod;
       btn.disabled = disabled;
-      btn.textContent = "Оплатить " + finalPrice();
+      var amt = base;
+      if (promo.percent > 0) amt = Math.round(amt * (100 - promo.percent) / 100);
+      btn.textContent = "Оплатить " + amt + " ₽";
       btn.onclick = disabled ? null : function () {
-        showInstructions(info, selectedMethod, promo, productCode, base);
+        showInstructions(info, selectedMethod, promo, productCode, amt);
       };
     }
 
