@@ -1510,25 +1510,23 @@ body.auth-ready .nav__actions { visibility: visible; }
 .modal__backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(4, 6, 8, 0.72);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: rgba(7, 9, 11, 0.70);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
 }
 .modal__card {
   position: relative;
-  width: min(480px, 100%);
+  width: min(440px, 100%);
   max-height: 86dvh;
   overflow: auto;
-  padding: var(--card-pad);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--r-lg);
-  background: var(--bg-solid);
-  box-shadow: var(--sh-lg);
+  padding: var(--sp-5);
+  border: 1px solid rgba(184, 213, 255, 0.12);
+  border-radius: 16px;
+  background: rgba(14, 18, 25, 0.85);
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.6);
   animation: toast-in var(--dur-slow) var(--ease-out) both;
   user-select: none;
   -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
 }
 .modal__x {
   position: absolute;
@@ -1537,7 +1535,20 @@ body.auth-ready .nav__actions { visibility: visible; }
 }
 
 .promo-row { display: flex; gap: var(--sp-2); margin-top: var(--sp-2); }
-.promo-row .input { flex: 1; min-width: 0; }
+.promo-row .input {
+  flex: 1;
+  min-width: 0;
+  background: #07090c;
+  border: 1px solid rgba(184, 213, 255, 0.12);
+  border-radius: 10px;
+  color: #dce4ef;
+  font-size: var(--fs-sm);
+}
+.promo-row .input::placeholder { color: rgba(184, 213, 255, 0.3); }
+.promo-row .input:focus {
+  border-color: rgba(184, 213, 255, 0.25);
+  box-shadow: 0 0 0 2px rgba(184, 213, 255, 0.08);
+}
 .pay__btn {
   display: flex;
   align-items: center;
@@ -1570,52 +1581,78 @@ body.auth-ready .nav__actions { visibility: visible; }
 
 /* Product card in payment modal */
 .pay-product {
+  position: relative;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--sp-4);
   padding: var(--sp-4);
-  border-radius: var(--r-md);
-  background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
-  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(184, 213, 255, 0.04);
+  border: 1px solid rgba(184, 213, 255, 0.10);
+  overflow: hidden;
 }
-.pay-product__info { flex: 1; min-width: 0; }
+.pay-product::before,
+.pay-product::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  opacity: 0.5;
+}
+.pay-product::before {
+  top: -30px; left: -30px;
+  width: 120px; height: 120px;
+  background: #388cff;
+}
+.pay-product::after {
+  bottom: -30px; right: -30px;
+  width: 120px; height: 120px;
+  background: #92c0ff;
+}
+.pay-product__info { flex: 1; min-width: 0; position: relative; z-index: 1; }
 .pay-product__name {
   font-size: var(--fs-md);
-  font-weight: 700;
-  color: var(--fg);
+  font-weight: 600;
+  color: #dce4ef;
 }
 .pay-product__desc {
   font-size: var(--fs-sm);
-  color: var(--fg-dim);
+  color: rgba(184, 213, 255, 0.49);
   margin-top: var(--sp-1);
+  font-weight: 500;
 }
 .pay-product__price {
-  font-size: var(--fs-xl);
-  font-weight: 700;
-  color: var(--fg);
   text-align: right;
   white-space: nowrap;
+  position: relative;
+  z-index: 1;
+}
+.pay-product__amount {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: #dce4ef;
 }
 .pay-product__badge {
   display: block;
   font-size: var(--fs-2xs);
-  font-weight: 500;
-  color: var(--fg-faint);
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: rgba(184, 213, 255, 0.49);
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  margin-top: var(--sp-1);
+  margin-top: 2px;
 }
 
 /* Payment methods list */
 .pay-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   margin-top: var(--sp-3);
-  background: var(--w-04);
-  border-radius: var(--r-md);
-  border: 1px solid var(--border);
+  background: rgba(184, 213, 255, 0.14);
+  border-radius: 12px;
+  border: 1px solid rgba(184, 213, 255, 0.19);
   overflow: hidden;
 }
 .pay-row {
@@ -1624,38 +1661,41 @@ body.auth-ready .nav__actions { visibility: visible; }
   gap: var(--sp-3);
   width: 100%;
   padding: var(--sp-3) var(--sp-4);
-  background: transparent;
+  background: rgba(14, 18, 25, 0.6);
   border: none;
   text-align: left;
   cursor: pointer;
-  transition: background 150ms var(--ease-out);
+  transition: background 150ms ease, border-color 150ms ease;
 }
-.pay-row:hover { background: rgba(255,255,255,0.04); }
-.pay-row--active { background: rgba(255,255,255,0.06); }
+.pay-row:hover {
+  background: rgba(184, 213, 255, 0.07);
+}
+.pay-row--active {
+  background: rgba(184, 213, 255, 0.10);
+}
 .pay-row__icon {
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   display: grid;
   place-items: center;
-  border-radius: var(--r-sm);
-  background: var(--w-06);
-  border: 1px solid var(--border);
-  color: var(--fg);
+  border-radius: 10px;
+  background: rgba(184, 213, 255, 0.08);
+  border: 1px solid rgba(184, 213, 255, 0.12);
+  color: #dce4ef;
 }
-.pay-row__icon .i { width: 22px; height: 22px; }
+.pay-row__icon .i { width: 20px; height: 20px; }
 .pay-row__name {
   flex: 1;
   font-size: var(--fs-sm);
-  font-weight: 550;
-  color: var(--fg);
+  font-weight: 600;
+  color: #dce4ef;
 }
 .pay-row__chevron {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
-  color: var(--fg-faint);
-  opacity: 0.5;
+  color: rgba(184, 213, 255, 0.3);
 }
 
 /* Submit button */
@@ -1665,26 +1705,26 @@ body.auth-ready .nav__actions { visibility: visible; }
   justify-content: center;
   width: 100%;
   margin-top: var(--sp-5);
-  padding: var(--sp-3) var(--sp-4);
+  padding: 14px var(--sp-4);
   border: none;
-  border-radius: var(--r-md);
+  border-radius: 12px;
   background: #ffd400;
-  color: #000;
+  color: #07090b;
   font-size: var(--fs-base);
   font-weight: 700;
   cursor: pointer;
-  transition: all 200ms var(--ease-out);
+  transition: all 200ms ease;
 }
 .pay-submit:hover:not(:disabled) {
   background: #ffe44d;
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(255,212,0,0.35);
+  box-shadow: 0 4px 20px rgba(255, 212, 0, 0.3);
 }
 .pay-submit:active:not(:disabled) {
   transform: translateY(0);
 }
 .pay-submit:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 

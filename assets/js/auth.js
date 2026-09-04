@@ -501,6 +501,7 @@
       }).join("");
 
       body.innerHTML =
+        '<h2 style="font-size:var(--fs-xl);font-weight:800;color:#dce4ef;margin:0 0 var(--sp-4) 0">' + esc(product.name) + '</h2>' +
         '<div class="pay-product">' +
           '<div class="pay-product__info">' +
             '<div class="pay-product__name">' + esc(product.name) + '</div>' +
@@ -510,9 +511,9 @@
             '<span class="pay-product__badge">РАЗОВЫЙ ПЛАТЕЖ</span>' +
           '</div>' +
         '</div>' +
-        '<p class="eyebrow" style="margin-top:var(--sp-5)">Способ оплаты</p>' +
+        '<p class="eyebrow" style="margin-top:var(--sp-5);color:rgba(184,213,255,0.49);font-weight:600;font-size:var(--fs-xs);letter-spacing:0.06em">СПОСОБ ОПЛАТЫ</p>' +
         '<div class="pay-list">' + methods + '</div>' +
-        '<p class="eyebrow" style="margin-top:var(--sp-5)">Промокод</p>' +
+        '<p class="eyebrow" style="margin-top:var(--sp-5);color:rgba(184,213,255,0.49);font-weight:600;font-size:var(--fs-xs);letter-spacing:0.06em">ПРОМОКОД</p>' +
         '<div class="promo-row">' +
         '<input class="input" data-promo-input placeholder="Введите код, например RAIN20" maxlength="24" autocomplete="off">' +
         '</div>' +
