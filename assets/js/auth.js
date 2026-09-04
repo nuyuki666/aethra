@@ -27,9 +27,9 @@
     visual: { name: "Aethra Visual", desc: "Визуальное DLC для PvP", img: "/minecraft.png" }
   };
   var PAYMENT_METHODS = [
-    { id: "sbp", name: "Система быстрых платежей", icon: "sbp_icon" },
-    { id: "crypto", name: "Криптовалюта", icon: "tether" },
-    { id: "support", name: "Через техподдержку", icon: "message-circle" }
+    { id: "sbp", name: "Система быстрых платежей", icon: "img:assets/images/spb.png" },
+    { id: "crypto", name: "Криптовалюта", icon: "img:assets/images/usdt.png" },
+    { id: "support", name: "Через техподдержку", icon: "img:assets/images/tech.png" }
   ];
 
   var RULES = {
@@ -492,9 +492,12 @@
 
     function render() {
       var methods = PAYMENT_METHODS.map(function (x) {
+        var iconHtml = x.icon.indexOf("img:") === 0
+          ? '<img src="' + esc(x.icon.slice(4)) + '" alt="" style="width:22px;height:22px;border-radius:4px;object-fit:contain">'
+          : '<svg class="i"><use href="#i-' + x.icon + '"></use></svg>';
         return '<button class="pay-row' + (selectedMethod === x.id ? " pay-row--active" : "") +
           '" type="button" data-pay-method="' + x.id + '">' +
-          '<div class="pay-row__icon"><svg class="i"><use href="#i-' + x.icon + '"></use></svg></div>' +
+          '<div class="pay-row__icon">' + iconHtml + '</div>' +
           '<span class="pay-row__name">' + esc(x.name) + '</span>' +
           '<svg class="i pay-row__chevron"><use href="#i-chevron-right"></use></svg>' +
           '</button>';

@@ -1708,7 +1708,7 @@ body.auth-ready .nav__actions { visibility: visible; }
   padding: 14px var(--sp-4);
   border: none;
   border-radius: 12px;
-  background: #ffd400;
+  background: #dce4ef;
   color: #07090b;
   font-size: var(--fs-base);
   font-weight: 700;
@@ -1716,16 +1716,19 @@ body.auth-ready .nav__actions { visibility: visible; }
   transition: all 200ms ease;
 }
 .pay-submit:hover:not(:disabled) {
-  background: #ffe44d;
+  background: #ffffff;
   transform: translateY(-1px);
-  box-shadow: 0 4px 20px rgba(255, 212, 0, 0.3);
+  box-shadow: 0 4px 20px rgba(220, 228, 239, 0.2);
 }
 .pay-submit:active:not(:disabled) {
   transform: translateY(0);
 }
 .pay-submit:disabled {
-  opacity: 0.35;
+  opacity: 0.3;
   cursor: not-allowed;
+  background: rgba(184, 213, 255, 0.15);
+  color: rgba(184, 213, 255, 0.3);
+}
 }
 
 .steps {
