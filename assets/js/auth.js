@@ -519,7 +519,7 @@
         '<div class="pay-list">' + methods + '</div>' +
         '<p style="margin:20px 0 8px;font-size:11px;font-weight:600;color:rgba(184,213,255,0.4);letter-spacing:0.08em;text-transform:uppercase">ПРОМОКОД</p>' +
         '<div class="promo-row">' +
-        '<input class="input" data-promo-input placeholder="Введите код, например RAIN20" maxlength="24" autocomplete="off">' +
+        '<input class="input" data-promo-input placeholder="Введите код, например AETHRA" maxlength="24" autocomplete="off">' +
         '</div>' +
         '<p data-promo-status style="font-size:12px;min-height:16px;margin-top:6px;color:rgba(184,213,255,0.5)"></p>' +
         '<button class="pay-submit" type="button" data-pay-submit disabled>' +
