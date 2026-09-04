@@ -54,9 +54,9 @@
     telegram:
       '<path d="M21.6 4.1 3.4 11.2c-1 .4-1 1.7.1 2l4.5 1.4 1.7 5.2c.3.8 1.2 1 1.8.4l2.4-2.4 4.6 3.4c.7.5 1.6.1 1.8-.7l3-14.2c.2-.9-.7-1.5-1.7-1.2z" fill="none"/><path d="M8 14.6 19.5 6.2" fill="none"/>',
     crypto:
-      '<circle cx="12" cy="12" r="9.5" fill="none"/><path d="M9 8h4.5a2 2 0 0 1 0 4H9V8z" fill="none"/><path d="M9 12h5a2 2 0 0 1 0 4H9v-4z" fill="none"/><path d="M14 7v2M14 15v2M8 10v4"/>',
+      '<circle cx="12" cy="12" r="9"/><path d="M9 8h4a2.5 2.5 0 0 1 0 5H9V8z"/><path d="M9 13h5a2.5 2.5 0 0 1 0 5H9v-5z"/><path d="M14 7v2M14 15v2"/>',
     sbp:
-      '<rect x="2" y="4" width="20" height="16" rx="3" fill="none"/><path d="M7 12h10M12 7v10"/>',
+      '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 12h10"/><path d="M12 8v8"/>',
     tether:
       '<circle cx="12" cy="12" r="10" fill="#26A17B"/><path d="M14.5 7h-5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5H12v3h-3.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5H11v-3h3.5a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5z" fill="#fff"/><path d="M12 6.5v-1M12 18.5v-1" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>',
     sbp_icon:

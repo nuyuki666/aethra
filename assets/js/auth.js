@@ -27,7 +27,7 @@
     visual: { name: "Aethra Visual", desc: "Визуальное DLC для PvP", img: "/minecraft.png" }
   };
   var PAYMENT_METHODS = [
-    { id: "sbp", name: "Система быстрых платежей", icon: "sbp_icon" },
+    { id: "sbp", name: "Система быстрых платежей", icon: "sbp" },
     { id: "crypto", name: "Криптовалюта", icon: "crypto" },
     { id: "support", name: "Через техподдержку", icon: "message" }
   ];
