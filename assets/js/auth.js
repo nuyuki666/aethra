@@ -712,8 +712,8 @@
     body.innerHTML =
       '<h2 style="font-size:20px;font-weight:800;color:#dce4ef;margin:0 0 16px 0;line-height:1.2">' + esc(product.name) + '</h2>' +
       '<p style="font-size:13px;color:rgba(184,213,255,0.45);margin-bottom:20px">' + esc(product.desc) + '</p>' +
-      '<p style="font-size:11px;font-weight:600;color:rgba(184,213,255,0.4);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px">Выберите тариф</p>' +
-      '<div style="display:flex;flex-direction:column;gap:8px">' +
+      '<p style="margin:20px 0 8px;font-size:11px;font-weight:600;color:rgba(184,213,255,0.4);letter-spacing:0.08em;text-transform:uppercase">Выберите тариф</p>' +
+      '<div class="pay-list">' +
       Object.keys(PLAN_INFO).map(function (code) {
         var p = PLAN_INFO[code];
         return '<button class="pay-row" type="button" data-select-plan="' + code + '" data-select-product="' + productCode + '">' +
