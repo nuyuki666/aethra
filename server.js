@@ -382,7 +382,7 @@ async function main() {
   });
 
   /* --------------------------------------------------- platega.io payments */
-  const PLATEGA_API = process.env.PLATEGA_API_URL || "https://api.my.platega.io";
+  const PLATEGA_API = process.env.PLATEGA_API_URL || "https://my.platega.io";
   const PLATEGA_KEY = process.env.PLATEGA_API_KEY || "";
   const PLATEGA_MERCHANT = process.env.PLATEGA_MERCHANT_ID || "";
 
