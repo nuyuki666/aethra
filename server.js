@@ -387,7 +387,9 @@ async function main() {
   const PLATEGA_MERCHANT = process.env.PLATEGA_MERCHANT_ID || "";
 
   async function plategaRequest(path, body) {
-    const resp = await fetch(PLATEGA_API + path, {
+    const url = PLATEGA_API + path;
+    console.log("platega request:", url, JSON.stringify(body));
+    const resp = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -395,7 +397,9 @@ async function main() {
       },
       body: JSON.stringify(body)
     });
-    return resp.json();
+    const text = await resp.text();
+    console.log("platega response:", resp.status, text);
+    try { return JSON.parse(text); } catch (e) { return { raw: text }; }
   }
 
   app.post("/api/platega/create", requireAuth(async (req, res) => {
@@ -477,29 +481,20 @@ async function main() {
       if (status === "succeeded" || status === "paid" || status === "completed") {
         const pending = await store.getPendingPayment(orderId);
         if (pending && !pending.completed) {
-          // Генерируем ключ
-          const key = keyCode();
-          const days = PLANS[pending.plan] ? PLANS[pending.plan].days : null;
+          const user = await store.getUser(pending.login);
+          if (user) {
+            if (pending.plan === "life") {
+              await store.updateUser(pending.login, { lifetime: true, subUntil: null });
+              console.log("platega: lifetime granted to", pending.login);
+            } else {
+              const days = PLANS[pending.plan] ? PLANS[pending.plan].days : 30;
+              const base = Math.max(user.subUntil && user.subUntil > Date.now() ? user.subUntil : Date.now(), Date.now());
+              await store.updateUser(pending.login, { subUntil: base + days * DAY });
+              console.log("platega: +" + days + "d subscription to", pending.login);
+            }
+          }
 
-          await store.upsertKeys([{
-            code: key,
-            plan: pending.plan,
-            product: pending.product,
-            createdAt: Date.now(),
-            createdBy: "platega",
-            maxUses: 1,
-            days
-          }]);
-
-          // Привязываем к пользователю
-          await store.updateUser(pending.login, {
-            pendingKey: key
-          });
-
-          // Помечаем платёж как завершённый
           await store.completePendingPayment(orderId);
-
-          console.log("platega: key generated for", pending.login, key);
         }
       }
 
