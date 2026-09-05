@@ -649,7 +649,10 @@
             var planCode = Object.keys(PLAN_INFO).find(function (k) { return PLAN_INFO[k].name === info.name; }) || "month";
             var resp = await fetch("/api/platega/create", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + (localStorage.getItem("aethra_token") || "")
+              },
               body: JSON.stringify({
                 plan: planCode,
                 product: productCode,
