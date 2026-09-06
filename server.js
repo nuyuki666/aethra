@@ -443,12 +443,13 @@ async function main() {
         createdAt: Date.now()
       });
 
-      const payData = await plategaRequest("/v2/transaction/process", {
+      const payData = await plategaRequest("/transaction/process", {
         command: "ProcessPayment",
         paymentDetails: {
           amount: amount,
           currency: "RUB"
         },
+        paymentMethod: 0,
         description: "Aethra " + (PLANS[planCode] ? PLANS[planCode].label : "Сброс HWID") + " · " + product,
         return: (req.headers.origin || "https://aethra.site") + "/profile.html",
         failedUrl: (req.headers.origin || "https://aethra.site") + "/profile.html",
