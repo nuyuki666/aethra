@@ -443,24 +443,30 @@ async function main() {
         createdAt: Date.now()
       });
 
-      const payData = await plategaRequest("/payments", {
-        amount: amount * 100,
-        currency: "RUB",
-        order_id: orderId,
+      const payData = await plategaRequest("/transaction/process", {
+        paymentDetails: {
+          amount: amount,
+          currency: "RUB"
+        },
         description: "Aethra " + (PLANS[planCode] ? PLANS[planCode].label : "Сброс HWID") + " · " + product,
-        return_url: (req.headers.origin || "https://aethra.site") + "/profile.html",
-        payment_method: method,
+        return: (req.headers.origin || "https://aethra.site") + "/profile.html",
+        failedUrl: (req.headers.origin || "https://aethra.site") + "/profile.html",
+        payload: orderId,
         metadata: {
           login: req.user.login,
           plan: planCode,
-          product
+          product: product,
+          method: method
         }
       });
 
-      if (payData.payment_url) {
-        res.json({ ok: true, payment_url: payData.payment_url, order_id: orderId });
-      } else if (payData.data && payData.data.payment_url) {
-        res.json({ ok: true, payment_url: payData.data.payment_url, order_id: orderId });
+      console.log("platega result:", JSON.stringify(payData));
+
+      const paymentUrl = payData.paymentUrl || payData.payment_url || payData.url ||
+        (payData.data && (payData.data.paymentUrl || payData.data.payment_url || payData.data.url));
+
+      if (paymentUrl) {
+        res.json({ ok: true, payment_url: paymentUrl, order_id: orderId });
       } else {
         console.error("platega create error:", payData);
         bad(res, "Ошибка создания платежа");
