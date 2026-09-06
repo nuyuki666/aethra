@@ -448,6 +448,7 @@ async function main() {
           amount: amount,
           currency: "RUB"
         },
+        paymentMethod: method,
         description: "Aethra " + (PLANS[planCode] ? PLANS[planCode].label : "Сброс HWID") + " · " + product,
         return: (req.headers.origin || "https://aethra.site") + "/profile.html",
         failedUrl: (req.headers.origin || "https://aethra.site") + "/profile.html",
@@ -455,8 +456,7 @@ async function main() {
         metadata: {
           login: req.user.login,
           plan: planCode,
-          product: product,
-          method: method
+          product: product
         }
       });
 
