@@ -393,7 +393,8 @@ async function main() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer " + PLATEGA_KEY
+        "X-MerchantId": PLATEGA_MERCHANT,
+        "X-Secret": PLATEGA_KEY
       },
       body: JSON.stringify(body)
     });
