@@ -443,14 +443,11 @@ async function main() {
         createdAt: Date.now()
       });
 
-      const methodMap = { sbp: "SBP", crypto: "Crypto" };
       const payData = await plategaRequest("/transaction/process", {
-        command: "init",
         paymentDetails: {
           amount: amount,
           currency: "RUB"
         },
-        paymentMethod: methodMap[method] || "SBP",
         description: "Aethra " + (PLANS[planCode] ? PLANS[planCode].label : "Сброс HWID") + " · " + product,
         return: (req.headers.origin || "https://aethra.site") + "/profile.html",
         failedUrl: (req.headers.origin || "https://aethra.site") + "/profile.html",
