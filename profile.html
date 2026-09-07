@@ -123,7 +123,7 @@
               <div class="kv__row"><dt>E-mail</dt><dd data-kv="email">—</dd></div>
               <div class="kv__row"><dt>Дата регистрации</dt><dd data-kv="reg">26.07.2026 00:31</dd></div>
               <div class="kv__row"><dt>Последний вход</dt><dd data-kv="last">—</dd></div>
-              <div class="kv__row"><dt>HWID</dt><dd>Не привязан</dd></div>
+              <div class="kv__row"><dt>HWID</dt><dd data-kv="hwid">Не привязан</dd></div>
             </dl>
           </article>
 
@@ -287,6 +287,9 @@
               <div style="display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-5)">
                 <button class="btn btn--ghost btn--sm" type="button" data-copy="hwid">
                   <svg class="i"><use href="#i-copy"></use></svg> Скопировать ID
+                </button>
+                <button class="btn btn--danger btn--sm" type="button" data-hwid-reset style="display:none">
+                  <svg class="i"><use href="#i-refresh"></use></svg> Сбросить HWID
                 </button>
                 <button class="btn btn--primary btn--sm" type="button" data-buy-hwid-reset>
                   <svg class="i"><use href="#i-refresh"></use></svg> Купить сброс HWID (349 ₽)

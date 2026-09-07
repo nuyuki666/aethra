@@ -907,17 +907,33 @@
   async function refreshHwid() {
     var r = await S.loaderInfo();
     if (!r.ok) return;
-    var kv = $('[data-kv="hwid"]');
-    if (kv) kv.textContent = r.hwid ? r.hwidMasked : "Не привязан";
-    var badge = $("[data-hwid-badge]");
-    if (badge) {
+    $$('[data-kv="hwid"]').forEach(function (kv) {
+      kv.textContent = r.hwid ? r.hwidMasked : "Не привязан";
+    });
+    $$("[data-hwid-badge]").forEach(function (badge) {
       badge.className = "badge" + (r.hwid ? " badge--ok" : "");
       badge.textContent = r.hwid ? "HWID привязан" : "HWID не привязан";
+    });
+    var usedEl = $("[data-hwid-used]");
+    if (usedEl) {
+      usedEl.textContent = r.isAdmin ? "Безлимитно (Администратор)" : (r.resetsLeft + " доступно");
     }
     var resets = $("[data-hwid-resets]");
-    if (resets) resets.textContent = r.resetsLeft + " / " + r.resetLimit;
+    if (resets) resets.textContent = r.isAdmin ? "Безлимитно" : (r.resetsLeft + " / " + r.resetLimit);
     var resetBtn = $("[data-hwid-reset]");
-    if (resetBtn) resetBtn.disabled = !r.hwid || r.resetsLeft <= 0;
+    if (resetBtn) {
+      if (r.isAdmin) {
+        resetBtn.style.display = "inline-flex";
+        resetBtn.disabled = !r.hwid;
+        resetBtn.innerHTML = '<svg class="i"><use href="#i-refresh"></use></svg> Сбросить HWID (Админ)';
+      } else if (r.resetsLeft > 0) {
+        resetBtn.style.display = "inline-flex";
+        resetBtn.disabled = !r.hwid;
+        resetBtn.innerHTML = '<svg class="i"><use href="#i-refresh"></use></svg> Сбросить HWID (' + r.resetsLeft + ')';
+      } else {
+        resetBtn.style.display = "none";
+      }
+    }
   }
 
   function detectDeviceType() {

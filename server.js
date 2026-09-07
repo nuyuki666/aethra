@@ -1424,12 +1424,14 @@ async function main() {
 
   app.get("/api/loader/info", requireAuth(async (req, res) => {
     const u = req.user;
+    const isAdmin = Boolean(u.role === "admin" || u.login === ADMIN_LOGIN);
     res.json({
       ok: true,
       hwid: u.hwid || "",
       hwidMasked: u.hwid ? maskHwid(u.hwid) : "",
-      resetsLeft: Math.max(0, HWID_RESET_LIMIT - (u.hwidResets || 0)),
-      resetLimit: HWID_RESET_LIMIT,
+      resetsLeft: isAdmin ? 999 : Math.max(0, HWID_RESET_LIMIT - (u.hwidResets || 0)),
+      resetLimit: isAdmin ? 999 : HWID_RESET_LIMIT,
+      isAdmin,
       downloadsAvailable: subActive(u)
     });
   }));
@@ -1437,15 +1439,17 @@ async function main() {
   app.post("/api/hwid/reset", requireAuth(async (req, res) => {
     try {
       const u = req.user;
+      const isAdmin = Boolean(u.role === "admin" || u.login === ADMIN_LOGIN);
       const used = u.hwidResets || 0;
-      if (used >= HWID_RESET_LIMIT) return bad(res, "Лимит сбросов исчерпан. Напишите в поддержку");
+      if (!isAdmin && used >= HWID_RESET_LIMIT) return bad(res, "Лимит сбросов исчерпан. Напишите в поддержку");
       if (!u.hwid) return bad(res, "HWID не привязан");
-      await store.updateUser(u.login, { hwid: "", hwidResets: used + 1 });
-      await store.addHistory(u.login, "Сброс привязки HWID (" + (used + 1) + "/" + HWID_RESET_LIMIT + ")");
+      await store.updateUser(u.login, { hwid: "", hwidResets: isAdmin ? 0 : used + 1 });
+      await store.addHistory(u.login, "Сброс привязки HWID" + (isAdmin ? " (Администратор — безлимитно)" : " (" + (used + 1) + "/" + HWID_RESET_LIMIT + ")"));
       res.json({
         ok: true,
-        resetsLeft: HWID_RESET_LIMIT - used - 1,
-        resetLimit: HWID_RESET_LIMIT
+        resetsLeft: isAdmin ? 999 : Math.max(0, HWID_RESET_LIMIT - used - 1),
+        resetLimit: isAdmin ? 999 : HWID_RESET_LIMIT,
+        isAdmin
       });
     } catch (e) {
       console.error(e);
