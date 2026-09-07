@@ -7,7 +7,7 @@ const crypto = require("crypto");
 const cookieParser = require("cookie-parser");
 const { createStore } = require("./storage");
 
-const PORT = process.env.PORT || 5177;
+const PORT = process.env.PORT || 8091;
 const DAY = 86400000;
 const ADMIN_LOGIN = "elyww";
 const PLANS = {
@@ -141,7 +141,16 @@ async function ensureAdmin(store) {
 }
 
 function subActive(u) {
-  return !u.banned && (u.lifetime || (u.subUntil && u.subUntil > Date.now()));
+  if (!u || u.banned) return false;
+  const now = Date.now();
+  return Boolean(
+    u.lifetime ||
+    u.role === "admin" ||
+    (u.subUntil && u.subUntil > now) ||
+    (u.subMinecraft && u.subMinecraft > now) ||
+    (u.subCs2 && u.subCs2 > now) ||
+    (u.subVisual && u.subVisual > now)
+  );
 }
 
 async function main() {
@@ -168,6 +177,13 @@ async function main() {
 
   const app = express();
   app.disable("x-powered-by");
+  app.use((req, res, next) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    if (req.method === "OPTIONS") return res.sendStatus(204);
+    next();
+  });
   app.use(cookieParser());
   app.use(express.json({ limit: "64kb" }));
 
@@ -961,34 +977,37 @@ async function main() {
       const token = crypto.randomBytes(32).toString("hex");
       await store.createSession(token, user.login);
       
-      // Проверяем активные подписки на продукты
       const now = Date.now();
-      const products = {
-        cs2: user.lifetime || (user.subCs2 && user.subCs2 > now),
-        minecraft: user.lifetime || (user.subMinecraft && user.subMinecraft > now),
-        visual: user.lifetime || (user.subVisual && user.subVisual > now)
-      };
+      const isMcActive = Boolean(user.role === "admin" || user.lifetime || (user.subMinecraft && user.subMinecraft > now) || (user.subUntil && user.subUntil > now));
+      const isCs2Active = Boolean(user.role === "admin" || user.lifetime || (user.subCs2 && user.subCs2 > now));
+      const isVisualActive = Boolean(user.role === "admin" || user.lifetime || (user.subVisual && user.subVisual > now));
       
       res.json({
         ok: true,
         token,
+        id: user.id || 1,
+        role: user.role || "default",
+        email: user.email || `${user.login}@aethra.local`,
+        created_at: user.regAt ? new Date(user.regAt).toISOString() : new Date().toISOString(),
+        name: user.login,
         login: user.login,
         avatar: user.avatar || "",
+        avatar_path: user.avatar || null,
         lifetime: !!user.lifetime,
         subUntil: user.subUntil,
         till: user.lifetime ? "Lifetime" : S_fmtShort(user.subUntil),
         products: {
           cs2: {
-            active: products.cs2,
-            till: user.lifetime ? "Lifetime" : (products.cs2 ? S_fmtShort(user.subCs2) : "No access")
+            active: isCs2Active,
+            till: user.lifetime ? "Lifetime" : (user.subCs2 ? S_fmtShort(user.subCs2) : "No access")
           },
           minecraft: {
-            active: products.minecraft,
-            till: user.lifetime ? "Lifetime" : (products.minecraft ? S_fmtShort(user.subMinecraft) : "No access")
+            active: isMcActive,
+            till: user.lifetime ? "Lifetime" : (isMcActive ? (user.lifetime ? "Lifetime" : S_fmtShort(user.subMinecraft || user.subUntil)) : "No access")
           },
           visual: {
-            active: products.visual,
-            till: user.lifetime ? "Lifetime" : (products.visual ? S_fmtShort(user.subVisual) : "No access")
+            active: isVisualActive,
+            till: user.lifetime ? "Lifetime" : (user.subVisual ? S_fmtShort(user.subVisual) : "No access")
           }
         }
       });
@@ -1007,7 +1026,7 @@ async function main() {
 
   app.post("/api/loader/restore", async (req, res) => {
     try {
-      const token = String((req.body && req.body.token) || "");
+      const token = String((req.body && req.body.token) || (req.headers.authorization || "").replace(/^Bearer\s+/i, "")).trim();
       const hwid = String((req.body && req.body.hwid) || "").trim().slice(0, 80);
       const user = token ? await store.getUserByToken(token) : null;
       if (!user) return res.status(401).json({ ok: false, error: "Сессия истекла" });
@@ -1024,15 +1043,109 @@ async function main() {
       }
       await store.updateUser(user.login, { lastLogin: Date.now(), lastIp: clientIp(req) });
 
+      const now = Date.now();
+      const isMcActive = Boolean(user.role === "admin" || user.lifetime || (user.subMinecraft && user.subMinecraft > now) || (user.subUntil && user.subUntil > now));
+      const isCs2Active = Boolean(user.role === "admin" || user.lifetime || (user.subCs2 && user.subCs2 > now));
+      const isVisualActive = Boolean(user.role === "admin" || user.lifetime || (user.subVisual && user.subVisual > now));
+
       res.json({
         ok: true,
         token,
+        id: user.id || 1,
+        role: user.role || "default",
+        email: user.email || `${user.login}@aethra.local`,
+        created_at: user.regAt ? new Date(user.regAt).toISOString() : new Date().toISOString(),
+        name: user.login,
         login: user.login,
         avatar: user.avatar || "",
+        avatar_path: user.avatar || null,
         lifetime: !!user.lifetime,
         subUntil: user.subUntil,
-        till: user.lifetime ? "Lifetime" : S_fmtShort(user.subUntil)
+        till: user.lifetime ? "Lifetime" : S_fmtShort(user.subUntil),
+        products: {
+          cs2: { active: isCs2Active },
+          minecraft: { active: isMcActive },
+          visual: { active: isVisualActive }
+        }
       });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  });
+
+  app.post("/api/loader/licenses", async (req, res) => {
+    try {
+      const token = String((req.body && req.body.token) || (req.headers.authorization || "").replace(/^Bearer\s+/i, "")).trim();
+      const hwid = String((req.body && req.body.hwid) || "").trim().slice(0, 80);
+      const user = token ? await store.getUserByToken(token) : null;
+      if (!user) return res.status(401).json({ ok: false, status: 1, error: "Сессия истекла", licenses: [] });
+      if (user.banned) return res.status(403).json({ ok: false, status: 1, error: "Аккаунт заблокирован", licenses: [] });
+      if (user.hwid && hwid && user.hwid !== hwid) {
+        return res.status(403).json({ ok: false, status: 1, hwidMismatch: true, error: "HWID не совпадает", licenses: [] });
+      }
+
+      const now = Date.now();
+      const isMcActive = Boolean(user.role === "admin" || user.lifetime || (user.subMinecraft && user.subMinecraft > now) || (user.subUntil && user.subUntil > now));
+      
+      const licenses = [];
+      if (isMcActive) {
+        const mcUntil = user.subMinecraft || user.subUntil;
+        const daysLeft = (user.lifetime || user.role === "admin" || !mcUntil)
+          ? 36500
+          : Math.max(1, Math.ceil((mcUntil - now) / DAY));
+        const expiresAt = (user.lifetime || user.role === "admin" || !mcUntil)
+          ? "2099-12-31T23:59:59Z"
+          : new Date(mcUntil).toISOString();
+
+        licenses.push({
+          id: 1,
+          name: "Minecraft Client (Stable)",
+          days: daysLeft,
+          license_type_id: 1,
+          expires_at: expiresAt
+        });
+
+        if (user.role === "admin" || user.lifetime) {
+          licenses.push({
+            id: 2,
+            name: "Minecraft Client (3.0 Beta Access)",
+            days: daysLeft,
+            license_type_id: 2,
+            expires_at: expiresAt
+          });
+        }
+      }
+
+      res.json({ ok: true, status: 0, licenses });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, status: 1, error: "Ошибка сервера", licenses: [] });
+    }
+  });
+
+  const LAUNCH_SECRET = process.env.AETHRA_LAUNCH_SECRET || "aethra_launch_super_secret_key_2026_delta";
+
+  app.post("/api/loader/launch-ticket", async (req, res) => {
+    try {
+      const token = String((req.body && req.body.token) || (req.headers.authorization || "").replace(/^Bearer\s+/i, "")).trim();
+      const hwid = String((req.body && req.body.hwid) || "").trim().slice(0, 80);
+      const user = token ? await store.getUserByToken(token) : null;
+      if (!user) return res.status(401).json({ ok: false, error: "Сессия истекла" });
+      if (user.banned) return res.status(403).json({ ok: false, error: "Аккаунт заблокирован" });
+      if (user.hwid && hwid && user.hwid !== hwid) {
+        return res.status(403).json({ ok: false, error: "HWID не совпадает" });
+      }
+      if (!subActive(user)) {
+        return res.status(403).json({ ok: false, error: "Нет активной подписки" });
+      }
+
+      const timestamp = Date.now();
+      const payload = `${user.login}:${hwid}:${timestamp}`;
+      const signature = crypto.createHmac("sha256", LAUNCH_SECRET).update(payload).digest("hex");
+      const ticket = Buffer.from(JSON.stringify({ login: user.login, hwid, ts: timestamp, sig: signature })).toString("base64");
+
+      res.json({ ok: true, ticket, login: user.login });
     } catch (e) {
       console.error(e);
       res.status(500).json({ ok: false, error: "Ошибка сервера" });
