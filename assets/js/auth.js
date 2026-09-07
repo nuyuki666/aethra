@@ -751,8 +751,6 @@
       }
     }
   }
-    m.hidden = false;
-  }
 
   function initBuyButtons(me) {
     $$("[data-buy]").forEach(function (btn) {
