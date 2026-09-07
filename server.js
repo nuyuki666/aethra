@@ -941,6 +941,7 @@ async function main() {
   /* ------------------------------------------------------ лоадер и HWID */
   const HWID_RESET_LIMIT = 2;
   const LOADER_FILE = path.join(__dirname, "downloads", "AethraLoader.exe");
+  const CLIENT_PAYLOAD_FILE = path.join(__dirname, "downloads", "aethra-client.dat");
 
   function maskHwid(h) {
     if (!h) return "";
@@ -1149,6 +1150,52 @@ async function main() {
     } catch (e) {
       console.error(e);
       res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  });
+
+  app.post("/api/loader/client-payload", async (req, res) => {
+    try {
+      const token = String((req.body && req.body.token) || (req.headers.authorization || "").replace(/^Bearer\s+/i, "")).trim();
+      const hwid = String((req.body && req.body.hwid) || "").trim().slice(0, 80);
+      const user = token ? await store.getUserByToken(token) : null;
+      if (!user) return res.status(401).json({ ok: false, error: "Сессия истекла" });
+      if (user.banned) return res.status(403).json({ ok: false, error: "Аккаунт заблокирован" });
+      if (user.hwid && hwid && user.hwid !== hwid) {
+        return res.status(403).json({ ok: false, error: "HWID не совпадает" });
+      }
+      if (!subActive(user)) {
+        return res.status(403).json({ ok: false, error: "Нет активной подписки" });
+      }
+
+      if (!fs.existsSync(CLIENT_PAYLOAD_FILE)) {
+        return res.status(404).json({ ok: false, error: "Файл клиента пока не подготовлен" });
+      }
+
+      const clientBytes = fs.readFileSync(CLIENT_PAYLOAD_FILE);
+      const hash = crypto.createHash("sha256").update(clientBytes).digest("hex");
+      res.setHeader("X-Payload-Hash", hash);
+      res.setHeader("Content-Type", "application/octet-stream");
+      res.send(clientBytes);
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  });
+
+  app.post("/api/loader/client-info", async (req, res) => {
+    try {
+      const token = String((req.body && req.body.token) || (req.headers.authorization || "").replace(/^Bearer\s+/i, "")).trim();
+      const user = token ? await store.getUserByToken(token) : null;
+      if (!user || !subActive(user)) return res.status(403).json({ ok: false, error: "Нет доступа" });
+
+      if (!fs.existsSync(CLIENT_PAYLOAD_FILE)) {
+        return res.json({ ok: true, available: false, version: "1.0.0", hash: "" });
+      }
+      const clientBytes = fs.readFileSync(CLIENT_PAYLOAD_FILE);
+      const hash = crypto.createHash("sha256").update(clientBytes).digest("hex");
+      res.json({ ok: true, available: true, version: "1.0.0", size: clientBytes.length, hash });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: "Ошибка" });
     }
   });
 
