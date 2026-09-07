@@ -376,20 +376,34 @@
 
     var form = $('form[data-promos-generate]');
     if (form) {
+      var customCodeInput = $("#promoCustomCode");
+      var countInput = $("#promoCount");
+      if (customCodeInput && countInput) {
+        customCodeInput.addEventListener("input", function () {
+          if (customCodeInput.value.trim().length > 0) {
+            countInput.value = "1";
+          }
+        });
+      }
+
       form.addEventListener("submit", async function (e) {
         e.preventDefault();
         var productBtn = productSeg ? $(".seg__btn.is-on", productSeg) : null;
         var product = productBtn ? productBtn.dataset.value : "all";
         var percent = parseInt($("#promoPercent").value, 10) || 0;
-        var count = parseInt($("#promoCount").value, 10) || 1;
+        var customCode = ($("#promoCustomCode").value || "").trim().toUpperCase();
+        var count = customCode ? 1 : (parseInt($("#promoCount").value, 10) || 1);
         count = Math.max(1, Math.min(count, 50));
         var maxUses = Math.max(0, Math.min(parseInt($("#promoMaxUses").value, 10) || 0, 1000));
-        var customCode = ($("#promoCustomCode").value || "").trim().toUpperCase();
 
         var r = await S.makePromos(percent, count, maxUses, product, customCode);
         var productName = product === "all" ? "все товары" : product.toUpperCase();
-        if (r.ok) toast("Создано промокодов: " + r.codes.length + " (−" + percent + "%, " + productName + ", " + (maxUses || "∞") + " акт.)");
-        else toast(r.error || "Не удалось создать промокоды", "bad");
+        if (r.ok) {
+          toast("Создано промокодов: " + r.codes.length + " (−" + percent + "%, " + productName + ", " + (maxUses || "∞") + " акт.)");
+          if (customCodeInput) customCodeInput.value = "";
+        } else {
+          toast(r.error || "Не удалось создать промокоды", "bad");
+        }
         await renderPromos();
       });
     }
@@ -432,8 +446,13 @@
     var count = $("[data-logs-count]");
     if (!body) return;
 
-    var r = await S.adminGet("/api/admin/logs");
-    if (!r.ok) { toast(r.error || "Не удалось загрузить логи", "bad"); return; }
+    var r = await S.adminGet("/admin/logs");
+    if (!r || !r.ok) {
+      console.warn("loadLogs:", r && r.error);
+      if (empty) empty.hidden = false;
+      if (table) table.hidden = true;
+      return;
+    }
 
     var logs = r.logs || [];
     if (count) count.textContent = logs.length + " записей";

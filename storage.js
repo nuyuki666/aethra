@@ -196,6 +196,7 @@ class FileStore {
       this.data.promos.unshift({
         code: p.code,
         percent: p.percent,
+        product: p.product || "all",
         active: true,
         uses: 0,
         maxUses: p.maxUses || 0,
@@ -215,7 +216,7 @@ class FileStore {
     const p = this.data.promos.find(x =>
       x.code === code && x.active && ((x.maxUses || 0) === 0 || (x.uses || 0) < x.maxUses)
     );
-    return p ? { code: p.code, percent: p.percent } : null;
+    return p ? { code: p.code, percent: p.percent, product: p.product || "all" } : null;
   }
 
   async incrPromoUse(code) {
@@ -320,9 +321,10 @@ class PgStore {
     await this.pool.query("ALTER TABLE keys ADD COLUMN IF NOT EXISTS days INTEGER");
     await this.pool.query("ALTER TABLE promos ADD COLUMN IF NOT EXISTS max_uses INTEGER NOT NULL DEFAULT 0");
     
-    // Добавляем product для ключей и промокодов
     await this.pool.query("ALTER TABLE keys ADD COLUMN IF NOT EXISTS product TEXT DEFAULT 'cs2'");
     await this.pool.query("ALTER TABLE promos ADD COLUMN IF NOT EXISTS product TEXT DEFAULT 'all'");
+    await this.pool.query("UPDATE promos SET max_uses = 0 WHERE max_uses IS NULL");
+    await this.pool.query("UPDATE promos SET product = 'all' WHERE product IS NULL");
     
     // Добавляем поддержку множественных подписок на товары
     await this.pool.query("ALTER TABLE users ADD COLUMN IF NOT EXISTS sub_cs2 BIGINT");
@@ -575,8 +577,8 @@ class PgStore {
   async upsertPromos(list) {
     for (const p of list) {
       await this.pool.query(
-        "INSERT INTO promos (code, percent, active, uses, max_uses, created_at, created_by) VALUES ($1,$2,TRUE,0,$3,$4,$5) ON CONFLICT (code) DO NOTHING",
-        [p.code, p.percent, p.maxUses || 0, p.createdAt, p.createdBy]
+        "INSERT INTO promos (code, percent, active, uses, max_uses, created_at, created_by, product) VALUES ($1,$2,TRUE,0,$3,$4,$5,$6) ON CONFLICT (code) DO NOTHING",
+        [p.code, p.percent, p.maxUses || 0, p.createdAt, p.createdBy, p.product || "all"]
       );
     }
   }
@@ -597,7 +599,7 @@ class PgStore {
 
   async getPromo(code) {
     const res = await this.pool.query(
-      "SELECT code, percent, product FROM promos WHERE UPPER(code) = UPPER($1) AND active = TRUE AND (max_uses = 0 OR uses < max_uses)",
+      "SELECT code, percent, product FROM promos WHERE UPPER(code) = UPPER($1) AND active = TRUE AND (COALESCE(max_uses, 0) = 0 OR uses < max_uses)",
       [String(code || "")]
     );
     return res.rows[0] ? { code: res.rows[0].code, percent: res.rows[0].percent, product: res.rows[0].product || "all" } : null;
@@ -605,7 +607,7 @@ class PgStore {
 
   async incrPromoUse(code) {
     const res = await this.pool.query(
-      "UPDATE promos SET uses = uses + 1 WHERE UPPER(code) = UPPER($1) AND active = TRUE AND (max_uses = 0 OR uses < max_uses) RETURNING code",
+      "UPDATE promos SET uses = uses + 1 WHERE UPPER(code) = UPPER($1) AND active = TRUE AND (COALESCE(max_uses, 0) = 0 OR uses < max_uses) RETURNING code",
       [String(code || "")]
     );
     return res.rowCount > 0;

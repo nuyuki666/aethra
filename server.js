@@ -141,9 +141,10 @@ async function main() {
 
   /* ------------------------------------------------------------ auth utils */
   async function currentUser(req) {
-    const m = /^Bearer\s+(.+)$/i.exec(req.headers.authorization || "");
-    if (!m) return null;
-    return store.getUserByToken(m[1].trim());
+    const headerToken = (req.headers.authorization || "").replace(/^Bearer\s+/i, "").trim();
+    const token = headerToken || req.cookies?.token || req.cookies?.aethra_token;
+    if (!token) return null;
+    return store.getUserByToken(token);
   }
 
   function requireAuth(handler) {
@@ -529,57 +530,64 @@ async function main() {
   }));
 
   /* ------------------------------------------------------------- промокоды */
-  app.post("/api/promo/check", requireAuth(async (req, res) => {
+  app.post("/api/promo/check", async (req, res) => {
     try {
-      const code = String((req.body && req.body.code) || "");
-      const product = String((req.body && req.body.product) || "");
+      const code = String((req.body && req.body.code) || "").trim().toUpperCase();
+      const product = String((req.body && req.body.product) || "").trim();
+      if (!code) return bad(res, "Введите промокод");
       const p = await store.getPromo(code);
       if (!p) return bad(res, "Промокод не найден или больше не активен");
       
       // Проверка что промокод подходит для этого товара
-      if (p.product && p.product !== "all" && p.product !== product) {
+      if (p.product && p.product !== "all" && product && p.product !== product) {
         return bad(res, "Этот промокод не действует на выбранный товар");
       }
       
-      res.json({ ok: true, percent: p.percent });
+      res.json({ ok: true, percent: p.percent, code: p.code });
     } catch (e) {
-      console.error(e);
-      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+      console.error("promo check error:", e);
+      res.status(500).json({ ok: false, error: e.message || "Ошибка сервера" });
     }
-  }));
+  });
 
-  app.post("/api/promo/use", requireAuth(async (req, res) => {
+  app.post("/api/promo/use", async (req, res) => {
     try {
-      await store.incrPromoUse(String((req.body && req.body.code) || ""));
+      const code = String((req.body && req.body.code) || "").trim().toUpperCase();
+      if (code) await store.incrPromoUse(code);
       res.json({ ok: true });
     } catch (e) {
-      console.error(e);
-      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+      console.error("promo use error:", e);
+      res.status(500).json({ ok: false, error: e.message || "Ошибка сервера" });
     }
-  }));
+  });
 
   app.get("/api/admin/promos", requireAdmin(async (req, res) => {
-    res.json({ ok: true, promos: await store.getAllPromos() });
+    try {
+      res.json({ ok: true, promos: await store.getAllPromos() });
+    } catch (e) {
+      console.error("get promos error:", e);
+      res.status(500).json({ ok: false, error: e.message || "Ошибка сервера" });
+    }
   }));
 
   app.post("/api/admin/promos", requireAdmin(async (req, res) => {
     try {
       const percent = parseInt((req.body && req.body.percent), 10);
-      const count = parseInt((req.body && req.body.count), 10);
+      let count = parseInt((req.body && req.body.count), 10);
       const maxUses = parseInt((req.body && req.body.maxUses), 10) || 0;
       const product = String((req.body && req.body.product) || "all");
       const customCode = String((req.body && req.body.customCode) || "").trim().toUpperCase();
       if (!percent || percent < 1 || percent > 90) return bad(res, "Скидка: от 1 до 90%");
-      if (!count || count < 1 || count > 50) return bad(res, "Количество: от 1 до 50");
-      if (maxUses < 0 || maxUses > 1000) return bad(res, "Лимит активаций: 0 (безлимит) или 1–1000");
-      if (!["all", "cs2", "minecraft", "visual"].includes(product)) return bad(res, "Неизвестный товар");
-
       if (customCode) {
-        if (count > 1) return bad(res, "При вводе имени можно создать только 1 промокод");
+        count = 1;
         if (!/^[A-Z0-9_-]{1,20}$/.test(customCode)) return bad(res, "Имя: только латиница, цифры, _ - (до 20 символов)");
         const existing = await store.getPromo(customCode);
         if (existing) return bad(res, "Промокод «" + customCode + "» уже существует");
+      } else {
+        if (!count || count < 1 || count > 50) return bad(res, "Количество: от 1 до 50");
       }
+      if (maxUses < 0 || maxUses > 1000) return bad(res, "Лимит активаций: 0 (безлимит) или 1–1000");
+      if (!["all", "cs2", "minecraft", "visual"].includes(product)) return bad(res, "Неизвестный товар");
 
       const codes = [];
       for (let i = 0; i < count; i++) codes.push(customCode || promoCode());
@@ -593,8 +601,8 @@ async function main() {
       })));
       res.json({ ok: true, codes, percent });
     } catch (e) {
-      console.error(e);
-      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+      console.error("upsert promos error:", e);
+      res.status(500).json({ ok: false, error: e.message || "Ошибка сервера" });
     }
   }));
 
@@ -855,6 +863,34 @@ async function main() {
     res.json({ ok: true, stats });
   }));
 
+  app.get("/api/admin/logs", requireAdmin(async (req, res) => {
+    try {
+      const keys = await store.getAllKeys();
+      const usedKeys = keys.filter(k => k.usedBy || (k.uses && k.uses > 0));
+      const allUsers = await store.getAllUsers();
+      const userMap = {};
+      allUsers.forEach(u => { userMap[u.login] = u; });
+
+      const logs = usedKeys.map(k => {
+        const u = userMap[k.usedBy] || {};
+        return {
+          at: k.usedAt || k.createdAt,
+          login: k.usedBy || "—",
+          userId: u.id || "—",
+          key: k.code,
+          plan: (PLANS[k.plan] && PLANS[k.plan].label) || k.plan,
+          days: k.days,
+          ip: u.lastIp || "—"
+        };
+      }).sort((a, b) => b.at - a.at);
+
+      res.json({ ok: true, logs });
+    } catch (e) {
+      console.error("get admin logs error:", e);
+      res.status(500).json({ ok: false, error: e.message || "Ошибка сервера" });
+    }
+  }));
+
   app.post("/api/admin/grant", requireAdmin(async (req, res) => {
     try {
       const login = String((req.body && req.body.login) || "");
@@ -975,8 +1011,11 @@ async function main() {
   }));
 
   /* ---------------------------------------------------------------- static */
-  app.get("/main", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
-  app.get("/index.html", (req, res) => res.redirect(301, "/main"));
+  app.get(["/main", "/index", "/index.html"], (req, res) => res.sendFile(path.join(__dirname, "index.html")));
+  app.get(["/admin", "/admin.html"], (req, res) => res.sendFile(path.join(__dirname, "admin.html")));
+  app.get(["/profile", "/profile.html"], (req, res) => res.sendFile(path.join(__dirname, "profile.html")));
+  app.get(["/login", "/login.html"], (req, res) => res.sendFile(path.join(__dirname, "login.html")));
+  app.get(["/register", "/register.html"], (req, res) => res.sendFile(path.join(__dirname, "register.html")));
 
   // Лоадер доступен всем авторизованным пользователям (проверка подписки внутри лоадера)
   app.use("/loader", async (req, res, next) => {

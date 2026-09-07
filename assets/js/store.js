@@ -37,17 +37,28 @@
   var offlineNotified = false;
 
   async function api(path, body, method) {
+    var cleanPath = String(path || "");
+    if (cleanPath.startsWith("/api/")) {
+      cleanPath = cleanPath.slice(4);
+    } else if (cleanPath === "/api") {
+      cleanPath = "";
+    }
+    if (!cleanPath.startsWith("/")) cleanPath = "/" + cleanPath;
+
     var options = {
       method: method || (body !== undefined ? "POST" : "GET"),
-      headers: { "Content-Type": "application/json" }
+      headers: {}
     };
     var t = getToken();
     if (t) options.headers.Authorization = "Bearer " + t;
-    if (body !== undefined) options.body = JSON.stringify(body);
+    if (body !== undefined) {
+      options.headers["Content-Type"] = "application/json";
+      options.body = JSON.stringify(body);
+    }
 
     var res;
     try {
-      res = await fetch("/api" + path, options);
+      res = await fetch("/api" + cleanPath, options);
     } catch (e) {
       if (!offlineNotified) {
         offlineNotified = true;
@@ -132,7 +143,7 @@
       return api("/chat", { text: text });
     },
     chatDelete: function (id) {
-      return api("/chat/" + id, null, "DELETE");
+      return api("/chat/" + id, undefined, "DELETE");
     },
 
     changePassword: function (currentPassword, newPassword) {
@@ -143,8 +154,8 @@
       return api("/avatar", { dataUrl: dataUrl });
     },
 
-    promoCheck: function (code) {
-      return api("/promo/check", { code: code });
+    promoCheck: function (code, product) {
+      return api("/promo/check", { code: code, product: product || "minecraft" });
     },
     promoUse: function (code) {
       return api("/promo/use", { code: code });
