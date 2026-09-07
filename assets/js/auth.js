@@ -27,9 +27,9 @@
     visual: { name: "Aethra Visual", desc: "Визуальное DLC для PvP", img: "/minecraft.png" }
   };
   var PAYMENT_METHODS = [
-    { id: "sbp", name: "Система быстрых платежей", icon: "sbp" },
-    { id: "crypto", name: "Криптовалюта", icon: "crypto" },
-    { id: "support", name: "Через техподдержку", icon: "message" }
+    { id: "sbp", name: "Система быстрых платежей", icon: "/assets/images/spb.png", svg: "sbp" },
+    { id: "crypto", name: "Криптовалюта", icon: "/assets/images/usdt.png", svg: "crypto" },
+    { id: "support", name: "Через техподдержку", icon: "/assets/images/tech.png", svg: "telegram" }
   ];
 
   var RULES = {
@@ -503,10 +503,9 @@
         finalPriceAmt = Math.round(basePrice * (100 - promo.percent) / 100);
       }
 
-      var orderNum = orderCode();
-
       var payPillsHtml = PAYMENT_METHODS.map(function (x) {
-        var iconHtml = '<svg class="i"><use href="#i-' + (x.icon === "message" ? "telegram" : x.icon) + '"></use></svg>';
+        var iconHtml = '<img src="' + esc(x.icon) + '" alt="" style="width:18px;height:18px;object-fit:contain;vertical-align:middle" onerror="this.style.display=\'none\';if(this.nextElementSibling)this.nextElementSibling.style.display=\'inline-block\'">' +
+          '<svg class="i" style="display:none;width:18px;height:18px"><use href="#i-' + x.svg + '"></use></svg>';
         var isActive = selectedMethod === x.id ? " is-active" : "";
         var labelText = x.id === "sbp" ? "СБП" : (x.id === "crypto" ? "CryptoBot" : "Техподдержка");
         return '<button type="button" class="pay-pill' + isActive + '" data-pay-method="' + x.id + '">' +
@@ -536,12 +535,9 @@
           '</div>' +
 
           '<div class="buy-modal-main">' +
-            '<div class="buy-modal-main__head">' +
-              '<span class="buy-modal-order-tag">ЗАКАЗ #' + orderNum + '</span>' +
-              '<button class="modal__x" type="button" data-modal-close aria-label="Закрыть">' +
-                '<svg class="i"><use href="#i-close"></use></svg>' +
-              '</button>' +
-            '</div>' +
+            '<button class="modal__x" type="button" data-modal-close aria-label="Закрыть">' +
+              '<svg class="i"><use href="#i-close"></use></svg>' +
+            '</button>' +
 
             '<div class="buy-modal-price-box">' +
               '<span class="buy-modal-price-val" data-modal-price>' + finalPriceAmt + ' ₽</span>' +
