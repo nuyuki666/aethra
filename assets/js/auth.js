@@ -520,6 +520,17 @@
           '</button>';
       }).join("");
 
+      var planDesc = "Доступ к клиенту и всем последующим обновлениям на выбранный период.";
+      if (currentPlan === "week") {
+        planDesc = "Доступ к клиенту и всем обновлениям на 7 дней.";
+      } else if (currentPlan === "month") {
+        planDesc = "Доступ к клиенту и всем обновлениям на 30 дней.";
+      } else if (currentPlan === "life") {
+        planDesc = "Бессрочный доступ к клиенту и всем будущим обновлениям.";
+      } else if (currentPlan === "hwid-reset") {
+        planDesc = "Разовая услуга сброса привязки оборудования (HWID).";
+      }
+
       body.innerHTML =
         '<div class="buy-modal-grid">' +
           '<div class="buy-modal-poster">' +
@@ -528,7 +539,7 @@
             '<div class="buy-modal-poster__content">' +
               '<div class="buy-modal-poster__icon"><svg class="i"><use href="#i-logo"></use></svg></div>' +
               '<h3 class="buy-modal-poster__title">' + esc(product.name) + '</h3>' +
-              '<p class="buy-modal-poster__desc">Вы получаете клиент абсолютно навсегда, так же все последующие обновления.</p>' +
+              '<p class="buy-modal-poster__desc">' + esc(planDesc) + '</p>' +
             '</div>' +
           '</div>' +
 
