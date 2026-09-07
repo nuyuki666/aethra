@@ -1088,7 +1088,7 @@ async function main() {
       await store.createSession(token, user.login);
       
       const now = Date.now();
-      const isMcActive = Boolean(user.role === "admin" || user.lifetime || (user.subMinecraft && user.subMinecraft > now) || (user.subUntil && user.subUntil > now));
+      const isMcActive = true;
       const isCs2Active = Boolean(user.role === "admin" || user.lifetime || (user.subCs2 && user.subCs2 > now));
       const isVisualActive = Boolean(user.role === "admin" || user.lifetime || (user.subVisual && user.subVisual > now));
       
@@ -1105,15 +1105,15 @@ async function main() {
         avatar_path: user.avatar || null,
         lifetime: !!user.lifetime,
         subUntil: user.subUntil,
-        till: user.lifetime ? "Lifetime" : S_fmtShort(user.subUntil),
+        till: user.lifetime ? "Lifetime" : "Release Access",
         products: {
           cs2: {
             active: isCs2Active,
             till: user.lifetime ? "Lifetime" : (user.subCs2 ? S_fmtShort(user.subCs2) : "No access")
           },
           minecraft: {
-            active: isMcActive,
-            till: user.lifetime ? "Lifetime" : (isMcActive ? (user.lifetime ? "Lifetime" : S_fmtShort(user.subMinecraft || user.subUntil)) : "No access")
+            active: true,
+            till: user.lifetime ? "Lifetime" : "Release Access"
           },
           visual: {
             active: isVisualActive,
@@ -1180,7 +1180,7 @@ async function main() {
       await store.updateUser(user.login, { lastLogin: Date.now(), lastIp: ip });
 
       const now = Date.now();
-      const isMcActive = Boolean(user.role === "admin" || user.lifetime || (user.subMinecraft && user.subMinecraft > now) || (user.subUntil && user.subUntil > now));
+      const isMcActive = true;
       const isCs2Active = Boolean(user.role === "admin" || user.lifetime || (user.subCs2 && user.subCs2 > now));
       const isVisualActive = Boolean(user.role === "admin" || user.lifetime || (user.subVisual && user.subVisual > now));
 
@@ -1197,10 +1197,10 @@ async function main() {
         avatar_path: user.avatar || null,
         lifetime: !!user.lifetime,
         subUntil: user.subUntil,
-        till: user.lifetime ? "Lifetime" : S_fmtShort(user.subUntil),
+        till: user.lifetime ? "Lifetime" : "Release Access",
         products: {
           cs2: { active: isCs2Active },
-          minecraft: { active: isMcActive },
+          minecraft: { active: true },
           visual: { active: isVisualActive }
         }
       });
@@ -1233,37 +1233,25 @@ async function main() {
         return res.status(403).json({ ok: false, status: 1, hwidMismatch: true, error: "HWID не совпадает", licenses: [] });
       }
 
-      const now = Date.now();
-      const isMcActive = Boolean(user.role === "admin" || user.lifetime || (user.subMinecraft && user.subMinecraft > now) || (user.subUntil && user.subUntil > now));
-      
-      const licenses = [];
-      if (isMcActive) {
-        const mcUntil = user.subMinecraft || user.subUntil;
-        const daysLeft = (user.lifetime || user.role === "admin" || !mcUntil)
-          ? 36500
-          : Math.max(1, Math.ceil((mcUntil - now) / DAY));
-        const expiresAt = (user.lifetime || user.role === "admin" || !mcUntil)
-          ? "2099-12-31T23:59:59Z"
-          : new Date(mcUntil).toISOString();
+      const daysLeft = 36500;
+      const expiresAt = "2099-12-31T23:59:59Z";
 
-        licenses.push({
+      const licenses = [
+        {
           id: 1,
           name: "Minecraft Client (Stable)",
           days: daysLeft,
           license_type_id: 1,
           expires_at: expiresAt
-        });
-
-        if (user.role === "admin" || user.lifetime) {
-          licenses.push({
-            id: 2,
-            name: "Minecraft Client (3.0 Beta Access)",
-            days: daysLeft,
-            license_type_id: 2,
-            expires_at: expiresAt
-          });
+        },
+        {
+          id: 2,
+          name: "Minecraft Client (3.0 Beta Access)",
+          days: daysLeft,
+          license_type_id: 2,
+          expires_at: expiresAt
         }
-      }
+      ];
 
       res.json({ ok: true, status: 0, licenses });
     } catch (e) {
@@ -1300,9 +1288,6 @@ async function main() {
 
       if (user.hwid && hwid && user.hwid !== hwid) {
         return res.status(403).json({ ok: false, error: "HWID не совпадает" });
-      }
-      if (!subActive(user)) {
-        return res.status(403).json({ ok: false, error: "Нет активной подписки" });
       }
 
       const timestamp = Date.now();
@@ -1343,9 +1328,6 @@ async function main() {
 
       if (user.hwid && hwid && user.hwid !== hwid) {
         return res.status(403).json({ ok: false, error: "HWID не совпадает" });
-      }
-      if (!subActive(user)) {
-        return res.status(403).json({ ok: false, error: "Нет активной подписки" });
       }
 
       if (!fs.existsSync(CLIENT_PAYLOAD_FILE)) {
