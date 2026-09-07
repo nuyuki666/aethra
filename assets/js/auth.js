@@ -666,12 +666,38 @@
       // Submit Button
       var submitBtn = $("[data-pay-submit]", body);
       if (submitBtn) {
-        submitBtn.addEventListener("click", function () {
+        submitBtn.addEventListener("click", async function () {
           if (!selectedMethod || !agreed) return;
           var planObj = PLAN_INFO[currentPlan];
           var basePrice = parseInt(planObj.price, 10) || 0;
           var amt = promo.percent > 0 ? Math.round(basePrice * (100 - promo.percent) / 100) : basePrice;
-          showInstructions(planObj, selectedMethod, promo, productCode, amt);
+
+          var btnSpan = $("span", submitBtn);
+          submitBtn.disabled = true;
+          if (btnSpan) btnSpan.textContent = "Перенаправляем на оплату…";
+
+          try {
+            var r = await S.createPayment({
+              plan: currentPlan,
+              product: productCode,
+              method: selectedMethod,
+              amount: amt,
+              promoCode: promo.code || ""
+            });
+
+            if (r.ok && r.payment_url) {
+              if (promo.code) S.promoUse(promo.code);
+              window.location.href = r.payment_url;
+            } else {
+              submitBtn.disabled = false;
+              if (btnSpan) btnSpan.textContent = "Оплатить " + amt + " ₽";
+              if (window.toast) toast(r.error || "Ошибка создания платежа", "bad");
+            }
+          } catch (e) {
+            submitBtn.disabled = false;
+            if (btnSpan) btnSpan.textContent = "Оплатить " + amt + " ₽";
+            if (window.toast) toast("Ошибка соединения с платёжной системой", "bad");
+          }
         });
       }
     }
@@ -720,124 +746,6 @@
 
   function showPaymentMethods(planCode, productCode, m, body) {
     openBuyModalWithProduct(productCode, planCode);
-  }
-
-  function showInstructions(info, methodId, promo, productCode, amount) {
-    var m = $("[data-buy-modal]");
-    var body = $("[data-modal-body]", m);
-    var order = orderCode();
-    promo = promo || { code: "", percent: 0 };
-    var total = amount || parseInt(info.price, 10) || 0;
-    var product = PRODUCTS[productCode] || PRODUCTS["minecraft"];
-
-    var methodInfo = null;
-    PAYMENT_METHODS.forEach(function (x) {
-      if (x.id === methodId) methodInfo = x;
-    });
-    if (!methodInfo) methodInfo = { name: methodId, icon: "credit-card" };
-
-    var isSupport = methodId === "support";
-
-    var steps;
-    if (isSupport) {
-      steps = '<ol class="steps">' +
-        "<li>Напишите в поддержку: укажите товар, сумму и способ оплаты.</li>" +
-        "<li>Получите ключ формата <b class='mono'>AETH-XXXX-XXXX</b>.</li>" +
-        "<li>Активируйте ключ во вкладке «Подписка».</li>" +
-        "</ol>";
-    } else {
-      steps = '<ol class="steps">' +
-        "<li>Вы будете перенаправлены на страницу оплаты.</li>" +
-        "<li>Оплатите заказ <b class='mono'>" + esc(order) + "</b>.</li>" +
-        "<li>Подписка активируется автоматически после подтверждения оплаты.</li>" +
-        "</ol>";
-    }
-
-    var payBtn;
-    if (isSupport) {
-      payBtn = '<a class="buy-modal-submit" href="' + esc(PAY.tg) + '" target="_blank" rel="noopener" style="text-decoration:none">' +
-        '<span>Написать в поддержку</span><svg class="i"><use href="#i-send"></use></svg></a>';
-    } else {
-      payBtn = '<button class="buy-modal-submit" type="button" data-pay-go>' +
-        '<span>Перейти к оплате ' + total + ' ₽</span><svg class="i"><use href="#i-arrow-right"></use></svg></button>';
-    }
-
-    body.innerHTML =
-      '<div class="buy-modal-grid">' +
-        '<div class="buy-modal-poster">' +
-          '<div class="buy-modal-poster__bg" style="background-image: url(\'' + esc(product.img || "/minecraft.png") + '\')"></div>' +
-          '<div class="buy-modal-poster__overlay"></div>' +
-          '<div class="buy-modal-poster__content">' +
-            '<div class="buy-modal-poster__icon"><svg class="i"><use href="#i-shield"></use></svg></div>' +
-            '<h3 class="buy-modal-poster__title">' + esc(product.name) + '</h3>' +
-            '<p class="buy-modal-poster__desc">Вы получаете клиент абсолютно навсегда, так же все последующие обновления.</p>' +
-          '</div>' +
-        '</div>' +
-
-        '<div class="buy-modal-main">' +
-          '<div class="buy-modal-main__head">' +
-            '<span class="buy-modal-order-tag">ЗАКАЗ #' + order + '</span>' +
-            '<button class="modal__x" type="button" data-modal-close aria-label="Закрыть">' +
-              '<svg class="i"><use href="#i-close"></use></svg>' +
-            '</button>' +
-          '</div>' +
-
-          '<div class="buy-modal-price-box">' +
-            '<span class="buy-modal-price-val">' + total + ' ₽</span>' +
-            '<span class="buy-modal-price-term">/ ' + esc(info.name) + '</span>' +
-          '</div>' +
-
-          '<div class="buy-modal-group">' +
-            '<label class="buy-modal-label">ИНСТРУКЦИЯ ПО ОПЛАТЕ</label>' +
-            steps +
-          '</div>' +
-
-          payBtn +
-          '<p style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:16px;text-align:center">' +
-            'Если после оплаты прошло более 30 минут, а ключ не пришёл — напишите в техподдержку.' +
-          '</p>' +
-        '</div>' +
-      '</div>';
-
-    if (!isSupport) {
-      var go = $("[data-pay-go]", body);
-      if (go) {
-        go.addEventListener("click", async function () {
-          go.disabled = true;
-          $("span", go).textContent = "Создаём платёж…";
-          try {
-            var planCode = Object.keys(PLAN_INFO).find(function (k) { return PLAN_INFO[k].name === info.name; }) || "month";
-            var resp = await fetch("/api/platega/create", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + (localStorage.getItem("aethra_token") || "")
-              },
-              body: JSON.stringify({
-                plan: planCode,
-                product: productCode,
-                method: methodId,
-                amount: total,
-                promoCode: promo.code || ""
-              })
-            });
-            var data = await resp.json();
-            if (data.ok && data.payment_url) {
-              if (promo.code) S.promoUse(promo.code);
-              window.location.href = data.payment_url;
-            } else {
-              go.disabled = false;
-              $("span", go).textContent = "Перейти к оплате " + total + " ₽";
-              toast(data.error || "Ошибка создания платежа", "bad");
-            }
-          } catch (e) {
-            go.disabled = false;
-            $("span", go).textContent = "Перейти к оплате " + total + " ₽";
-            toast("Ошибка сети", "bad");
-          }
-        });
-      }
-    }
   }
 
   function initBuyButtons(me) {

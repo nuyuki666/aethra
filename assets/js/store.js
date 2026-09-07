@@ -228,6 +228,9 @@
     },
     adminPost: async function (path, body) {
       return api(path, body);
+    },
+    createPayment: function (data) {
+      return api("/platega/create", data);
     }
   };
 })();
