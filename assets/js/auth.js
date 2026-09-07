@@ -657,6 +657,7 @@
       var priceVal = $("[data-modal-price]", body);
       var priceTerm = $("[data-modal-term]", body);
       var submitBtn = $("[data-pay-submit]", body);
+      var posterDesc = $(".buy-modal-poster__desc", body);
 
       if (priceVal) priceVal.textContent = amt + " ₽";
       if (priceTerm) priceTerm.textContent = "/ " + planObj.name;
@@ -664,6 +665,25 @@
         submitBtn.disabled = !selectedMethod || !agreed;
         var btnSpan = $("span", submitBtn);
         if (btnSpan) btnSpan.textContent = "Оплатить " + amt + " ₽";
+      }
+
+      if (posterDesc) {
+        var newDesc = "Доступ к клиенту и всем последующим обновлениям на выбранный период.";
+        if (currentPlan === "week") newDesc = "Доступ к клиенту и всем обновлениям на 7 дней.";
+        else if (currentPlan === "month") newDesc = "Доступ к клиенту и всем обновлениям на 30 дней.";
+        else if (currentPlan === "life") newDesc = "Бессрочный доступ к клиенту и всем будущим обновлениям.";
+        else if (currentPlan === "hwid-reset") newDesc = "Разовая услуга сброса привязки оборудования (HWID).";
+
+        if (posterDesc.textContent !== newDesc) {
+          posterDesc.style.transition = "opacity 0.15s ease, transform 0.15s ease";
+          posterDesc.style.opacity = "0";
+          posterDesc.style.transform = "translateY(4px)";
+          setTimeout(function () {
+            posterDesc.textContent = newDesc;
+            posterDesc.style.opacity = "1";
+            posterDesc.style.transform = "translateY(0)";
+          }, 150);
+        }
       }
     }
 

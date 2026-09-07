@@ -818,17 +818,18 @@ async function main() {
     try {
       const msgId = parseInt(req.params.id, 10);
       if (!msgId) return bad(res, "Неверный ID сообщения");
-      const messages = await store.getChatMessages(0);
-      const msg = messages.find(m => m.id === msgId);
+      const msg = await store.getChatMessageById(msgId);
 
-      if (req.user.role !== "admin" && (!msg || msg.login !== req.user.login)) {
-        return bad(res, "Нет прав на удаление этого сообщения");
+      if (req.user.role !== "admin") {
+        if (!msg || msg.login !== req.user.login) {
+          return bad(res, "Нет прав на удаление этого сообщения");
+        }
       }
 
       await store.deleteChatMessage(msgId);
       res.json({ ok: true, id: msgId });
     } catch (e) {
-      console.error(e);
+      console.error("delete chat message error:", e);
       res.status(500).json({ ok: false, error: "Ошибка сервера" });
     }
   }));

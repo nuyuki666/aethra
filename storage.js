@@ -178,6 +178,12 @@ class FileStore {
     return msg;
   }
 
+  async getChatMessageById(id) {
+    const msgId = parseInt(id, 10);
+    const m = this.data.messages.find(x => x.id === msgId);
+    return m ? { ...m } : null;
+  }
+
   async deleteChatMessage(id) {
     const msgId = parseInt(id, 10);
     this.data.messages = this.data.messages.filter(m => m.id !== msgId);
@@ -551,6 +557,13 @@ class PgStore {
     );
     const r = res.rows[0];
     return { id: r.id, login: r.login, text: r.text, at: Number(r.at) };
+  }
+
+  async getChatMessageById(id) {
+    const msgId = parseInt(id, 10);
+    const res = await this.pool.query("SELECT id, login, text, at FROM messages WHERE id = $1", [msgId]);
+    const r = res.rows[0];
+    return r ? { id: r.id, login: r.login, text: r.text, at: Number(r.at) } : null;
   }
 
   async deleteChatMessage(id) {
