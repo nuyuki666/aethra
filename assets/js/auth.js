@@ -298,6 +298,7 @@
     function render(m) {
       var el = document.createElement("div");
       el.className = "chat__msg";
+      el.setAttribute("data-msg-id", m.id);
       var av = document.createElement("div");
       av.className = "avatar";
       av.setAttribute("data-chat-avatar", m.login);
@@ -313,6 +314,25 @@
       var stamp = document.createElement("span");
       stamp.textContent = time(m.at);
       author.appendChild(stamp);
+
+      if (me && (me.role === "admin" || m.login === me.login)) {
+        var delBtn = document.createElement("button");
+        delBtn.type = "button";
+        delBtn.className = "chat__del";
+        delBtn.title = "Удалить сообщение";
+        delBtn.innerHTML = '<svg class="i" style="width:12px;height:12px"><use href="#i-trash"></use></svg>';
+        delBtn.addEventListener("click", async function (e) {
+          e.stopPropagation();
+          var r = await S.chatDelete(m.id);
+          if (r.ok) {
+            el.remove();
+          } else {
+            if (window.toast) toast(r.error || "Ошибка удаления", "bad");
+          }
+        });
+        author.appendChild(delBtn);
+      }
+
       var body = document.createElement("div");
       body.className = "chat__body";
       body.textContent = m.text;
@@ -346,27 +366,46 @@
     }
 
     async function load() {
-      var r = await S.chatGet(lastId);
+      var r = await S.chatGet(0);
       if (!r.ok) return;
       var msgs = r.messages || [];
       if (!cleared) {
         cleared = true;
         log.innerHTML = "";
-        if (!msgs.length) {
-          var empty = document.createElement("div");
-          empty.className = "chat__msg text-dim";
-          empty.style.fontSize = "var(--fs-sm)";
-          empty.textContent = "Сообщений пока нет — напишите первым!";
-          log.appendChild(empty);
-          return;
-        }
       }
-      msgs.forEach(function (m) {
-        lastId = Math.max(lastId, m.id);
-        log.appendChild(render(m));
+      if (!msgs.length) {
+        log.innerHTML = "";
+        var empty = document.createElement("div");
+        empty.className = "chat__msg text-dim";
+        empty.style.fontSize = "var(--fs-sm)";
+        empty.textContent = "Сообщений пока нет — напишите первым!";
+        log.appendChild(empty);
+        return;
+      }
+
+      var emptyEl = log.querySelector(".text-dim");
+      if (emptyEl && msgs.length > 0) emptyEl.remove();
+
+      var activeIds = {};
+      msgs.forEach(function (m) { activeIds[m.id] = true; });
+
+      $$(".chat__msg[data-msg-id]", log).forEach(function (el) {
+        var id = parseInt(el.getAttribute("data-msg-id"), 10);
+        if (id && !activeIds[id]) {
+          el.remove();
+        }
       });
+
+      var shouldScroll = false;
+      msgs.forEach(function (m) {
+        if (!log.querySelector('.chat__msg[data-msg-id="' + m.id + '"]')) {
+          log.appendChild(render(m));
+          shouldScroll = true;
+        }
+      });
+
       while (log.children.length > 80) log.removeChild(log.firstChild);
-      log.scrollTop = log.scrollHeight;
+      if (shouldScroll) log.scrollTop = log.scrollHeight;
       refreshAvatars();
     }
 
@@ -773,39 +812,6 @@
         openBuyModalWithProduct(btn.dataset.buyProduct);
       });
     });
-  }
-
-  function openBuyModalWithProduct(productCode) {
-    var m = ensureModal();
-    var body = $("[data-modal-body]", m);
-    var info = PLAN_INFO["month"];
-    var product = PRODUCTS[productCode];
-    if (!info || !product) return;
-
-    body.innerHTML =
-      '<h2>' + esc(product.name) + '</h2>' +
-      '<p class="modal-subtitle">' + esc(product.desc) + '</p>' +
-      '<p class="modal-section-title">ВЫБЕРИТЕ ТАРИФ</p>' +
-      '<div class="pay-list">' +
-      Object.keys(PLAN_INFO).map(function (code) {
-        var p = PLAN_INFO[code];
-        return '<button class="pay-row" type="button" data-select-plan="' + code + '" data-select-product="' + productCode + '">' +
-          '<div class="pay-row__icon"><svg class="i"><use href="#i-zap"></use></svg></div>' +
-          '<div style="flex:1"><div class="pay-row__name">' + esc(p.name) + '</div>' +
-          '<div class="pay-row__term">' + esc(p.term) + '</div></div>' +
-          '<span class="pay-row__price">' + esc(p.price) + '</span>' +
-          '<svg class="i pay-row__chevron"><use href="#i-chevron-right"></use></svg>' +
-          '</button>';
-      }).join("") +
-      '</div>';
-
-    $$("[data-select-plan]", body).forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        showPaymentMethods(btn.dataset.selectPlan, btn.dataset.selectProduct, m, body);
-      });
-    });
-
-    m.hidden = false;
   }
 
   /* ------------------------------------------------------------ аватарка */

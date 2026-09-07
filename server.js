@@ -814,6 +814,25 @@ async function main() {
     }
   }));
 
+  app.delete("/api/chat/:id", requireAuth(async (req, res) => {
+    try {
+      const msgId = parseInt(req.params.id, 10);
+      if (!msgId) return bad(res, "Неверный ID сообщения");
+      const messages = await store.getChatMessages(0);
+      const msg = messages.find(m => m.id === msgId);
+
+      if (req.user.role !== "admin" && (!msg || msg.login !== req.user.login)) {
+        return bad(res, "Нет прав на удаление этого сообщения");
+      }
+
+      await store.deleteChatMessage(msgId);
+      res.json({ ok: true, id: msgId });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  }));
+
   /* ----------------------------------------------------------------- admin */
   app.get("/api/admin/users", requireAdmin(async (req, res) => {
     res.json({ ok: true, users: await store.getAllUsers() });

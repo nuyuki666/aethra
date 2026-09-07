@@ -178,6 +178,13 @@ class FileStore {
     return msg;
   }
 
+  async deleteChatMessage(id) {
+    const msgId = parseInt(id, 10);
+    this.data.messages = this.data.messages.filter(m => m.id !== msgId);
+    this.persist();
+    return true;
+  }
+
   async upsertPromos(list) {
     for (const p of list) {
       this.data.promos.unshift({
@@ -544,6 +551,12 @@ class PgStore {
     );
     const r = res.rows[0];
     return { id: r.id, login: r.login, text: r.text, at: Number(r.at) };
+  }
+
+  async deleteChatMessage(id) {
+    const msgId = parseInt(id, 10);
+    await this.pool.query("DELETE FROM messages WHERE id = $1", [msgId]);
+    return true;
   }
 
   async upsertPromos(list) {

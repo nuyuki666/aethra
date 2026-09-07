@@ -131,6 +131,9 @@
     chatSend: function (text) {
       return api("/chat", { text: text });
     },
+    chatDelete: function (id) {
+      return api("/chat/" + id, null, "DELETE");
+    },
 
     changePassword: function (currentPassword, newPassword) {
       return api("/password", { currentPassword: currentPassword, newPassword: newPassword });
