@@ -78,9 +78,6 @@
         <button class="dash__tab" role="tab" id="tab-account" aria-controls="panel-account" aria-selected="true">
           <svg class="i"><use href="#i-user"></use></svg> Аккаунт
         </button>
-        <button class="dash__tab" role="tab" id="tab-buy" aria-controls="panel-buy" aria-selected="false" tabindex="-1">
-          <svg class="i"><use href="#i-card"></use></svg> Купить ключ
-        </button>
         <button class="dash__tab" role="tab" id="tab-subscription" aria-controls="panel-subscription" aria-selected="false" tabindex="-1">
           <svg class="i"><use href="#i-key"></use></svg> Подписка
         </button>
@@ -183,62 +180,6 @@
           </div>
         </section>
 
-        <!-- ==================================================== panel: buy -->
-        <section class="dash__panel" id="panel-buy" role="tabpanel" aria-labelledby="tab-buy" tabindex="0" hidden>
-          <div class="page-head">
-            <div>
-              <h1>Купить ключ</h1>
-              <p>Ключ приходит на страницу «Подписка» сразу после оплаты</p>
-            </div>
-          </div>
-
-          <div class="plans">
-            <article class="card product-card product-card--featured">
-              <div class="product-card__head">
-                <div class="product-card__icon">
-                  <svg class="i"><use href="#i-shield"></use></svg>
-                </div>
-                <span class="product-card__badge">ДОСТУПНО</span>
-              </div>
-              <span class="product-card__cat">MINECRAFT</span>
-              <h3 class="product-card__name">Aethra DLC</h3>
-              <p class="product-card__desc">Лучшее DLC для Minecraft с превосходной килл-аурой.</p>
-              <div class="product-card__foot">
-                <button class="btn btn--primary btn--block product-card__cta" type="button" data-buy-product="minecraft">Выбрать</button>
-              </div>
-            </article>
-          </div>
-
-          <article class="card">
-            <div class="panel-head">
-              <h3>Способы оплаты</h3>
-              <span class="eyebrow">Комиссия включена</span>
-            </div>
-            <div class="payment-methods">
-              <div class="payment-method">
-                <div class="payment-method__icon">
-                  <svg class="i i--lg"><use href="#i-sbp"></use></svg>
-                </div>
-                <div class="payment-method__content">
-                  <div class="payment-method__name">СБП QR</div>
-                  <div class="payment-method__desc">Система Быстрых Платежей</div>
-                  <div class="payment-method__format"><span class="badge badge--ok">Моментально</span></div>
-                </div>
-              </div>
-              <div class="payment-method">
-                <div class="payment-method__icon">
-                  <svg class="i i--lg"><use href="#i-crypto"></use></svg>
-                </div>
-                <div class="payment-method__content">
-                  <div class="payment-method__name">Криптовалюта</div>
-                  <div class="payment-method__desc">USDT · BTC · ETH · TON · SOL</div>
-                  <div class="payment-method__format"><span class="badge">До 10 минут</span></div>
-                </div>
-              </div>
-            </div>
-          </article>
-        </section>
-
         <!-- =========================================== panel: subscription -->
         <section class="dash__panel" id="panel-subscription" role="tabpanel" aria-labelledby="tab-subscription" tabindex="0" hidden>
           <div class="page-head">
@@ -246,7 +187,6 @@
               <h1>Подписка</h1>
               <p>Текущий доступ и история покупок</p>
             </div>
-            <button class="btn btn--primary" type="button">Купить ключ</button>
           </div>
 
           <article class="card">

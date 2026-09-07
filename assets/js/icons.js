@@ -16,6 +16,7 @@
     "user-plus": '<circle cx="9.5" cy="8" r="3.4"/><path d="M3 20a6.5 6.5 0 0 1 13 0"/><path d="M19 8v6M16 11h6"/>',
     menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
     close: '<path d="m6 6 12 12M18 6 6 18"/>',
+    trash: '<path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/>',
     chevron: '<path d="m6 9 6 6 6-6"/>',
     "chevron-right": '<path d="m9 6 6 6-6 6"/>',
     "arrow-right": '<path d="M4 12h15M13 6l6 6-6 6"/>',

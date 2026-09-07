@@ -533,9 +533,6 @@
           '</div>' +
 
           '<div class="buy-modal-main">' +
-            '<button class="modal__x" type="button" data-modal-close aria-label="Закрыть">' +
-              '<svg class="i"><use href="#i-close"></use></svg>' +
-            '</button>' +
 
             '<div class="buy-modal-price-box">' +
               '<span class="buy-modal-price-val" data-modal-price>' + finalPriceAmt + ' ₽</span>' +
