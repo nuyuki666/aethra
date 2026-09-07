@@ -442,138 +442,196 @@
   }
 
   function openBuyModal(planCode, productCode) {
-    var info = PLAN_INFO[planCode];
-    if (!info) return;
-    var m = ensureModal();
-    var body = $("[data-modal-body]", m);
-
-    // Сначала показываем выбор товара
-    var productBtns = Object.keys(PRODUCTS).map(function(code) {
-      var p = PRODUCTS[code];
-      return '<button class="server" type="button" data-select-product="' + code + '" style="cursor:pointer;border:none;background:none;padding:var(--sp-3);border-radius:12px;transition:all .2s;width:100%;text-align:left;margin-bottom:var(--sp-2);background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:var(--sp-3)">' +
-        '<div style="width:48px;height:48px;border-radius:8px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">' +
-        '<img src="' + esc(p.img) + '" alt="" style="width:100%;height:100%;object-fit:cover;display:block" /></div>' +
-        '<div style="flex:1;min-width:0"><div class="server__name">' + esc(p.name) + '</div>' +
-        '<div class="server__meta">' + esc(p.desc) + '</div></div>' +
-        '<svg class="i" style="opacity:0.4;flex-shrink:0"><use href="#i-chevron-right"></use></svg>' +
-        '</button>';
-    }).join("");
-
-    body.innerHTML =
-      '<span class="eyebrow">Покупка подписки</span>' +
-      '<h3 style="font-size:var(--fs-xl);margin-top:var(--sp-2)">' + esc(info.name) + " · " + esc(info.price) + "</h3>" +
-      '<p class="text-dim" style="font-size:var(--fs-sm);margin-top:var(--sp-2)">Выберите товар:</p>' +
-      '<div style="margin-top:var(--sp-3)">' + productBtns + '</div>';
-
-    $$("[data-select-product]", body).forEach(function(btn) {
-      btn.addEventListener("click", function() {
-        var selectedProduct = btn.dataset.selectProduct;
-        showPaymentMethods(planCode, selectedProduct, m, body);
-      });
-    });
-
-    m.hidden = false;
+    openBuyModalWithProduct(productCode || "minecraft", planCode || "week");
   }
 
-  function showPaymentMethods(planCode, productCode, m, body) {
-    var info = PLAN_INFO[planCode];
-    var product = PRODUCTS[productCode];
-    if (!info || !product) return;
+  function openBuyModalWithProduct(productCode, initialPlanCode) {
+    productCode = productCode || "minecraft";
+    var m = ensureModal();
+    var body = $("[data-modal-body]", m);
+    var product = PRODUCTS[productCode] || PRODUCTS["minecraft"];
 
-    var base = parseInt(info.price, 10) || 0;
+    var currentPlan = initialPlanCode && PLAN_INFO[initialPlanCode] ? initialPlanCode : "week";
     var selectedMethod = null;
     var promo = { code: "", percent: 0 };
+    var agreed = true;
 
-    function finalPrice() {
-      var amt = base;
-      if (promo.percent > 0) amt = Math.round(amt * (100 - promo.percent) / 100);
-      return amt + " ₽";
-    }
+    function renderModal() {
+      var planObj = PLAN_INFO[currentPlan] || PLAN_INFO["week"];
+      var basePrice = parseInt(planObj.price, 10) || 0;
+      var finalPriceAmt = basePrice;
+      if (promo.percent > 0) {
+        finalPriceAmt = Math.round(basePrice * (100 - promo.percent) / 100);
+      }
 
-    function render() {
-      var methods = PAYMENT_METHODS.map(function (x) {
-        var iconHtml = x.icon.indexOf("img:") === 0
-          ? '<img src="' + esc(x.icon.slice(4)) + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:8px">'
-          : '<svg class="i"><use href="#i-' + x.icon + '"></use></svg>';
-        return '<button class="pay-row' + (selectedMethod === x.id ? " pay-row--active" : "") +
-          '" type="button" data-pay-method="' + x.id + '">' +
-          '<div class="pay-row__icon">' + iconHtml + '</div>' +
-          '<span class="pay-row__name">' + esc(x.name) + '</span>' +
-          '<svg class="i pay-row__chevron"><use href="#i-chevron-right"></use></svg>' +
+      var orderNum = orderCode();
+
+      var payPillsHtml = PAYMENT_METHODS.map(function (x) {
+        var iconHtml = '<svg class="i"><use href="#i-' + (x.icon === "message" ? "telegram" : x.icon) + '"></use></svg>';
+        var isActive = selectedMethod === x.id ? " is-active" : "";
+        var labelText = x.id === "sbp" ? "СБП" : (x.id === "crypto" ? "CryptoBot" : "Техподдержка");
+        return '<button type="button" class="pay-pill' + isActive + '" data-pay-method="' + x.id + '">' +
+          '<span class="pay-pill__icon">' + iconHtml + '</span>' +
+          '<span>' + esc(labelText) + '</span>' +
+          '</button>';
+      }).join("");
+
+      var planPillsHtml = Object.keys(PLAN_INFO).map(function (code) {
+        var p = PLAN_INFO[code];
+        var isActive = currentPlan === code ? " is-active" : "";
+        return '<button type="button" class="plan-pill' + isActive + '" data-select-plan="' + code + '">' +
+          '<span>' + esc(p.name) + ' – ' + esc(p.price) + '</span>' +
           '</button>';
       }).join("");
 
       body.innerHTML =
-        '<h2>' + esc(product.name) + '</h2>' +
-        '<div class="pay-product">' +
-          '<div class="pay-product__info">' +
-            '<div class="pay-product__name">' + esc(product.name) + '</div>' +
-            '<div class="pay-product__desc">' + esc(info.name) + ' · ' + esc(info.term) + '</div>' +
+        '<div class="buy-modal-grid">' +
+          '<div class="buy-modal-poster">' +
+            '<div class="buy-modal-poster__bg" style="background-image: url(\'' + esc(product.img || "/minecraft.png") + '\')"></div>' +
+            '<div class="buy-modal-poster__overlay"></div>' +
+            '<div class="buy-modal-poster__content">' +
+              '<div class="buy-modal-poster__icon"><svg class="i"><use href="#i-shield"></use></svg></div>' +
+              '<h3 class="buy-modal-poster__title">' + esc(product.name) + '</h3>' +
+              '<p class="buy-modal-poster__desc">Вы получаете клиент абсолютно навсегда, так же все последующие обновления.</p>' +
+            '</div>' +
           '</div>' +
-          '<div class="pay-product__price">' +
-            '<div class="pay-product__amount">' + esc(info.price) + '</div>' +
-            '<span class="pay-product__badge">РАЗОВЫЙ ПЛАТЕЖ</span>' +
+
+          '<div class="buy-modal-main">' +
+            '<div class="buy-modal-main__head">' +
+              '<span class="buy-modal-order-tag">ЗАКАЗ #' + orderNum + '</span>' +
+              '<button class="modal__x" type="button" data-modal-close aria-label="Закрыть">' +
+                '<svg class="i"><use href="#i-close"></use></svg>' +
+              '</button>' +
+            '</div>' +
+
+            '<div class="buy-modal-price-box">' +
+              '<span class="buy-modal-price-val" data-modal-price>' + finalPriceAmt + ' ₽</span>' +
+              '<span class="buy-modal-price-term" data-modal-term>/ ' + esc(planObj.name) + '</span>' +
+            '</div>' +
+
+            '<div class="buy-modal-group">' +
+              '<label class="buy-modal-label">СПОСОБ ОПЛАТЫ</label>' +
+              '<div class="buy-modal-pills">' + payPillsHtml + '</div>' +
+            '</div>' +
+
+            '<div class="buy-modal-group">' +
+              '<label class="buy-modal-label">ПЕРИОД ТАРИФА</label>' +
+              '<div class="buy-modal-pills">' + planPillsHtml + '</div>' +
+            '</div>' +
+
+            '<div class="buy-modal-group">' +
+              '<label class="buy-modal-label">ПРОМОКОД</label>' +
+              '<div class="buy-modal-promo-field">' +
+                '<input class="input" data-promo-input placeholder="Введите промокод" maxlength="24" autocomplete="off">' +
+                '<button type="button" data-promo-apply>Применить</button>' +
+              '</div>' +
+              '<div data-promo-status style="font-size:12px;min-height:16px;margin-top:4px;color:rgba(255,255,255,0.5)"></div>' +
+            '</div>' +
+
+            '<label class="buy-modal-agree">' +
+              '<input type="checkbox" data-agree-checkbox ' + (agreed ? "checked" : "") + '>' +
+              '<span>Я согласен с <a href="/terms.html" target="_blank" rel="noopener">условиями использования</a> и понимаю, что покупка не подлежит возврату.</span>' +
+            '</label>' +
+
+            '<button class="buy-modal-submit" type="button" data-pay-submit ' + (!selectedMethod || !agreed ? "disabled" : "") + '>' +
+              '<span>Оплатить ' + finalPriceAmt + ' ₽</span>' +
+              '<svg class="i"><use href="#i-arrow-right"></use></svg>' +
+            '</button>' +
           '</div>' +
-        '</div>' +
-        '<p class="modal-section-title">СПОСОБ ОПЛАТЫ</p>' +
-        '<div class="pay-list">' + methods + '</div>' +
-        '<p class="modal-section-title">ПРОМОКОД</p>' +
-        '<div class="promo-row">' +
-        '<input class="input" data-promo-input placeholder="Введите код" maxlength="24" autocomplete="off">' +
-        '<button class="btn btn--ghost" type="button" data-promo-apply style="flex-shrink:0">Применить</button>' +
-        '</div>' +
-        '<p data-promo-status style="font-size:12px;min-height:16px;margin-top:6px;color:rgba(184,213,255,0.5)"></p>' +
-        '<button class="pay-submit" type="button" data-pay-submit disabled>' +
-        'Оплатить ' + esc(finalPrice()) + '</button>';
+        '</div>';
 
       bindEvents();
     }
 
     function bindEvents() {
+      // Payment Pills
       $$("[data-pay-method]", body).forEach(function (btn) {
         btn.addEventListener("click", function () {
           selectedMethod = btn.dataset.payMethod;
-          $$(".pay-row", body).forEach(function (c) { c.classList.remove("pay-row--active"); });
-          btn.classList.add("pay-row--active");
-          updateSubmit();
+          $$(".pay-pill", body).forEach(function (c) { c.classList.remove("is-active"); });
+          btn.classList.add("is-active");
+          updateState();
         });
       });
 
-      var promoInput = $("[data-promo-input]", body);
-      var status = $("[data-promo-status]", body);
-
-      $("[data-promo-apply]", body).addEventListener("click", async function () {
-        var code = promoInput.value.trim().toUpperCase();
-        if (!code) { status.textContent = "Введите промокод"; return; }
-        var r = await S.promoCheck(code, productCode);
-        if (!r.ok) {
-          promo = { code: "", percent: 0 };
-          status.innerHTML = '<span style="color:var(--bad)">' + esc(r.error) + "</span>";
-          return;
-        }
-        promo = { code: code, percent: r.percent };
-        status.innerHTML = '<span style="color:var(--ok)">Применено: −' + r.percent +
-          "% → " + finalPrice() + "</span>";
-        updateSubmit();
+      // Tariff Pills
+      $$("[data-select-plan]", body).forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          currentPlan = btn.dataset.selectPlan;
+          $$(".plan-pill", body).forEach(function (c) { c.classList.remove("is-active"); });
+          btn.classList.add("is-active");
+          updateState();
+        });
       });
 
-      updateSubmit();
+      // Agree Checkbox
+      var agreeBox = $("[data-agree-checkbox]", body);
+      if (agreeBox) {
+        agreeBox.addEventListener("change", function () {
+          agreed = agreeBox.checked;
+          updateState();
+        });
+      }
+
+      // Promo Apply
+      var promoInput = $("[data-promo-input]", body);
+      var promoStatus = $("[data-promo-status]", body);
+      var promoBtn = $("[data-promo-apply]", body);
+
+      if (promoBtn && promoInput) {
+        promoBtn.addEventListener("click", async function () {
+          var code = promoInput.value.trim().toUpperCase();
+          if (!code) { promoStatus.textContent = "Введите промокод"; return; }
+          var r = await S.promoCheck(code, productCode);
+          if (!r.ok) {
+            promo = { code: "", percent: 0 };
+            promoStatus.innerHTML = '<span style="color:var(--bad)">' + esc(r.error) + "</span>";
+            updateState();
+            return;
+          }
+          promo = { code: code, percent: r.percent };
+          promoStatus.innerHTML = '<span style="color:var(--ok)">Применено: −' + r.percent + '%</span>';
+          updateState();
+        });
+      }
+
+      // Submit Button
+      var submitBtn = $("[data-pay-submit]", body);
+      if (submitBtn) {
+        submitBtn.addEventListener("click", function () {
+          if (!selectedMethod || !agreed) return;
+          var planObj = PLAN_INFO[currentPlan];
+          var basePrice = parseInt(planObj.price, 10) || 0;
+          var amt = promo.percent > 0 ? Math.round(basePrice * (100 - promo.percent) / 100) : basePrice;
+          showInstructions(planObj, selectedMethod, promo, productCode, amt);
+        });
+      }
     }
 
-    function updateSubmit() {
-      var btn = $("[data-pay-submit]", body);
-      if (!btn) return;
-      var disabled = !selectedMethod;
-      btn.disabled = disabled;
-      var amt = base;
-      if (promo.percent > 0) amt = Math.round(amt * (100 - promo.percent) / 100);
-      btn.textContent = "Оплатить " + amt + " ₽";
-      btn.onclick = disabled ? null : function () {
-        showInstructions(info, selectedMethod, promo, productCode, amt);
-      };
+    function updateState() {
+      var planObj = PLAN_INFO[currentPlan];
+      var basePrice = parseInt(planObj.price, 10) || 0;
+      var amt = promo.percent > 0 ? Math.round(basePrice * (100 - promo.percent) / 100) : basePrice;
+
+      var priceVal = $("[data-modal-price]", body);
+      var priceTerm = $("[data-modal-term]", body);
+      var submitBtn = $("[data-pay-submit]", body);
+
+      if (priceVal) priceVal.textContent = amt + " ₽";
+      if (priceTerm) priceTerm.textContent = "/ " + planObj.name;
+      if (submitBtn) {
+        submitBtn.disabled = !selectedMethod || !agreed;
+        var btnSpan = $("span", submitBtn);
+        if (btnSpan) btnSpan.textContent = "Оплатить " + amt + " ₽";
+      }
     }
 
-    render();
+    renderModal();
+    m.hidden = false;
+  }
+
+  function showPaymentMethods(planCode, productCode, m, body) {
+    openBuyModalWithProduct(productCode, planCode);
   }
 
   function showInstructions(info, methodId, promo, productCode, amount) {
@@ -582,6 +640,7 @@
     var order = orderCode();
     promo = promo || { code: "", percent: 0 };
     var total = amount || parseInt(info.price, 10) || 0;
+    var product = PRODUCTS[productCode] || PRODUCTS["minecraft"];
 
     var methodInfo = null;
     PAYMENT_METHODS.forEach(function (x) {
@@ -590,11 +649,6 @@
     if (!methodInfo) methodInfo = { name: methodId, icon: "credit-card" };
 
     var isSupport = methodId === "support";
-
-    var promoLine = promo.percent > 0
-      ? '<p style="margin-top:12px;font-size:13px">К оплате: <b style="font-size:18px;color:#74ff89">' + total +
-        " ₽</b> <s style='color:rgba(184,213,255,0.3)'>" + parseInt(info.price, 10) + " ₽</s></p>"
-      : '<p style="margin-top:12px;font-size:13px">К оплате: <b style="font-size:18px;color:#dce4ef">' + total + " ₽</b></p>";
 
     var steps;
     if (isSupport) {
@@ -613,38 +667,56 @@
 
     var payBtn;
     if (isSupport) {
-      payBtn = '<a class="pay-submit" href="' + esc(PAY.tg) + '" target="_blank" rel="noopener" style="text-decoration:none;display:flex;align-items:center;justify-content:center">' +
-        'Написать в поддержку</a>';
+      payBtn = '<a class="buy-modal-submit" href="' + esc(PAY.tg) + '" target="_blank" rel="noopener" style="text-decoration:none">' +
+        '<span>Написать в поддержку</span><svg class="i"><use href="#i-send"></use></svg></a>';
     } else {
-      payBtn = '<button class="pay-submit" type="button" data-pay-go>Перейти к оплате</button>';
+      payBtn = '<button class="buy-modal-submit" type="button" data-pay-go>' +
+        '<span>Перейти к оплате ' + total + ' ₽</span><svg class="i"><use href="#i-arrow-right"></use></svg></button>';
     }
 
     body.innerHTML =
-      '<h2 style="font-size:20px;font-weight:800;color:#dce4ef;margin:0 0 16px 0;line-height:1.2">' + esc(productCode ? PRODUCTS[productCode].name : "") + '</h2>' +
-      '<div class="pay-product">' +
-        '<div class="pay-product__info">' +
-          '<div class="pay-product__name">' + esc(info.name) + '</div>' +
-          '<div class="pay-product__desc">' + esc(info.term) + '</div>' +
+      '<div class="buy-modal-grid">' +
+        '<div class="buy-modal-poster">' +
+          '<div class="buy-modal-poster__bg" style="background-image: url(\'' + esc(product.img || "/minecraft.png") + '\')"></div>' +
+          '<div class="buy-modal-poster__overlay"></div>' +
+          '<div class="buy-modal-poster__content">' +
+            '<div class="buy-modal-poster__icon"><svg class="i"><use href="#i-shield"></use></svg></div>' +
+            '<h3 class="buy-modal-poster__title">' + esc(product.name) + '</h3>' +
+            '<p class="buy-modal-poster__desc">Вы получаете клиент абсолютно навсегда, так же все последующие обновления.</p>' +
+          '</div>' +
         '</div>' +
-        '<div class="pay-product__price">' +
-          '<div class="pay-product__amount">' + esc(info.price) + '</div>' +
-          '<span class="pay-product__badge">ОПЛАТА</span>' +
+
+        '<div class="buy-modal-main">' +
+          '<div class="buy-modal-main__head">' +
+            '<span class="buy-modal-order-tag">ЗАКАЗ #' + order + '</span>' +
+            '<button class="modal__x" type="button" data-modal-close aria-label="Закрыть">' +
+              '<svg class="i"><use href="#i-close"></use></svg>' +
+            '</button>' +
+          '</div>' +
+
+          '<div class="buy-modal-price-box">' +
+            '<span class="buy-modal-price-val">' + total + ' ₽</span>' +
+            '<span class="buy-modal-price-term">/ ' + esc(info.name) + '</span>' +
+          '</div>' +
+
+          '<div class="buy-modal-group">' +
+            '<label class="buy-modal-label">ИНСТРУКЦИЯ ПО ОПЛАТЕ</label>' +
+            steps +
+          '</div>' +
+
+          payBtn +
+          '<p style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:16px;text-align:center">' +
+            'Если после оплаты прошло более 30 минут, а ключ не пришёл — напишите в техподдержку.' +
+          '</p>' +
         '</div>' +
-      '</div>' +
-      '<p style="margin:20px 0 8px;font-size:11px;font-weight:600;color:rgba(184,213,255,0.4);letter-spacing:0.08em;text-transform:uppercase">' + esc(methodInfo.name) + '</p>' +
-      promoLine +
-      steps +
-      payBtn +
-      '<p style="font-size:11px;color:rgba(184,213,255,0.3);margin-top:16px;text-align:center">' +
-      'Если после оплаты прошло более 30 минут, а ключ не пришёл — напишите в техподдержку.' +
-      '</p>';
+      '</div>';
 
     if (!isSupport) {
       var go = $("[data-pay-go]", body);
       if (go) {
         go.addEventListener("click", async function () {
           go.disabled = true;
-          go.textContent = "Создаём платёж…";
+          $("span", go).textContent = "Создаём платёж…";
           try {
             var planCode = Object.keys(PLAN_INFO).find(function (k) { return PLAN_INFO[k].name === info.name; }) || "month";
             var resp = await fetch("/api/platega/create", {
@@ -667,18 +739,18 @@
               window.location.href = data.payment_url;
             } else {
               go.disabled = false;
-              go.textContent = "Перейти к оплате";
+              $("span", go).textContent = "Перейти к оплате " + total + " ₽";
               toast(data.error || "Ошибка создания платежа", "bad");
             }
           } catch (e) {
             go.disabled = false;
-            go.textContent = "Перейти к оплате";
+            $("span", go).textContent = "Перейти к оплате " + total + " ₽";
             toast("Ошибка сети", "bad");
           }
         });
       }
     }
-
+  }
     m.hidden = false;
   }
 

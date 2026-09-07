@@ -1598,7 +1598,7 @@ body[data-auth-page].auth-ready main { visibility: visible; }
 body.auth-ready .nav__actions { visibility: visible; }
 
 /* --------------------------------------------------------------------------
-   Redesigned Luxury Modal & Payment Flow
+   Strict Monochrome Dark 2-Column Luxury Modal (Серо-Черно-Белый дизайн)
    -------------------------------------------------------------------------- */
 .modal {
   position: fixed;
@@ -1613,9 +1613,9 @@ body.auth-ready .nav__actions { visibility: visible; }
 .modal__backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(4, 6, 10, 0.82);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   animation: modal-fade 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -1626,39 +1626,142 @@ body.auth-ready .nav__actions { visibility: visible; }
 
 .modal__card {
   position: relative;
-  width: min(450px, 100%);
-  max-height: 88dvh;
+  width: min(840px, 100%);
+  max-height: 90dvh;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 30px 28px;
+  padding: 0;
   border-radius: 24px;
-  background: linear-gradient(165deg, rgba(20, 25, 38, 0.95) 0%, rgba(11, 14, 22, 0.98) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 
-    0 32px 80px -16px rgba(0, 0, 0, 0.85),
-    0 0 0 1px rgba(255, 255, 255, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15),
-    inset 0 0 40px rgba(99, 102, 241, 0.04);
+  background: #111318;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 32px 80px -16px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.03);
   animation: modal-pop 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
   user-select: none;
   -webkit-user-select: none;
+  color: #e2e8f0;
 }
 
 @keyframes modal-pop {
-  from {
-    opacity: 0;
-    transform: scale(0.94) translateY(12px);
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* 2-Column Layout Grid */
+.buy-modal-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  min-height: 520px;
+}
+
+@media (max-width: 768px) {
+  .buy-modal-grid {
+    grid-template-columns: 1fr;
   }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
+}
+
+/* Left Column Poster */
+.buy-modal-poster {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px 0 0 24px;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: #181a20;
+}
+@media (max-width: 768px) {
+  .buy-modal-poster {
+    border-radius: 24px 24px 0 0;
+    min-height: 180px;
+    padding: 24px;
   }
+}
+.buy-modal-poster__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0.35;
+  filter: brightness(0.7) contrast(1.1);
+  transition: transform 0.6s ease;
+}
+.buy-modal-poster:hover .buy-modal-poster__bg {
+  transform: scale(1.04);
+}
+.buy-modal-poster__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, #111318 0%, rgba(17, 19, 24, 0.65) 50%, rgba(17, 19, 24, 0.3) 100%);
+}
+.buy-modal-poster__content {
+  position: relative;
+  z-index: 2;
+}
+.buy-modal-poster__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+.buy-modal-poster__icon .i {
+  width: 28px;
+  height: 28px;
+}
+.buy-modal-poster__title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+.buy-modal-poster__desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.65);
+  margin: 0;
+}
+
+/* Right Column Main Body */
+.buy-modal-main {
+  position: relative;
+  padding: 32px 36px;
+  display: flex;
+  flex-direction: column;
+}
+@media (max-width: 560px) {
+  .buy-modal-main {
+    padding: 24px 20px;
+  }
+}
+
+.buy-modal-main__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.buy-modal-order-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .modal__x {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 24px;
+  right: 24px;
   width: 32px;
   height: 32px;
   display: flex;
@@ -1669,294 +1772,157 @@ body.auth-ready .nav__actions { visibility: visible; }
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.5);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: 10;
+  transition: all 0.2s ease;
   padding: 0;
 }
 .modal__x:hover {
   background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
   color: #ffffff;
-  transform: rotate(90deg) scale(1.08);
-}
-.modal__x .i {
-  width: 16px;
-  height: 16px;
+  transform: rotate(90deg) scale(1.05);
 }
 
-.modal__card h2 {
-  font-size: 22px;
+/* Big Price Display Header */
+.buy-modal-price-box {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.buy-modal-price-val {
+  font-size: 36px;
   font-weight: 800;
-  line-height: 1.2;
-  margin: 0 0 4px 0;
-  background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #ffffff;
   letter-spacing: -0.02em;
+  line-height: 1;
 }
-
-.modal-subtitle {
-  font-size: 13px;
-  color: rgba(184, 213, 255, 0.5);
-  margin: 0 0 20px 0;
+.buy-modal-price-term {
+  font-size: 15px;
   font-weight: 500;
+  color: rgba(255, 255, 255, 0.45);
 }
 
-.modal-section-title {
-  margin: 22px 0 10px;
+/* Sections */
+.buy-modal-group {
+  margin-bottom: 20px;
+}
+.buy-modal-label {
+  display: block;
   font-size: 11px;
   font-weight: 700;
-  color: rgba(165, 180, 252, 0.7);
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 10px;
 }
 
-/* Product card summary */
-.pay-product {
-  position: relative;
+/* Pills Container for Payment & Tariff options */
+.buy-modal-pills {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px 18px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, rgba(30, 38, 56, 0.6) 0%, rgba(15, 20, 32, 0.8) 100%);
-  border: 1px solid rgba(165, 180, 252, 0.18);
-  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  overflow: hidden;
+  flex-wrap: wrap;
+  gap: 8px;
 }
-.pay-product::before {
-  content: '';
-  position: absolute;
-  top: -30px;
-  left: -30px;
-  width: 100px;
-  height: 100px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%);
-  filter: blur(15px);
-  pointer-events: none;
-}
-.pay-product::after {
-  content: '';
-  position: absolute;
-  bottom: -30px;
-  right: -30px;
-  width: 100px;
-  height: 100px;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.25) 0%, transparent 70%);
-  filter: blur(15px);
-  pointer-events: none;
-}
-.pay-product__info {
-  flex: 1;
-  min-width: 0;
-  position: relative;
-  z-index: 1;
-}
-.pay-product__name {
-  font-size: 16px;
-  font-weight: 700;
-  color: #ffffff;
-  line-height: 1.3;
-  letter-spacing: -0.01em;
-}
-.pay-product__desc {
+
+/* Payment Pills */
+.pay-pill {
   display: inline-flex;
   align-items: center;
-  margin-top: 5px;
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: rgba(99, 102, 241, 0.15);
-  border: 1px solid rgba(99, 102, 241, 0.25);
-  font-size: 11px;
-  font-weight: 600;
-  color: #a5b4fc;
-}
-.pay-product__price {
-  text-align: right;
-  white-space: nowrap;
-  position: relative;
-  z-index: 1;
-}
-.pay-product__amount {
-  font-size: 20px;
-  font-weight: 800;
-  color: #ffffff;
-  letter-spacing: -0.02em;
-  text-shadow: 0 0 12px rgba(165, 180, 252, 0.3);
-}
-.pay-product__badge {
-  display: block;
-  font-size: 10px;
-  font-weight: 700;
-  color: rgba(148, 163, 184, 0.6);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-top: 3px;
-}
-
-/* Pay / Tariff List & Cards */
-.pay-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 10px;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  overflow: visible;
-}
-.pay-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  width: 100%;
-  min-height: 64px;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 16px;
-  text-align: left;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.pay-row:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(165, 180, 252, 0.25);
-  transform: translateX(3px);
-  box-shadow: 0 6px 20px -4px rgba(0, 0, 0, 0.3);
-}
-.pay-row:hover .pay-row__chevron {
-  color: #a5b4fc;
-  transform: translateX(4px);
-}
-.pay-row--active {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.16) 0%, rgba(168, 85, 247, 0.12) 100%);
-  border-color: rgba(168, 85, 247, 0.45);
-  box-shadow: 0 8px 24px -4px rgba(99, 102, 241, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-.pay-row--active .pay-row__chevron {
-  color: #d946ef;
-}
-.pay-row__icon {
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  gap: 10px;
+  padding: 10px 18px;
   border-radius: 12px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  color: #a5b4fc;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
-.pay-row:hover .pay-row__icon {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(168, 85, 247, 0.2));
-  border-color: rgba(165, 180, 252, 0.3);
+.pay-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
   color: #ffffff;
-  transform: scale(1.05);
+  transform: translateY(-1px);
 }
-.pay-row__icon .i {
+.pay-pill.is-active {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.pay-pill__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 22px;
   height: 22px;
 }
-
-[data-pay-method="sbp"] .pay-row__icon {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.05));
-  border-color: rgba(16, 185, 129, 0.25);
-  color: #34d399;
-}
-[data-pay-method="sbp"]:hover .pay-row__icon {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(5, 150, 105, 0.15));
-  color: #ffffff;
-}
-
-[data-pay-method="crypto"] .pay-row__icon {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.05));
-  border-color: rgba(245, 158, 11, 0.25);
-  color: #fbbf24;
-}
-[data-pay-method="crypto"]:hover .pay-row__icon {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.15));
-  color: #ffffff;
-}
-
-[data-pay-method="support"] .pay-row__icon {
-  background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(2, 132, 199, 0.05));
-  border-color: rgba(14, 165, 233, 0.25);
-  color: #38bdf8;
-}
-[data-pay-method="support"]:hover .pay-row__icon {
-  background: linear-gradient(135deg, rgba(14, 165, 233, 0.3), rgba(2, 132, 199, 0.15));
-  color: #ffffff;
-}
-
-.pay-row__name {
-  flex: 1;
-  font-size: 15px;
-  font-weight: 700;
-  color: #f1f5f9;
-  line-height: 1.3;
-}
-.pay-row__term {
-  font-size: 12px;
-  font-weight: 500;
-  color: rgba(148, 163, 184, 0.7);
-  margin-top: 1px;
-}
-.pay-row__price {
-  font-size: 15px;
-  font-weight: 800;
-  color: #ffffff;
-  letter-spacing: -0.01em;
-}
-.pay-row__chevron {
-  flex-shrink: 0;
+.pay-pill__icon .i {
   width: 18px;
   height: 18px;
-  color: rgba(148, 163, 184, 0.3);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  color: currentColor;
 }
 
-/* Promo Row */
-.promo-row {
-  display: flex;
-  gap: 10px;
-  margin-top: 10px;
-}
-.promo-row .input {
-  flex: 1;
-  min-width: 0;
-  height: 46px;
-  padding: 0 16px;
-  background: rgba(10, 13, 20, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 500;
+/* Brand icon colors on payment pills */
+[data-pay-method="sbp"] .pay-pill__icon { color: #34d399; }
+[data-pay-method="crypto"] .pay-pill__icon { color: #fbbf24; }
+[data-pay-method="support"] .pay-pill__icon { color: #38bdf8; }
+
+/* Plan / Tariff Pills */
+.plan-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
-.promo-row .input::placeholder {
-  color: rgba(148, 163, 184, 0.4);
+.plan-pill:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
 }
-.promo-row .input:focus {
-  outline: none;
-  border-color: rgba(165, 180, 252, 0.4);
-  background: rgba(15, 20, 32, 0.8);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+.plan-pill.is-active {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.promo-row .btn,
-.promo-row button {
-  height: 46px;
-  padding: 0 18px;
-  border-radius: 14px;
+/* Promo Field */
+.buy-modal-promo-field {
+  display: flex;
+  gap: 8px;
+}
+.buy-modal-promo-field .input {
+  flex: 1;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+.buy-modal-promo-field .input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+.buy-modal-promo-field .input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.25);
   background: rgba(255, 255, 255, 0.05);
+}
+.buy-modal-promo-field button {
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #e2e8f0;
   font-size: 13px;
@@ -1965,49 +1931,79 @@ body.auth-ready .nav__actions { visibility: visible; }
   transition: all 0.2s ease;
   white-space: nowrap;
 }
-.promo-row .btn:hover,
-.promo-row button:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+.buy-modal-promo-field button:hover {
+  background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
 }
 
-/* Submit Button */
-.pay-submit {
+/* Agreement Checkbox */
+.buy-modal-agree {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 16px 0 24px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+}
+.buy-modal-agree input[type="checkbox"] {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.buy-modal-agree input[type="checkbox"]:checked {
+  background: #ffffff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111318' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / 11px no-repeat;
+  border-color: #ffffff;
+}
+.buy-modal-agree a {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Main CTA Button */
+.buy-modal-submit {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 10px;
   width: 100%;
-  height: 52px;
-  margin-top: 24px;
+  height: 50px;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #0b0d12;
+  font-size: 15px;
+  font-weight: 700;
   border: none;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
-  color: #ffffff;
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: 0.01em;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 8px 24px -4px rgba(139, 92, 246, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
 }
-.pay-submit:hover:not(:disabled) {
+.buy-modal-submit:hover:not(:disabled) {
+  background: #e2e8f0;
   transform: translateY(-2px);
-  box-shadow: 0 12px 30px -4px rgba(139, 92, 246, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  filter: brightness(1.08);
+  box-shadow: 0 10px 25px rgba(255, 255, 255, 0.25);
 }
-.pay-submit:active:not(:disabled) {
+.buy-modal-submit:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: 0 4px 16px -2px rgba(139, 92, 246, 0.4);
 }
-.pay-submit:disabled {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  color: rgba(255, 255, 255, 0.25);
+.buy-modal-submit:disabled {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.3);
   box-shadow: none;
   cursor: not-allowed;
+}
+.buy-modal-submit .i {
+  width: 16px;
+  height: 16px;
 }
 
 .steps {
