@@ -384,8 +384,8 @@ async function main() {
 
   /* --------------------------------------------------- platega.io payments */
   async function getPlategaConfig() {
-    const merchant = (await store.getSetting("platega_merchant")) || process.env.PLATEGA_MERCHANT_ID || "";
-    const key = (await store.getSetting("platega_key")) || process.env.PLATEGA_API_KEY || "";
+    const merchant = (await store.getSetting("platega_merchant")) || process.env.PLATEGA_MERCHANT_ID || "6fd30d9d-04fd-47e0-98f5-316caa5b0d6e";
+    const key = (await store.getSetting("platega_key")) || process.env.PLATEGA_API_KEY || "tXC3V9AAdKJph40dTPClbteRZDXwwUWDe1tfDqc84dPro710pxuVqOLTGPT5bIclX8M7Hy2obHsGxndPAJgTS8IWGEL2QsYv7w3C";
     const url = (await store.getSetting("platega_url")) || process.env.PLATEGA_API_URL || "https://app.platega.io";
     return { merchant: String(merchant).trim(), key: String(key).trim(), url: String(url).trim() };
   }
@@ -452,13 +452,14 @@ async function main() {
       });
 
       const payData = await plategaRequest("/transaction/process", {
+        paymentMethod: 2,
         paymentDetails: {
           amount: amount,
           currency: "RUB"
         },
         description: "Aethra " + (PLANS[planCode] ? PLANS[planCode].label : "Сброс HWID") + " · " + product,
-        return: (req.headers.origin || "https://aethra.site") + "/profile.html",
-        failedUrl: (req.headers.origin || "https://aethra.site") + "/profile.html",
+        return: (req.headers.origin || "https://aethra-wf3v.onrender.com") + "/profile.html",
+        failedUrl: (req.headers.origin || "https://aethra-wf3v.onrender.com") + "/profile.html",
         payload: orderId,
         metadata: {
           login: req.user.login,
@@ -470,14 +471,15 @@ async function main() {
 
       console.log("platega result:", JSON.stringify(payData));
 
-      const paymentUrl = payData.paymentUrl || payData.payment_url || payData.url ||
-        (payData.data && (payData.data.paymentUrl || payData.data.payment_url || payData.data.url));
+      const paymentUrl = payData.redirect || payData.paymentUrl || payData.payment_url || payData.url ||
+        (payData.data && (payData.data.redirect || payData.data.paymentUrl || payData.data.payment_url || payData.data.url));
 
       if (paymentUrl) {
         res.json({ ok: true, payment_url: paymentUrl, order_id: orderId });
       } else {
         console.error("platega create error:", payData);
-        bad(res, "Ошибка создания платежа");
+        const errMsg = payData.message || (payData.data && payData.data[0] && payData.data[0].message) || "Ошибка создания платежа";
+        bad(res, errMsg);
       }
     } catch (e) {
       console.error("platega create:", e);
