@@ -2,7 +2,7 @@
 chcp 65001 >nul
 cd /d "%~dp0"
 title Aethra - сервер
-set "PORT=5177"
+set "PORT=8091"
 
 echo ==========================================
 echo    Aethra - локальный сервер

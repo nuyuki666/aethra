@@ -966,9 +966,9 @@
       });
     }
 
-    var downloadLoader = $("[data-download-loader]");
-    if (downloadLoader) {
-      downloadLoader.addEventListener("click", function (e) {
+    var downloadButtons = $$("[data-download-loader]");
+    downloadButtons.forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
         e.preventDefault();
         var t = S.hasToken();
         if (!t) {
@@ -978,7 +978,7 @@
         window.location.href = "/api/download/loader?t=" + encodeURIComponent(t);
         toast("Загрузка началась...");
       });
-    }
+    });
     
     updateSessionIcon();
   }

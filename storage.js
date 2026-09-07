@@ -121,6 +121,12 @@ class FileStore {
     this.persist();
   }
 
+  async deleteSessionsByLogin(login) {
+    const l = String(login || "").toLowerCase();
+    this.data.sessions = this.data.sessions.filter(s => s.login.toLowerCase() !== l);
+    this.persist();
+  }
+
   async getUserByToken(token) {
     const s = this.data.sessions.find(x => x.token === token);
     return s ? this.getUserByLogin(s.login) : null;
@@ -528,6 +534,10 @@ class PgStore {
 
   async deleteSession(token) {
     await this.pool.query("DELETE FROM sessions WHERE token = $1", [token]);
+  }
+
+  async deleteSessionsByLogin(login) {
+    await this.pool.query("DELETE FROM sessions WHERE LOWER(login) = LOWER($1)", [String(login)]);
   }
 
   async getUserByToken(token) {

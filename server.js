@@ -187,6 +187,52 @@ async function main() {
   app.use(cookieParser());
   app.use(express.json({ limit: "64kb" }));
 
+  /* ------------------------------------------------ anti-tamper & auto-ban */
+  async function isIpBanned(ip) {
+    if (!ip) return null;
+    const clean = String(ip).trim().toLowerCase().replace(/^::ffff:/, "");
+    if (clean === "127.0.0.1" || clean === "::1" || clean === "localhost") return null;
+    const all = await store.getAllUsers();
+    return all.find(u => {
+      if (!u.banned) return false;
+      const uIp = String(u.lastIp || "").trim().toLowerCase().replace(/^::ffff:/, "");
+      return uIp && uIp === clean;
+    }) || null;
+  }
+
+  async function isHwidBanned(hwid) {
+    if (!hwid) return null;
+    const clean = String(hwid).trim().toLowerCase();
+    const all = await store.getAllUsers();
+    return all.find(u => {
+      if (!u.banned) return false;
+      const uHwid = String(u.hwid || "").trim().toLowerCase();
+      return uHwid && uHwid === clean;
+    }) || null;
+  }
+
+  async function banUserAndHardware(login, reason, ip, hwid) {
+    if (!login) return;
+    const user = await store.getUserByLogin(login);
+    if (!user || user.role === "admin") return;
+
+    await store.updateUser(user.login, {
+      banned: true,
+      banReason: reason,
+      lifetime: false,
+      subUntil: null,
+      subMinecraft: null,
+      subCs2: null,
+      subVisual: null,
+      lastIp: ip || user.lastIp,
+      hwid: hwid || user.hwid
+    });
+    await store.addHistory(user.login, "АВТО-БАН: " + reason);
+    if (typeof store.deleteSessionsByLogin === "function") {
+      await store.deleteSessionsByLogin(user.login);
+    }
+  }
+
   /* ------------------------------------------------------------ auth utils */
   async function currentUser(req) {
     const headerToken = (req.headers.authorization || "").replace(/^Bearer\s+/i, "").trim();
@@ -236,6 +282,30 @@ async function main() {
       if ((await store.getAllUsers()).some(u => u.email.toLowerCase() === email.toLowerCase()))
         return bad(res, "Этот e-mail уже используется");
 
+      const ip = clientIp(req);
+      const bannedByIp = await isIpBanned(ip);
+      if (bannedByIp) {
+        await store.createUser({
+          login,
+          email,
+          passHash: hashPass(password),
+          role: "default",
+          banned: true,
+          banReason: `Попытка создания нового аккаунта с заблокированного IP (нарушитель ${bannedByIp.login})`,
+          lifetime: false,
+          subUntil: null,
+          regAt: Date.now(),
+          lastLogin: Date.now(),
+          lastIp: ip
+        });
+        await store.addHistory(login, `Авто-бан при регистрации: совпадение IP с нарушителем ${bannedByIp.login}`);
+        return res.status(403).json({
+          ok: false,
+          banned: true,
+          error: "Регистрация заблокирована: ваш IP-адрес связан с заблокированным нарушителем"
+        });
+      }
+
       const user = await store.createUser({
         login,
         email,
@@ -247,7 +317,7 @@ async function main() {
         subUntil: null,
         regAt: Date.now(),
         lastLogin: Date.now(),
-        lastIp: clientIp(req)
+        lastIp: ip
       });
 
       const token = newToken();
@@ -270,7 +340,18 @@ async function main() {
       const user = await store.getUserByLoginOrEmail(q);
       if (!user) return bad(res, "Неверный логин или пароль");
       if (user.banned) {
-        return res.status(403).json({ ok: false, banned: true, error: "Аккаунт заблокирован администратором" });
+        return res.status(403).json({ ok: false, banned: true, error: `Аккаунт заблокирован: ${user.banReason || "Нарушение правил"}` });
+      }
+
+      const ip = clientIp(req);
+      const bannedByIp = await isIpBanned(ip);
+      if (bannedByIp && user.role !== "admin") {
+        await banUserAndHardware(user.login, `Вход с заблокированного IP нарушителя ${bannedByIp.login}`, ip, user.hwid);
+        return res.status(403).json({
+          ok: false,
+          banned: true,
+          error: "Ваш аккаунт заблокирован: совпадение IP-адреса с заблокированным нарушителем"
+        });
       }
 
       await store.updateUser(user.login, { lastLogin: Date.now(), lastIp: clientIp(req) });
@@ -960,7 +1041,35 @@ async function main() {
       }
       const user = await store.getUserByLoginOrEmail(login);
       if (!user) return res.status(401).json({ ok: false, error: "Неверный логин или пароль" });
-      if (user.banned) return res.status(403).json({ ok: false, error: "Аккаунт заблокирован" });
+      if (user.banned) {
+        return res.status(403).json({ ok: false, banned: true, error: `Аккаунт заблокирован: ${user.banReason || "Нарушение правил"}` });
+      }
+
+      const ip = clientIp(req);
+      if (user.role !== "admin") {
+        if (hwid) {
+          const bannedByHwid = await isHwidBanned(hwid);
+          if (bannedByHwid) {
+            await banUserAndHardware(user.login, `Попытка обхода бана с нового аккаунта (аппаратный ID нарушителя ${bannedByHwid.login})`, ip, hwid);
+            return res.status(403).json({
+              ok: false,
+              banned: true,
+              error: `Ваш ПК заблокирован в системе (связан с нарушителем ${bannedByHwid.login}). Доступ аннулирован.`
+            });
+          }
+        }
+
+        const bannedByIp = await isIpBanned(ip);
+        if (bannedByIp) {
+          await banUserAndHardware(user.login, `Вход с заблокированного IP нарушителя ${bannedByIp.login}`, ip, hwid || user.hwid);
+          return res.status(403).json({
+            ok: false,
+            banned: true,
+            error: "Ваш IP-адрес связан с заблокированным нарушителем"
+          });
+        }
+      }
+
       if (!subActive(user)) return res.status(403).json({ ok: false, error: "Нет активной подписки. Купите ключ на сайте" });
 
       if (!user.hwid) {
@@ -974,7 +1083,7 @@ async function main() {
         });
       }
 
-      await store.updateUser(user.login, { lastLogin: Date.now(), lastIp: clientIp(req) });
+      await store.updateUser(user.login, { lastLogin: Date.now(), lastIp: ip });
       const token = crypto.randomBytes(32).toString("hex");
       await store.createSession(token, user.login);
       
@@ -1032,8 +1141,34 @@ async function main() {
       const user = token ? await store.getUserByToken(token) : null;
       if (!user) return res.status(401).json({ ok: false, error: "Сессия истекла" });
       if (user.banned) {
-        return res.status(403).json({ ok: false, error: "Аккаунт заблокирован" });
+        return res.status(403).json({ ok: false, banned: true, error: `Аккаунт заблокирован: ${user.banReason || "Нарушение правил"}` });
       }
+
+      const ip = clientIp(req);
+      if (user.role !== "admin") {
+        if (hwid) {
+          const bannedByHwid = await isHwidBanned(hwid);
+          if (bannedByHwid) {
+            await banUserAndHardware(user.login, `Попытка обхода бана с нового аккаунта (аппаратный ID нарушителя ${bannedByHwid.login})`, ip, hwid);
+            return res.status(403).json({
+              ok: false,
+              banned: true,
+              error: `Ваш ПК заблокирован в системе (связан с нарушителем ${bannedByHwid.login}). Доступ аннулирован.`
+            });
+          }
+        }
+
+        const bannedByIp = await isIpBanned(ip);
+        if (bannedByIp) {
+          await banUserAndHardware(user.login, `Вход с заблокированного IP нарушителя ${bannedByIp.login}`, ip, hwid || user.hwid);
+          return res.status(403).json({
+            ok: false,
+            banned: true,
+            error: "Ваш IP-адрес связан с заблокированным нарушителем"
+          });
+        }
+      }
+
       if (!subActive(user)) return res.status(403).json({ ok: false, error: "Нет активной подписки" });
       if (user.hwid && user.hwid !== hwid) {
         return res.status(403).json({ ok: false, hwidMismatch: true, error: "HWID не совпадает" });
@@ -1042,7 +1177,7 @@ async function main() {
         await store.updateUser(user.login, { hwid });
         await store.addHistory(user.login, "HWID привязан через лоадер");
       }
-      await store.updateUser(user.login, { lastLogin: Date.now(), lastIp: clientIp(req) });
+      await store.updateUser(user.login, { lastLogin: Date.now(), lastIp: ip });
 
       const now = Date.now();
       const isMcActive = Boolean(user.role === "admin" || user.lifetime || (user.subMinecraft && user.subMinecraft > now) || (user.subUntil && user.subUntil > now));
@@ -1081,7 +1216,19 @@ async function main() {
       const hwid = String((req.body && req.body.hwid) || "").trim().slice(0, 80);
       const user = token ? await store.getUserByToken(token) : null;
       if (!user) return res.status(401).json({ ok: false, status: 1, error: "Сессия истекла", licenses: [] });
-      if (user.banned) return res.status(403).json({ ok: false, status: 1, error: "Аккаунт заблокирован", licenses: [] });
+      if (user.banned) return res.status(403).json({ ok: false, status: 1, banned: true, error: "Аккаунт заблокирован", licenses: [] });
+
+      const ip = clientIp(req);
+      if (user.role !== "admin") {
+        if (hwid) {
+          const bannedByHwid = await isHwidBanned(hwid);
+          if (bannedByHwid) {
+            await banUserAndHardware(user.login, `Попытка проверки лицензии с заблокированного железа (${bannedByHwid.login})`, ip, hwid);
+            return res.status(403).json({ ok: false, status: 1, banned: true, error: "Железо заблокировано", licenses: [] });
+          }
+        }
+      }
+
       if (user.hwid && hwid && user.hwid !== hwid) {
         return res.status(403).json({ ok: false, status: 1, hwidMismatch: true, error: "HWID не совпадает", licenses: [] });
       }
@@ -1133,7 +1280,24 @@ async function main() {
       const hwid = String((req.body && req.body.hwid) || "").trim().slice(0, 80);
       const user = token ? await store.getUserByToken(token) : null;
       if (!user) return res.status(401).json({ ok: false, error: "Сессия истекла" });
-      if (user.banned) return res.status(403).json({ ok: false, error: "Аккаунт заблокирован" });
+      if (user.banned) return res.status(403).json({ ok: false, banned: true, error: "Аккаунт заблокирован" });
+
+      const ip = clientIp(req);
+      if (user.role !== "admin") {
+        if (hwid) {
+          const bannedByHwid = await isHwidBanned(hwid);
+          if (bannedByHwid) {
+            await banUserAndHardware(user.login, `Попытка получения тикета с заблокированного железа (${bannedByHwid.login})`, ip, hwid);
+            return res.status(403).json({ ok: false, banned: true, error: "Железо заблокировано" });
+          }
+        }
+        const bannedByIp = await isIpBanned(ip);
+        if (bannedByIp) {
+          await banUserAndHardware(user.login, `Попытка получения тикета с заблокированного IP (${bannedByIp.login})`, ip, hwid || user.hwid);
+          return res.status(403).json({ ok: false, banned: true, error: "IP заблокирован" });
+        }
+      }
+
       if (user.hwid && hwid && user.hwid !== hwid) {
         return res.status(403).json({ ok: false, error: "HWID не совпадает" });
       }
@@ -1159,7 +1323,24 @@ async function main() {
       const hwid = String((req.body && req.body.hwid) || "").trim().slice(0, 80);
       const user = token ? await store.getUserByToken(token) : null;
       if (!user) return res.status(401).json({ ok: false, error: "Сессия истекла" });
-      if (user.banned) return res.status(403).json({ ok: false, error: "Аккаунт заблокирован" });
+      if (user.banned) return res.status(403).json({ ok: false, banned: true, error: "Аккаунт заблокирован" });
+
+      const ip = clientIp(req);
+      if (user.role !== "admin") {
+        if (hwid) {
+          const bannedByHwid = await isHwidBanned(hwid);
+          if (bannedByHwid) {
+            await banUserAndHardware(user.login, `Попытка скачивания клиента с заблокированного железа (${bannedByHwid.login})`, ip, hwid);
+            return res.status(403).json({ ok: false, banned: true, error: "Железо заблокировано" });
+          }
+        }
+        const bannedByIp = await isIpBanned(ip);
+        if (bannedByIp) {
+          await banUserAndHardware(user.login, `Попытка скачивания клиента с заблокированного IP (${bannedByIp.login})`, ip, hwid || user.hwid);
+          return res.status(403).json({ ok: false, banned: true, error: "IP заблокирован" });
+        }
+      }
+
       if (user.hwid && hwid && user.hwid !== hwid) {
         return res.status(403).json({ ok: false, error: "HWID не совпадает" });
       }
@@ -1199,6 +1380,48 @@ async function main() {
     }
   });
 
+  /* ------------------------------------------------ security alert from loader */
+  app.post("/api/loader/security-alert", async (req, res) => {
+    try {
+      const token = String((req.body && req.body.token) || "").trim();
+      const hwid = String((req.body && req.body.hwid) || "").trim().slice(0, 80);
+      const reason = String((req.body && req.body.reason) || "Попытка дампинга / отладки клиента").slice(0, 200);
+      const ip = clientIp(req);
+
+      console.warn(`[SECURITY ALERT] IP: ${ip}, HWID: ${hwid}, Token: ${token ? "yes" : "no"}, Reason: ${reason}`);
+
+      let targetUser = null;
+      if (token) {
+        targetUser = await store.getUserByToken(token);
+      }
+      if (!targetUser && hwid) {
+        const all = await store.getAllUsers();
+        targetUser = all.find(u => u.hwid && u.hwid.toLowerCase() === hwid.toLowerCase());
+      }
+
+      if (targetUser) {
+        if (targetUser.role === "admin") {
+          console.log(`[SECURITY ALERT] Admin account ${targetUser.login} bypassed ban.`);
+          return res.json({ ok: true, admin: true });
+        }
+        await banUserAndHardware(targetUser.login, `Авто-бан сторожа безопасности: ${reason}`, ip, hwid || targetUser.hwid);
+        console.warn(`[SECURITY ALERT] BANNED user: ${targetUser.login}, IP: ${ip}, HWID: ${hwid}`);
+      } else if (hwid) {
+        const all = await store.getAllUsers();
+        for (const u of all) {
+          if (u.role !== "admin" && u.hwid && u.hwid.toLowerCase() === hwid.toLowerCase()) {
+            await banUserAndHardware(u.login, `Авто-бан по аппаратным следам взлома (${reason})`, ip, hwid);
+          }
+        }
+      }
+
+      res.json({ ok: true, banned: true });
+    } catch (e) {
+      console.error("[SECURITY ALERT] Error:", e);
+      res.status(500).json({ ok: false, error: "Internal error" });
+    }
+  });
+
   app.get("/api/loader/info", requireAuth(async (req, res) => {
     const u = req.user;
     res.json({
@@ -1207,9 +1430,7 @@ async function main() {
       hwidMasked: u.hwid ? maskHwid(u.hwid) : "",
       resetsLeft: Math.max(0, HWID_RESET_LIMIT - (u.hwidResets || 0)),
       resetLimit: HWID_RESET_LIMIT,
-      subActive: subActive(u),
-      lifetime: !!u.lifetime,
-      subUntil: u.subUntil
+      downloadsAvailable: subActive(u)
     });
   }));
 
@@ -1237,6 +1458,24 @@ async function main() {
       const token = String(req.query.t || "");
       const user = token ? await store.getUserByToken(token) : null;
       if (!user) return res.status(401).json({ ok: false, error: "Нужно войти в аккаунт" });
+      if (user.banned) return res.status(403).json({ ok: false, banned: true, error: "Аккаунт заблокирован" });
+
+      const ip = clientIp(req);
+      if (user.role !== "admin") {
+        const bannedByIp = await isIpBanned(ip);
+        if (bannedByIp) {
+          await banUserAndHardware(user.login, `Скачивание лоадера с заблокированного IP (${bannedByIp.login})`, ip, user.hwid);
+          return res.status(403).json({ ok: false, banned: true, error: "IP-адрес заблокирован" });
+        }
+        if (user.hwid) {
+          const bannedByHwid = await isHwidBanned(user.hwid);
+          if (bannedByHwid) {
+            await banUserAndHardware(user.login, `Скачивание лоадера с заблокированного железа (${bannedByHwid.login})`, ip, user.hwid);
+            return res.status(403).json({ ok: false, banned: true, error: "Железо заблокировано" });
+          }
+        }
+      }
+
       if (!subActive(user)) return res.status(403).json({ ok: false, error: "Нужна активная подписка" });
       if (!fs.existsSync(LOADER_FILE)) {
         return res.status(404).json({ ok: false, error: "Файл лоадера пока не загружен администратором" });
