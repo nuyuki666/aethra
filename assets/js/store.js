@@ -163,7 +163,7 @@
     },
     makePromos: async function (percent, count, maxUses, product, customCode) {
       var r = await api("/admin/promos", { percent: percent, count: parseInt(count, 10), maxUses: parseInt(maxUses, 10) || 0, product: product || "all", customCode: customCode || "" });
-      return r && r.ok ? r : { ok: false, codes: [] };
+      return r && r.ok ? r : { ok: false, error: (r && r.error) || "Не удалось создать промокоды", codes: [] };
     },
     removePromo: async function (code) {
       var r = await api("/admin/promos/delete", { code: code });

@@ -389,7 +389,7 @@
         var r = await S.makePromos(percent, count, maxUses, product, customCode);
         var productName = product === "all" ? "все товары" : product.toUpperCase();
         if (r.ok) toast("Создано промокодов: " + r.codes.length + " (−" + percent + "%, " + productName + ", " + (maxUses || "∞") + " акт.)");
-        else toast("Не удалось создать промокоды", "bad");
+        else toast(r.error || "Не удалось создать промокоды", "bad");
         await renderPromos();
       });
     }

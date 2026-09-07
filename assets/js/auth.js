@@ -198,9 +198,36 @@
     }
   }
 
+  function injectAdminLink(me) {
+    if (!me || me.role !== "admin") return;
+    var links = $(".nav__links");
+    if (links && !$('a[href="admin.html"]', links)) {
+      var li = document.createElement("li");
+      li.innerHTML = '<a class="nav__link" href="admin.html"><svg class="i"><use href="#i-shield"></use></svg>Админка</a>';
+      links.appendChild(li);
+    }
+    var sheetLinks = $(".nav__sheet-links");
+    if (sheetLinks && !$('a[href="admin.html"]', sheetLinks)) {
+      var a = document.createElement("a");
+      a.className = "nav__sheet-link";
+      a.href = "admin.html";
+      a.innerHTML = '<svg class="i"><use href="#i-shield"></use></svg>Админка';
+      sheetLinks.appendChild(a);
+    }
+  }
+
   /* ------------------------------------------------------------- redirects */
   async function handleGuards() {
     var page = document.body.dataset.authPage;
+
+    if (page === "admin") {
+      var meAdmin = await S.current();
+      if (!meAdmin || meAdmin.role !== "admin") {
+        location.replace("login.html");
+        return null;
+      }
+      return meAdmin;
+    }
 
     if (page === "login" || page === "register" || page === "profile") {
       var me0 = await S.current();
