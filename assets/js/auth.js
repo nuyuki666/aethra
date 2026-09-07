@@ -16,10 +16,10 @@
     platega: "https://my.platega.io/"
   };
   var PLAN_INFO = {
-    week: { name: "Неделя", price: "100 ₽", term: "7 дней" },
-    month: { name: "Месяц", price: "300 ₽", term: "30 дней" },
-    life: { name: "Навсегда", price: "450 ₽", term: "бессрочно" },
-    "hwid-reset": { name: "Сброс HWID", price: "200 ₽", term: "разовая услуга" }
+    month: { name: "30 дней", price: "349 ₽", term: "30 дней" },
+    quarter: { name: "90 дней", price: "499 ₽", term: "90 дней" },
+    life: { name: "Навсегда", price: "599 ₽", term: "бессрочно" },
+    "hwid-reset": { name: "Сброс HWID", price: "349 ₽", term: "разовая услуга" }
   };
   var PRODUCTS = {
     cs2: { name: "Aethra CS2", desc: "DLC для Counter-Strike 2", img: "/images.jpg" },
@@ -481,10 +481,30 @@
     m.innerHTML =
       '<div class="modal__backdrop" data-modal-close></div>' +
       '<div class="modal__card" role="dialog" aria-modal="true" aria-label="Покупка подписки">' +
-      '<button class="btn btn--quiet btn--sm modal__x" type="button" data-modal-close aria-label="Закрыть">' +
-      '<svg class="i"><use href="#i-close"></use></svg></button>' +
+      '<button class="modal__x" type="button" data-modal-close aria-label="Закрыть">' +
+      '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>' +
+      '</button>' +
       '<div data-modal-body></div></div>';
     document.body.appendChild(m);
+
+    var closeBtn = m.querySelector(".modal__x");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeModal();
+      });
+    }
+
+    var backdrop = m.querySelector(".modal__backdrop");
+    if (backdrop) {
+      backdrop.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeModal();
+      });
+    }
+
     m.addEventListener("click", function (e) {
       if (e.target.closest("[data-modal-close]")) closeModal();
     });
@@ -507,7 +527,7 @@
   }
 
   function openBuyModal(planCode, productCode) {
-    openBuyModalWithProduct(productCode || "minecraft", planCode || "week");
+    openBuyModalWithProduct(productCode || "minecraft", planCode || "month");
   }
 
   function openBuyModalWithProduct(productCode, initialPlanCode) {
@@ -516,13 +536,13 @@
     var body = $("[data-modal-body]", m);
     var product = PRODUCTS[productCode] || PRODUCTS["minecraft"];
 
-    var currentPlan = initialPlanCode && PLAN_INFO[initialPlanCode] ? initialPlanCode : "week";
+    var currentPlan = initialPlanCode && PLAN_INFO[initialPlanCode] ? initialPlanCode : "month";
     var selectedMethod = null;
     var promo = { code: "", percent: 0 };
     var agreed = true;
 
     function renderModal() {
-      var planObj = PLAN_INFO[currentPlan] || PLAN_INFO["week"];
+      var planObj = PLAN_INFO[currentPlan] || PLAN_INFO["month"];
       var basePrice = parseInt(planObj.price, 10) || 0;
       var finalPriceAmt = basePrice;
       if (promo.percent > 0) {
@@ -548,10 +568,10 @@
       }).join("");
 
       var planDesc = "Доступ к клиенту и всем последующим обновлениям на выбранный период.";
-      if (currentPlan === "week") {
-        planDesc = "Доступ к клиенту и всем обновлениям на 7 дней.";
-      } else if (currentPlan === "month") {
+      if (currentPlan === "month") {
         planDesc = "Доступ к клиенту и всем обновлениям на 30 дней.";
+      } else if (currentPlan === "quarter") {
+        planDesc = "Доступ к клиенту и всем обновлениям на 90 дней.";
       } else if (currentPlan === "life") {
         planDesc = "Бессрочный доступ к клиенту и всем будущим обновлениям.";
       } else if (currentPlan === "hwid-reset") {
@@ -722,8 +742,8 @@
 
       if (posterDesc) {
         var newDesc = "Доступ к клиенту и всем последующим обновлениям на выбранный период.";
-        if (currentPlan === "week") newDesc = "Доступ к клиенту и всем обновлениям на 7 дней.";
-        else if (currentPlan === "month") newDesc = "Доступ к клиенту и всем обновлениям на 30 дней.";
+        if (currentPlan === "month") newDesc = "Доступ к клиенту и всем обновлениям на 30 дней.";
+        else if (currentPlan === "quarter") newDesc = "Доступ к клиенту и всем обновлениям на 90 дней.";
         else if (currentPlan === "life") newDesc = "Бессрочный доступ к клиенту и всем будущим обновлениям.";
         else if (currentPlan === "hwid-reset") newDesc = "Разовая услуга сброса привязки оборудования (HWID).";
 

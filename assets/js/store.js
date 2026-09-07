@@ -7,8 +7,8 @@
   var TOKEN_KEY = "aethra_token";
 
   var PLANS = {
-    week: { label: "Неделя", days: 7 },
-    month: { label: "Месяц", days: 30 },
+    month: { label: "30 дней", days: 30 },
+    quarter: { label: "90 дней", days: 90 },
     life: { label: "Навсегда", days: null }
   };
 

@@ -11,9 +11,10 @@ const PORT = process.env.PORT || 5177;
 const DAY = 86400000;
 const ADMIN_LOGIN = "elyww";
 const PLANS = {
-  week: { label: "Неделя", days: 7 },
-  month: { label: "Месяц", days: 30 },
-  life: { label: "Навсегда", days: null }
+  month: { label: "30 дней", days: 30 },
+  quarter: { label: "90 дней", days: 90 },
+  life: { label: "Навсегда", days: null },
+  week: { label: "7 дней", days: 7 }
 };
 const KEY_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 const LOGIN_RE = /^[a-zA-Z0-9_.-]{3,32}$/;
@@ -606,8 +607,8 @@ async function main() {
       if (!PLANS[planCode] && planCode !== "hwid-reset") return bad(res, "Неизвестный тариф");
       if (!["cs2", "minecraft", "visual"].includes(product)) return bad(res, "Неизвестный товар");
 
-      const amounts = { week: 100, month: 300, life: 450, "hwid-reset": 200 };
-      var amount = amounts[planCode] || 300;
+      const amounts = { month: 349, quarter: 499, life: 599, "hwid-reset": 349 };
+      var amount = amounts[planCode] || 349;
 
       // Применяем скидку от промокода если передана
       if (promoCode && clientAmount > 0 && clientAmount < amount) {

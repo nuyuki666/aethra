@@ -1750,13 +1750,13 @@ body.auth-ready .nav__actions { visibility: visible; }
 /* Right Column Main Body */
 .buy-modal-main {
   position: relative;
-  padding: 32px 36px;
+  padding: 32px 56px 32px 36px;
   display: flex;
   flex-direction: column;
 }
 @media (max-width: 560px) {
   .buy-modal-main {
-    padding: 24px 20px;
+    padding: 24px 48px 24px 20px;
   }
 }
 
@@ -1777,25 +1777,42 @@ body.auth-ready .nav__actions { visibility: visible; }
 
 .modal__x {
   position: absolute;
-  top: 24px;
-  right: 24px;
-  width: 32px;
-  height: 32px;
+  top: 20px;
+  right: 20px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   padding: 0;
+  z-index: 100;
+  pointer-events: auto;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.modal__x svg {
+  pointer-events: none;
+  transition: transform 0.22s ease;
 }
 .modal__x:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.32);
   color: #ffffff;
-  transform: rotate(90deg) scale(1.05);
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+.modal__x:hover svg {
+  transform: rotate(90deg);
+}
+.modal__x:active {
+  transform: scale(0.92);
 }
 
 /* Big Price Display Header */
