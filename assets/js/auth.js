@@ -138,7 +138,7 @@
     });
     $$("[data-user-name]").forEach(function (el) { el.textContent = me.login; });
     $$("[data-user-meta]").forEach(function (el) {
-      el.textContent = "Роль: " + (me.role === "admin" ? "Admin" : "Default") + " · ID " + me.id;
+      el.textContent = "Роль: " + (me.role === "admin" ? "Admin" : "Default") + " · UID " + me.id;
     });
 
     var role = me.role === "admin" ? "Admin" : "Default";

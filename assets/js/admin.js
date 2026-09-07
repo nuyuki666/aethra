@@ -141,6 +141,7 @@
         actions.push(u.banned
           ? '<button class="btn btn--ghost btn--xs" data-act="unban" data-login="' + esc(u.login) + '">Разбан</button>'
           : '<button class="btn btn--danger btn--xs" data-act="ban" data-login="' + esc(u.login) + '">Бан</button>');
+        actions.push('<button class="btn btn--danger btn--xs" data-act="delete" data-login="' + esc(u.login) + '" title="Удалить аккаунт навсегда"><svg class="i" style="width:12px;height:12px"><use href="#i-trash"></use></svg></button>');
       } else {
         actions.push('<span class="badge badge--ok">Это вы · админ</span>');
       }
@@ -192,6 +193,11 @@
         } else if (act === "unban") {
           res = await S.unban(login);
           msg = login + ": блокировка снята";
+        } else if (act === "delete") {
+          var confirmed = confirm("Вы уверены, что хотите навсегда удалить аккаунт «" + login + "»?\n\nВсе данные пользователя, сессии и подписки будут стёрты.");
+          if (!confirmed) return;
+          res = await S.deleteUser(login);
+          msg = login + ": аккаунт удалён";
         } else if (act === "custom") {
           var days = prompt("Сколько дней подписки выдать «" + login + "»?", "14");
           if (days == null) return;
@@ -469,7 +475,7 @@
     body.innerHTML = logs.map(function (log) {
       return '<tr>' +
         '<td class="mono">' + S.fmtDateTime(log.at) + "</td>" +
-        '<td><b>' + esc(log.login) + "</b> <span class='text-dim'>ID " + log.userId + "</span></td>" +
+        '<td><b>' + esc(log.login) + "</b> <span class='text-dim'>UID " + log.userId + "</span></td>" +
         '<td class="mono">' + esc(log.key) + "</td>" +
         '<td>' + esc(log.plan) + " <span class='text-dim'>(" + (log.days === null ? "навсегда" : log.days + " дн.") + ")</span></td>" +
         '<td class="mono text-dim">' + esc(log.ip || "—") + "</td>" +

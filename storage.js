@@ -87,6 +87,20 @@ class FileStore {
     return this.pub(u);
   }
 
+  async deleteUser(login) {
+    const l = String(login || "").toLowerCase();
+    const before = this.data.users.length;
+    this.data.users = this.data.users.filter(x => x.login.toLowerCase() !== l);
+    this.data.sessions = this.data.sessions.filter(s => s.login.toLowerCase() !== l);
+    if (this.data.history) {
+      delete this.data.history[login];
+      delete this.data.history[l];
+    }
+    const removed = this.data.users.length < before;
+    if (removed) this.persist();
+    return removed;
+  }
+
   async addHistory(login, label) {
     const h = this.data.history[login] || (this.data.history[login] = []);
     h.unshift({ at: Date.now(), label: String(label) });
@@ -487,6 +501,15 @@ class PgStore {
     if (!res.rows[0]) return null;
     const rows = await this._userRows("WHERE id = $1", [res.rows[0].id]);
     return rows[0];
+  }
+
+  async deleteUser(login) {
+    const l = String(login || "").trim();
+    await this.pool.query("DELETE FROM sessions WHERE LOWER(login) = LOWER($1)", [l]);
+    await this.pool.query("DELETE FROM history WHERE LOWER(login) = LOWER($1)", [l]);
+    await this.pool.query("DELETE FROM pending_payments WHERE LOWER(login) = LOWER($1)", [l]);
+    const res = await this.pool.query("DELETE FROM users WHERE LOWER(login) = LOWER($1)", [l]);
+    return res.rowCount > 0;
   }
 
   async addHistory(login, label) {

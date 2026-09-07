@@ -983,6 +983,29 @@ async function main() {
     res.json({ ok: true, users: await store.getAllUsers() });
   }));
 
+  app.post("/api/admin/users/delete", requireAdmin(async (req, res) => {
+    try {
+      const login = String((req.body && req.body.login) || "").trim();
+      if (!login) return bad(res, "Укажите логин пользователя");
+      if (login.toLowerCase() === ADMIN_LOGIN.toLowerCase()) {
+        return bad(res, "Нельзя удалить главного администратора");
+      }
+      if (login.toLowerCase() === req.user.login.toLowerCase()) {
+        return bad(res, "Нельзя удалить собственный аккаунт");
+      }
+      const user = await store.getUserByLogin(login);
+      if (!user) return bad(res, "Пользователь не найден");
+      if (user.role === "admin") return bad(res, "Нельзя удалить администратора");
+
+      const removed = await store.deleteUser(login);
+      if (!removed) return bad(res, "Не удалось удалить пользователя");
+      res.json({ ok: true });
+    } catch (e) {
+      console.error("delete user error:", e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  }));
+
   app.get("/api/admin/keys", requireAdmin(async (req, res) => {
     res.json({ ok: true, keys: await store.getAllKeys() });
   }));

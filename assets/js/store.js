@@ -193,6 +193,9 @@
     unban: function (login) {
       return api("/admin/unban", { login: login });
     },
+    deleteUser: function (login) {
+      return api("/admin/users/delete", { login: login });
+    },
 
     makeKeys: async function (plan, count, maxUses, days) {
       var r = await api("/admin/keys", {
