@@ -239,16 +239,23 @@ class FileStore {
   }
 
   async upsertPendingPayment(order) {
-    this.data.pendingPayments.push(order);
+    const idx = this.data.pendingPayments.findIndex(p => p.orderId === order.orderId);
+    if (idx >= 0) {
+      this.data.pendingPayments[idx] = Object.assign({}, this.data.pendingPayments[idx], order);
+    } else {
+      this.data.pendingPayments.push(order);
+    }
     this.persist();
   }
 
-  async getPendingPayment(orderId) {
-    return this.data.pendingPayments.find(p => p.orderId === orderId) || null;
+  async getPendingPayment(id) {
+    if (!id) return null;
+    return this.data.pendingPayments.find(p => p.orderId === id || (p.transactionId && p.transactionId === id)) || null;
   }
 
-  async completePendingPayment(orderId) {
-    const p = this.data.pendingPayments.find(x => x.orderId === orderId);
+  async completePendingPayment(id) {
+    if (!id) return;
+    const p = this.data.pendingPayments.find(x => x.orderId === id || (x.transactionId && x.transactionId === id));
     if (p) { p.completed = true; this.persist(); }
   }
 
@@ -346,6 +353,7 @@ class PgStore {
     
     await this.pool.query(`CREATE TABLE IF NOT EXISTS pending_payments (
       order_id TEXT PRIMARY KEY,
+      transaction_id TEXT DEFAULT '',
       login TEXT NOT NULL,
       plan TEXT NOT NULL,
       product TEXT NOT NULL,
@@ -354,6 +362,9 @@ class PgStore {
       created_at BIGINT NOT NULL,
       completed BOOLEAN NOT NULL DEFAULT FALSE
     )`);
+    try {
+      await this.pool.query("ALTER TABLE pending_payments ADD COLUMN IF NOT EXISTS transaction_id TEXT DEFAULT ''");
+    } catch (_) {}
 
     await this.pool.query(`CREATE TABLE IF NOT EXISTS settings (
       key TEXT PRIMARY KEY,
@@ -635,20 +646,51 @@ class PgStore {
     return res.rowCount > 0;
   }
 
+  mapPending(r) {
+    if (!r) return null;
+    return {
+      orderId: r.order_id,
+      transactionId: r.transaction_id || "",
+      login: r.login,
+      plan: r.plan,
+      product: r.product,
+      amount: Number(r.amount),
+      method: r.method,
+      createdAt: Number(r.created_at),
+      completed: !!r.completed
+    };
+  }
+
   async upsertPendingPayment(order) {
     await this.pool.query(
-      "INSERT INTO pending_payments (order_id, login, plan, product, amount, method, created_at) VALUES ($1,$2,$3,$4,$5,$6,$7)",
-      [order.orderId, order.login, order.plan, order.product, order.amount, order.method || "", order.createdAt]
+      `INSERT INTO pending_payments (order_id, transaction_id, login, plan, product, amount, method, created_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+       ON CONFLICT (order_id) DO UPDATE SET
+         transaction_id = CASE WHEN EXCLUDED.transaction_id <> '' THEN EXCLUDED.transaction_id ELSE pending_payments.transaction_id END,
+         login = EXCLUDED.login,
+         plan = EXCLUDED.plan,
+         product = EXCLUDED.product,
+         amount = EXCLUDED.amount,
+         method = EXCLUDED.method`,
+      [order.orderId, order.transactionId || "", order.login, order.plan, order.product, order.amount, order.method || "", order.createdAt]
     );
   }
 
-  async getPendingPayment(orderId) {
-    const res = await this.pool.query("SELECT * FROM pending_payments WHERE order_id = $1", [orderId]);
-    return res.rows[0] || null;
+  async getPendingPayment(id) {
+    if (!id) return null;
+    const res = await this.pool.query(
+      "SELECT * FROM pending_payments WHERE order_id = $1 OR transaction_id = $1 LIMIT 1",
+      [String(id)]
+    );
+    return res.rows[0] ? this.mapPending(res.rows[0]) : null;
   }
 
-  async completePendingPayment(orderId) {
-    await this.pool.query("UPDATE pending_payments SET completed = TRUE WHERE order_id = $1", [orderId]);
+  async completePendingPayment(id) {
+    if (!id) return;
+    await this.pool.query(
+      "UPDATE pending_payments SET completed = TRUE WHERE order_id = $1 OR transaction_id = $1",
+      [String(id)]
+    );
   }
 
   async getSetting(key) {

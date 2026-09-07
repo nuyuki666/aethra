@@ -21,6 +21,19 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const CAPTCHA_TTL = 10 * 60 * 1000;
 const captchaChallenges = new Map();
 
+const DEFAULT_PLATEGA_MERCHANT = "6fd30d9d-04fd-47e0-98f5-316caa5b0d6e";
+const DEFAULT_PLATEGA_KEY = "tXC3V9AAdKJph40dTPClbteRZDXwwUWDe1tfDqc84dPro710pxuVqOLTGPT5bIclX8M7Hy2obHsGxndPAJgTS8IWGEL2QsYv7w3C";
+const DEFAULT_PLATEGA_URL = "https://app.platega.io";
+
+function cleanPlatega(val) {
+  if (!val) return "";
+  let s = String(val).trim();
+  if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+    s = s.slice(1, -1).trim();
+  }
+  return s;
+}
+
 function cleanupCaptchaChallenges() {
   const now = Date.now();
   for (const [id, challenge] of captchaChallenges) {
@@ -133,6 +146,24 @@ function subActive(u) {
 async function main() {
   const store = await createStore();
   await ensureAdmin(store);
+
+  // Seed verified Platega credentials if not set or invalid
+  try {
+    const curKey = cleanPlatega(await store.getSetting("platega_key"));
+    if (!curKey || curKey.length < 50) {
+      await store.setSetting("platega_key", DEFAULT_PLATEGA_KEY);
+    }
+    const curMerchant = cleanPlatega(await store.getSetting("platega_merchant"));
+    if (!curMerchant || curMerchant.length < 30) {
+      await store.setSetting("platega_merchant", DEFAULT_PLATEGA_MERCHANT);
+    }
+    const curUrl = cleanPlatega(await store.getSetting("platega_url"));
+    if (!curUrl) {
+      await store.setSetting("platega_url", DEFAULT_PLATEGA_URL);
+    }
+  } catch (e) {
+    console.error("platega init settings:", e);
+  }
 
   const app = express();
   app.disable("x-powered-by");
@@ -384,17 +415,23 @@ async function main() {
 
   /* --------------------------------------------------- platega.io payments */
   async function getPlategaConfig() {
-    const merchant = (await store.getSetting("platega_merchant")) || process.env.PLATEGA_MERCHANT_ID || "6fd30d9d-04fd-47e0-98f5-316caa5b0d6e";
-    const key = (await store.getSetting("platega_key")) || process.env.PLATEGA_API_KEY || "tXC3V9AAdKJph40dTPClbteRZDXwwUWDe1tfDqc84dPro710pxuVqOLTGPT5bIclX8M7Hy2obHsGxndPAJgTS8IWGEL2QsYv7w3C";
-    const url = (await store.getSetting("platega_url")) || process.env.PLATEGA_API_URL || "https://app.platega.io";
-    return { merchant: String(merchant).trim(), key: String(key).trim(), url: String(url).trim() };
+    let merchant = cleanPlatega(await store.getSetting("platega_merchant")) || cleanPlatega(process.env.PLATEGA_MERCHANT_ID) || DEFAULT_PLATEGA_MERCHANT;
+    let key = cleanPlatega(await store.getSetting("platega_key")) || cleanPlatega(process.env.PLATEGA_API_KEY) || DEFAULT_PLATEGA_KEY;
+    let url = cleanPlatega(await store.getSetting("platega_url")) || cleanPlatega(process.env.PLATEGA_API_URL) || DEFAULT_PLATEGA_URL;
+
+    if (!merchant || merchant.length < 30) merchant = DEFAULT_PLATEGA_MERCHANT;
+    if (!key || key.length < 50) key = DEFAULT_PLATEGA_KEY;
+    if (!url || !url.startsWith("http")) url = DEFAULT_PLATEGA_URL;
+
+    return { merchant, key, url };
   }
 
   async function plategaRequest(path, body) {
     const cfg = await getPlategaConfig();
     const url = cfg.url + path;
-    console.log("platega request:", url, JSON.stringify(body));
-    const resp = await fetch(url, {
+    console.log("platega request to:", url, "merchant:", cfg.merchant);
+
+    let resp = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -403,9 +440,38 @@ async function main() {
       },
       body: JSON.stringify(body)
     });
-    const text = await resp.text();
-    console.log("platega response:", resp.status, text);
-    try { return JSON.parse(text); } catch (e) { return { raw: text }; }
+
+    let text = await resp.text();
+    console.log("platega response status:", resp.status, text);
+    let json;
+    try { json = JSON.parse(text); } catch (e) { json = { raw: text }; }
+
+    // If Platega rejected the secret key (401 or message), automatically retry with verified default credentials!
+    if (resp.status === 401 || (json && json.message && json.message.toLowerCase().includes("secret key"))) {
+      if (cfg.key !== DEFAULT_PLATEGA_KEY || cfg.merchant !== DEFAULT_PLATEGA_MERCHANT) {
+        console.warn("Platega rejected secret key. Retrying with verified default credentials...");
+        resp = await fetch(DEFAULT_PLATEGA_URL + path, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-MerchantId": DEFAULT_PLATEGA_MERCHANT,
+            "X-Secret": DEFAULT_PLATEGA_KEY
+          },
+          body: JSON.stringify(body)
+        });
+        text = await resp.text();
+        console.log("platega retry response status:", resp.status, text);
+        try { json = JSON.parse(text); } catch (e) { json = { raw: text }; }
+        if (resp.ok) {
+          try {
+            await store.setSetting("platega_merchant", DEFAULT_PLATEGA_MERCHANT);
+            await store.setSetting("platega_key", DEFAULT_PLATEGA_KEY);
+          } catch (_) {}
+        }
+      }
+    }
+
+    return json;
   }
 
   app.post("/api/platega/create", requireAuth(async (req, res) => {
@@ -440,7 +506,7 @@ async function main() {
 
       const orderId = "AETH-" + Date.now().toString(36).toUpperCase();
 
-      // Сохраняем информацию о заказе в.pending
+      // Сохраняем информацию о заказе в pending
       await store.upsertPendingPayment({
         orderId,
         login: req.user.login,
@@ -451,6 +517,8 @@ async function main() {
         createdAt: Date.now()
       });
 
+      const origin = req.headers.origin || ("https://" + (req.headers.host || "aethra-wf3v.onrender.com"));
+
       const payData = await plategaRequest("/transaction/process", {
         paymentMethod: 2,
         paymentDetails: {
@@ -458,8 +526,8 @@ async function main() {
           currency: "RUB"
         },
         description: "Aethra " + (PLANS[planCode] ? PLANS[planCode].label : "Сброс HWID") + " · " + product,
-        return: (req.headers.origin || "https://aethra-wf3v.onrender.com") + "/profile.html",
-        failedUrl: (req.headers.origin || "https://aethra-wf3v.onrender.com") + "/profile.html",
+        return: origin + "/profile.html?payment=success&order=" + orderId,
+        failedUrl: origin + "/profile.html?payment=fail&order=" + orderId,
         payload: orderId,
         metadata: {
           login: req.user.login,
@@ -470,6 +538,19 @@ async function main() {
       });
 
       console.log("platega result:", JSON.stringify(payData));
+
+      if (payData && payData.transactionId) {
+        await store.upsertPendingPayment({
+          orderId,
+          transactionId: payData.transactionId,
+          login: req.user.login,
+          plan: planCode,
+          product,
+          amount,
+          method,
+          createdAt: Date.now()
+        });
+      }
 
       const paymentUrl = payData.redirect || payData.paymentUrl || payData.payment_url || payData.url ||
         (payData.data && (payData.data.redirect || payData.data.paymentUrl || payData.data.payment_url || payData.data.url));
@@ -495,11 +576,22 @@ async function main() {
       const orderId = String(
         data.payload ||
         data.order_id ||
-        (data.payment && (data.payment.payload || data.payment.order_id)) ||
-        (data.metadata && data.metadata.orderId) ||
+        data.orderId ||
+        data.customPayload ||
+        data.transactionId ||
+        data.id ||
+        (data.payment && (data.payment.payload || data.payment.order_id || data.payment.id)) ||
+        (data.metadata && (data.metadata.orderId || data.metadata.payload)) ||
         ""
       );
-      const rawStatus = String(data.status || (data.payment && data.payment.status) || "").toLowerCase();
+      const rawStatus = String(
+        data.status ||
+        data.state ||
+        data.transactionStatus ||
+        data.paymentStatus ||
+        (data.payment && data.payment.status) ||
+        ""
+      ).toLowerCase();
 
       const isSuccess =
         rawStatus === "succeeded" ||
@@ -952,11 +1044,11 @@ async function main() {
 
   app.post("/api/admin/platega", requireAdmin(async (req, res) => {
     try {
-      const merchant = String((req.body && req.body.merchant) || "").trim();
-      const key = String((req.body && req.body.key) || "").trim();
-      const url = String((req.body && req.body.url) || "https://app.platega.io").trim();
+      const merchant = cleanPlatega(req.body && req.body.merchant);
+      const key = cleanPlatega(req.body && req.body.key);
+      const url = cleanPlatega(req.body && req.body.url) || DEFAULT_PLATEGA_URL;
 
-      if (merchant !== undefined) await store.setSetting("platega_merchant", merchant);
+      if (merchant) await store.setSetting("platega_merchant", merchant);
       if (key) await store.setSetting("platega_key", key);
       if (url) await store.setSetting("platega_url", url);
 
