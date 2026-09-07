@@ -28,8 +28,7 @@
   };
   var PAYMENT_METHODS = [
     { id: "sbp", name: "Система быстрых платежей", icon: "/assets/images/spb.png", svg: "sbp" },
-    { id: "crypto", name: "Криптовалюта", icon: "/assets/images/usdt.png", svg: "crypto" },
-    { id: "support", name: "Через техподдержку", icon: "/assets/images/tech.png", svg: "telegram" }
+    { id: "crypto", name: "Криптовалюта", icon: "/assets/images/usdt.png", svg: "crypto" }
   ];
 
   var RULES = {
@@ -504,10 +503,9 @@
       }
 
       var payPillsHtml = PAYMENT_METHODS.map(function (x) {
-        var svgId = x.id === "support" ? "support" : x.svg;
-        var iconHtml = '<svg class="i" style="width:20px;height:20px"><use href="#i-' + svgId + '"></use></svg>';
+        var iconHtml = '<svg class="i" style="width:20px;height:20px"><use href="#i-' + x.svg + '"></use></svg>';
         var isActive = selectedMethod === x.id ? " is-active" : "";
-        var labelText = x.id === "sbp" ? "СБП" : (x.id === "crypto" ? "CryptoBot" : "Техподдержка");
+        var labelText = x.id === "sbp" ? "СБП" : "CryptoBot";
         return '<button type="button" class="pay-pill' + isActive + '" data-pay-method="' + x.id + '">' +
           '<span class="pay-pill__icon">' + iconHtml + '</span>' +
           '<span>' + esc(labelText) + '</span>' +
