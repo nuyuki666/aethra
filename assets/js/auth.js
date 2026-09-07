@@ -504,7 +504,7 @@
       }).join("");
 
       body.innerHTML =
-        '<h2 style="font-size:20px;font-weight:800;color:#dce4ef;margin:0 0 16px 0;line-height:1.2">' + esc(product.name) + '</h2>' +
+        '<h2>' + esc(product.name) + '</h2>' +
         '<div class="pay-product">' +
           '<div class="pay-product__info">' +
             '<div class="pay-product__name">' + esc(product.name) + '</div>' +
@@ -515,9 +515,9 @@
             '<span class="pay-product__badge">РАЗОВЫЙ ПЛАТЕЖ</span>' +
           '</div>' +
         '</div>' +
-        '<p style="margin:20px 0 8px;font-size:11px;font-weight:600;color:rgba(184,213,255,0.4);letter-spacing:0.08em;text-transform:uppercase">СПОСОБ ОПЛАТЫ</p>' +
+        '<p class="modal-section-title">СПОСОБ ОПЛАТЫ</p>' +
         '<div class="pay-list">' + methods + '</div>' +
-        '<p style="margin:20px 0 8px;font-size:11px;font-weight:600;color:rgba(184,213,255,0.4);letter-spacing:0.08em;text-transform:uppercase">ПРОМОКОД</p>' +
+        '<p class="modal-section-title">ПРОМОКОД</p>' +
         '<div class="promo-row">' +
         '<input class="input" data-promo-input placeholder="Введите код" maxlength="24" autocomplete="off">' +
         '<button class="btn btn--ghost" type="button" data-promo-apply style="flex-shrink:0">Применить</button>' +
@@ -713,17 +713,17 @@
     if (!info || !product) return;
 
     body.innerHTML =
-      '<h2 style="font-size:20px;font-weight:800;color:#dce4ef;margin:0 0 16px 0;line-height:1.2">' + esc(product.name) + '</h2>' +
-      '<p style="font-size:13px;color:rgba(184,213,255,0.45);margin-bottom:20px">' + esc(product.desc) + '</p>' +
-      '<p style="margin:20px 0 8px;font-size:11px;font-weight:600;color:rgba(184,213,255,0.4);letter-spacing:0.08em;text-transform:uppercase">Выберите тариф</p>' +
+      '<h2>' + esc(product.name) + '</h2>' +
+      '<p class="modal-subtitle">' + esc(product.desc) + '</p>' +
+      '<p class="modal-section-title">ВЫБЕРИТЕ ТАРИФ</p>' +
       '<div class="pay-list">' +
       Object.keys(PLAN_INFO).map(function (code) {
         var p = PLAN_INFO[code];
         return '<button class="pay-row" type="button" data-select-plan="' + code + '" data-select-product="' + productCode + '">' +
-          '<div class="pay-row__icon" style="background:rgba(184,213,255,0.04)"><svg class="i"><use href="#i-zap"></use></svg></div>' +
+          '<div class="pay-row__icon"><svg class="i"><use href="#i-zap"></use></svg></div>' +
           '<div style="flex:1"><div class="pay-row__name">' + esc(p.name) + '</div>' +
-          '<div style="font-size:11px;color:rgba(184,213,255,0.35)">' + esc(p.term) + '</div></div>' +
-          '<span style="font-size:14px;font-weight:700;color:#dce4ef">' + esc(p.price) + '</span>' +
+          '<div class="pay-row__term">' + esc(p.term) + '</div></div>' +
+          '<span class="pay-row__price">' + esc(p.price) + '</span>' +
           '<svg class="i pay-row__chevron"><use href="#i-chevron-right"></use></svg>' +
           '</button>';
       }).join("") +
