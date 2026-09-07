@@ -477,6 +477,67 @@
     }).join("");
   }
 
+  /* ---------------------------------------------------------------- platega */
+  async function loadPlatega() {
+    var statusEl = $("[data-platega-status]");
+    var merchantInp = $("#plategaMerchantId");
+    var keyInp = $("#plategaApiKey");
+    var urlInp = $("#plategaApiUrl");
+    var webhookInp = $("#plategaWebhookUrl");
+    if (!statusEl) return;
+
+    if (webhookInp) {
+      webhookInp.value = location.origin + "/api/platega/webhook";
+    }
+
+    var r = await S.adminGet("/admin/platega");
+    if (r && r.ok) {
+      if (merchantInp && r.merchant) merchantInp.value = r.merchant;
+      if (urlInp && r.url) urlInp.value = r.url;
+      if (r.hasKey && r.merchant) {
+        if (keyInp) keyInp.placeholder = "•••••••••••••••• (ключ сохранён)";
+        statusEl.textContent = "Подключено";
+        statusEl.style.color = "var(--ok)";
+      } else {
+        statusEl.textContent = "Не настроено";
+        statusEl.style.color = "var(--bad)";
+      }
+    }
+  }
+
+  function bindPlatega() {
+    var form = $("form[data-platega-form]");
+    var copyBtn = $("#btnCopyWebhook");
+    var webhookInp = $("#plategaWebhookUrl");
+
+    if (copyBtn && webhookInp) {
+      copyBtn.addEventListener("click", function () {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(webhookInp.value).then(function () {
+            toast("Webhook URL скопирован");
+          });
+        }
+      });
+    }
+
+    if (form) {
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        var merchant = ($("#plategaMerchantId").value || "").trim();
+        var key = ($("#plategaApiKey").value || "").trim();
+        var url = ($("#plategaApiUrl").value || "").trim();
+
+        var r = await S.adminPost("/admin/platega", { merchant: merchant, key: key, url: url });
+        if (r && r.ok) {
+          toast("Настройки Platega сохранены!");
+          await loadPlatega();
+        } else {
+          toast((r && r.error) || "Ошибка сохранения", "bad");
+        }
+      });
+    }
+  }
+
   async function boot() {
     if (!S) return;
     var me = await guard();
@@ -485,8 +546,10 @@
     bindUsers();
     bindKeys();
     bindPromos();
+    bindPlatega();
     bindLogout();
     loadLogs();
+    loadPlatega();
   }
 
   boot();

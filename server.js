@@ -383,19 +383,23 @@ async function main() {
   });
 
   /* --------------------------------------------------- platega.io payments */
-  const PLATEGA_API = process.env.PLATEGA_API_URL || "https://app.platega.io";
-  const PLATEGA_KEY = process.env.PLATEGA_API_KEY || "";
-  const PLATEGA_MERCHANT = process.env.PLATEGA_MERCHANT_ID || "";
+  async function getPlategaConfig() {
+    const merchant = (await store.getSetting("platega_merchant")) || process.env.PLATEGA_MERCHANT_ID || "";
+    const key = (await store.getSetting("platega_key")) || process.env.PLATEGA_API_KEY || "";
+    const url = (await store.getSetting("platega_url")) || process.env.PLATEGA_API_URL || "https://app.platega.io";
+    return { merchant: String(merchant).trim(), key: String(key).trim(), url: String(url).trim() };
+  }
 
   async function plategaRequest(path, body) {
-    const url = PLATEGA_API + path;
+    const cfg = await getPlategaConfig();
+    const url = cfg.url + path;
     console.log("platega request:", url, JSON.stringify(body));
     const resp = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-MerchantId": PLATEGA_MERCHANT,
-        "X-Secret": PLATEGA_KEY
+        "X-MerchantId": cfg.merchant,
+        "X-Secret": cfg.key
       },
       body: JSON.stringify(body)
     });
@@ -406,7 +410,10 @@ async function main() {
 
   app.post("/api/platega/create", requireAuth(async (req, res) => {
     try {
-      if (!PLATEGA_KEY) return bad(res, "Платёжная система не настроена");
+      const cfg = await getPlategaConfig();
+      if (!cfg.key || !cfg.merchant) {
+        return bad(res, "Платёжная система не настроена (укажите Merchant ID и Secret Key)");
+      }
 
       const planCode = String((req.body && req.body.plan) || "");
       const product = String((req.body && req.body.product) || "cs2");
@@ -480,24 +487,59 @@ async function main() {
 
   app.post("/api/platega/webhook", express.json(), async (req, res) => {
     try {
-      const data = req.body;
-      const orderId = data.order_id || (data.payment && data.payment.order_id);
-      const status = data.status || (data.payment && data.payment.status);
+      const data = req.body || {};
+      console.log("platega webhook received:", JSON.stringify(data));
 
-      console.log("platega webhook:", orderId, status);
+      const orderId = String(
+        data.payload ||
+        data.order_id ||
+        (data.payment && (data.payment.payload || data.payment.order_id)) ||
+        (data.metadata && data.metadata.orderId) ||
+        ""
+      );
+      const rawStatus = String(data.status || (data.payment && data.payment.status) || "").toLowerCase();
 
-      if (status === "succeeded" || status === "paid" || status === "completed") {
+      const isSuccess =
+        rawStatus === "succeeded" ||
+        rawStatus === "paid" ||
+        rawStatus === "completed" ||
+        rawStatus === "success" ||
+        rawStatus === "confirmed" ||
+        data.status === 1 ||
+        data.status === "1";
+
+      if (orderId && isSuccess) {
         const pending = await store.getPendingPayment(orderId);
         if (pending && !pending.completed) {
-          const user = await store.getUser(pending.login);
+          const user = await store.getUserByLogin(pending.login);
           if (user) {
+            const product = pending.product || "minecraft";
+            const productLabels = { cs2: "CS2", minecraft: "Minecraft", visual: "Visual" };
+            const productLabel = productLabels[product] || product;
+
             if (pending.plan === "life") {
               await store.updateUser(pending.login, { lifetime: true, subUntil: null });
+              await store.addHistory(pending.login, `Пожизненный доступ (${productLabel}) активирован после оплаты`);
               console.log("platega: lifetime granted to", pending.login);
+            } else if (pending.plan === "hwid-reset") {
+              await store.updateUser(pending.login, { hwid: "", hwidResets: 0 });
+              await store.addHistory(pending.login, "Сброс HWID после оплаты");
+              console.log("platega: hwid reset for", pending.login);
             } else {
-              const days = PLANS[pending.plan] ? PLANS[pending.plan].days : 30;
-              const base = Math.max(user.subUntil && user.subUntil > Date.now() ? user.subUntil : Date.now(), Date.now());
-              await store.updateUser(pending.login, { subUntil: base + days * DAY });
+              const days = (PLANS[pending.plan] && PLANS[pending.plan].days) || 30;
+              const subField = "sub_" + product;
+              let currentSub = 0;
+              if (product === "cs2") currentSub = user.subCs2 || 0;
+              else if (product === "minecraft") currentSub = user.subMinecraft || 0;
+              else if (product === "visual") currentSub = user.subVisual || 0;
+
+              const base = Math.max(currentSub, user.subUntil || 0, Date.now());
+              const newSub = base + days * DAY;
+              const updates = { subUntil: newSub };
+              updates[subField] = newSub;
+
+              await store.updateUser(pending.login, updates);
+              await store.addHistory(pending.login, `Подписка продлена на ${days} дн. (${productLabel}) после оплаты`);
               console.log("platega: +" + days + "d subscription to", pending.login);
             }
           }
@@ -888,6 +930,38 @@ async function main() {
     } catch (e) {
       console.error("get admin logs error:", e);
       res.status(500).json({ ok: false, error: e.message || "Ошибка сервера" });
+    }
+  }));
+
+  app.get("/api/admin/platega", requireAdmin(async (req, res) => {
+    try {
+      const cfg = await getPlategaConfig();
+      res.json({
+        ok: true,
+        merchant: cfg.merchant,
+        hasKey: Boolean(cfg.key),
+        url: cfg.url
+      });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  }));
+
+  app.post("/api/admin/platega", requireAdmin(async (req, res) => {
+    try {
+      const merchant = String((req.body && req.body.merchant) || "").trim();
+      const key = String((req.body && req.body.key) || "").trim();
+      const url = String((req.body && req.body.url) || "https://app.platega.io").trim();
+
+      if (merchant !== undefined) await store.setSetting("platega_merchant", merchant);
+      if (key) await store.setSetting("platega_key", key);
+      if (url) await store.setSetting("platega_url", url);
+
+      res.json({ ok: true });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
     }
   }));
 

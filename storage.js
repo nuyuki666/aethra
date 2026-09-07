@@ -251,6 +251,18 @@ class FileStore {
     const p = this.data.pendingPayments.find(x => x.orderId === orderId);
     if (p) { p.completed = true; this.persist(); }
   }
+
+  async getSetting(key) {
+    if (!this.data.settings) this.data.settings = {};
+    return this.data.settings[key] != null ? this.data.settings[key] : null;
+  }
+
+  async setSetting(key, val) {
+    if (!this.data.settings) this.data.settings = {};
+    this.data.settings[key] = String(val);
+    this.persist();
+    return true;
+  }
 }
 
 /* ==========================================================================
@@ -341,6 +353,11 @@ class PgStore {
       method TEXT NOT NULL DEFAULT '',
       created_at BIGINT NOT NULL,
       completed BOOLEAN NOT NULL DEFAULT FALSE
+    )`);
+
+    await this.pool.query(`CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
     )`);
     
     return this;
@@ -632,6 +649,19 @@ class PgStore {
 
   async completePendingPayment(orderId) {
     await this.pool.query("UPDATE pending_payments SET completed = TRUE WHERE order_id = $1", [orderId]);
+  }
+
+  async getSetting(key) {
+    const res = await this.pool.query("SELECT value FROM settings WHERE key = $1", [String(key)]);
+    return res.rows[0] ? res.rows[0].value : null;
+  }
+
+  async setSetting(key, val) {
+    await this.pool.query(
+      "INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
+      [String(key), String(val)]
+    );
+    return true;
   }
 }
 

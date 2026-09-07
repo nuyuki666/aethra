@@ -87,6 +87,9 @@
         <button class="dash__tab" role="tab" id="tab-logs" aria-controls="panel-logs" aria-selected="false" tabindex="-1">
           <svg class="i"><use href="#i-activity"></use></svg> Логи
         </button>
+        <button class="dash__tab" role="tab" id="tab-platega" aria-controls="panel-platega" aria-selected="false" tabindex="-1">
+          <svg class="i"><use href="#i-card"></use></svg> Платёжка
+        </button>
       </nav>
 
       <div>
@@ -348,6 +351,54 @@
               <svg class="i"><use href="#i-inbox"></use></svg>
               <p>Логов пока нет. Когда кто-то активирует ключ, записи появятся здесь.</p>
             </div>
+          </article>
+        </section>
+
+        <!-- ============================================== panel: platega -->
+        <section class="dash__panel" id="panel-platega" role="tabpanel" aria-labelledby="tab-platega" tabindex="0" hidden>
+          <div class="page-head">
+            <div>
+              <h1>Платёжная система Platega</h1>
+              <p>Настройка приёма онлайн-платежей (СБП, Криптовалюта, Карты) через my.platega.io</p>
+            </div>
+          </div>
+
+          <article class="card">
+            <div class="panel-head">
+              <h3>Параметры интеграции</h3>
+              <span class="eyebrow" data-platega-status>Проверка...</span>
+            </div>
+
+            <form data-platega-form style="display:flex;flex-direction:column;gap:16px;max-width:600px;margin-top:16px">
+              <div class="field" style="width:100%">
+                <label class="field__label" for="plategaMerchantId">Merchant ID (ID мерчанта в Platega)</label>
+                <input class="input" id="plategaMerchantId" type="text" placeholder="Например: 12345" autocomplete="off">
+              </div>
+
+              <div class="field" style="width:100%">
+                <label class="field__label" for="plategaApiKey">Secret Key (Секретный API-ключ)</label>
+                <input class="input" id="plategaApiKey" type="password" placeholder="Вставьте Secret Key из my.platega.io" autocomplete="off">
+              </div>
+
+              <div class="field" style="width:100%">
+                <label class="field__label" for="plategaApiUrl">API URL</label>
+                <input class="input" id="plategaApiUrl" type="text" value="https://app.platega.io" autocomplete="off">
+              </div>
+
+              <div class="field" style="width:100%">
+                <label class="field__label">Webhook URL (укажите этот адрес в кабинете Platega)</label>
+                <div style="display:flex;gap:8px">
+                  <input class="input" id="plategaWebhookUrl" type="text" readonly style="opacity:0.85">
+                  <button type="button" class="btn btn--quiet" id="btnCopyWebhook">Копировать</button>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:12px;margin-top:8px">
+                <button class="btn btn--primary" type="submit">
+                  <svg class="i"><use href="#i-check"></use></svg> Сохранить настройки
+                </button>
+              </div>
+            </form>
           </article>
         </section>
 
