@@ -731,7 +731,7 @@
 }
 .plans:has(> *:only-child) > * {
   width: 100%;
-  max-width: 440px;
+  max-width: 350px;
 }
 @media (min-width: 900px) {
   .plans:not(:has(> *:only-child)) {

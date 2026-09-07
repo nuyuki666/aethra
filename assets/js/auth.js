@@ -22,9 +22,9 @@
     "hwid-reset": { name: "Сброс HWID", price: "200 ₽", term: "разовая услуга" }
   };
   var PRODUCTS = {
-    cs2: { name: "Aethra CS2", desc: "DLC для Counter-Strike 2", img: "/images.png" },
-    minecraft: { name: "Aethra DLC", desc: "DLC для Minecraft", img: "/images.png" },
-    visual: { name: "Aethra Visual", desc: "Визуальное DLC для PvP", img: "/images.png" }
+    cs2: { name: "Aethra CS2", desc: "DLC для Counter-Strike 2", img: "/images.jpg" },
+    minecraft: { name: "Aethra DLC", desc: "DLC для Minecraft", img: "/images.jpg" },
+    visual: { name: "Aethra Visual", desc: "Визуальное DLC для PvP", img: "/images.jpg" }
   };
   var PAYMENT_METHODS = [
     { id: "sbp", name: "Система быстрых платежей", icon: "/assets/images/spb.png", svg: "sbp" },
@@ -523,7 +523,7 @@
       body.innerHTML =
         '<div class="buy-modal-grid">' +
           '<div class="buy-modal-poster">' +
-            '<div class="buy-modal-poster__bg" style="background-image: url(\'' + esc(product.img || "/images.png") + '\')"></div>' +
+            '<div class="buy-modal-poster__bg" style="background-image: url(\'' + esc(product.img || "/images.jpg") + '\')"></div>' +
             '<div class="buy-modal-poster__overlay"></div>' +
             '<div class="buy-modal-poster__content">' +
               '<div class="buy-modal-poster__icon"><svg class="i"><use href="#i-logo"></use></svg></div>' +
