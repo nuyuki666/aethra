@@ -1878,15 +1878,11 @@ body.auth-ready .nav__actions { visibility: visible; }
   height: 22px;
 }
 .pay-pill__icon .i {
-  width: 18px;
-  height: 18px;
-  color: currentColor;
+  width: 20px;
+  height: 20px;
+  stroke: none;
+  fill: none;
 }
-
-/* Brand icon colors on payment pills */
-[data-pay-method="sbp"] .pay-pill__icon { color: #34d399; }
-[data-pay-method="crypto"] .pay-pill__icon { color: #fbbf24; }
-[data-pay-method="support"] .pay-pill__icon { color: #38bdf8; }
 
 /* Plan / Tariff Pills */
 .plan-pill {
