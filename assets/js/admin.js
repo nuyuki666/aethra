@@ -544,6 +544,66 @@
     }
   }
 
+  /* ---------------------------------------------------------------- cryptobot */
+  async function loadCryptoBot() {
+    var statusEl = $("[data-cryptobot-status]");
+    var tokenInp = $("#cryptobotApiToken");
+    var webhookInp = $("#cryptobotWebhookUrl");
+    if (!statusEl) return;
+
+    if (webhookInp) {
+      webhookInp.value = location.origin + "/api/cryptobot/webhook";
+    }
+
+    var r = await S.adminGet("/admin/cryptobot");
+    if (r && r.ok) {
+      if (r.hasToken) {
+        if (tokenInp) tokenInp.placeholder = "•••••••••••••••• (токен сохранён)";
+        if (r.app && r.app.name) {
+          statusEl.textContent = "Подключено (" + r.app.name + ")";
+        } else {
+          statusEl.textContent = "Подключено";
+        }
+        statusEl.style.color = "var(--ok)";
+      } else {
+        statusEl.textContent = "Не настроено";
+        statusEl.style.color = "var(--bad)";
+      }
+    }
+  }
+
+  function bindCryptoBot() {
+    var form = $("form[data-cryptobot-form]");
+    var copyBtn = $("#btnCopyCryptoWebhook");
+    var webhookInp = $("#cryptobotWebhookUrl");
+
+    if (copyBtn && webhookInp) {
+      copyBtn.addEventListener("click", function () {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(webhookInp.value).then(function () {
+            toast("Webhook URL CryptoBot скопирован");
+          });
+        }
+      });
+    }
+
+    if (form) {
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        var token = ($("#cryptobotApiToken").value || "").trim();
+        var r = await S.adminPost("/admin/cryptobot", { token: token });
+        if (r && r.ok) {
+          toast("Настройки CryptoBot сохранены!");
+          var tokenInp = $("#cryptobotApiToken");
+          if (tokenInp) tokenInp.value = "";
+          await loadCryptoBot();
+        } else {
+          toast((r && r.error) || "Ошибка сохранения", "bad");
+        }
+      });
+    }
+  }
+
   async function boot() {
     if (!S) return;
     var me = await guard();
@@ -553,9 +613,11 @@
     bindKeys();
     bindPromos();
     bindPlatega();
+    bindCryptoBot();
     bindLogout();
     loadLogs();
     loadPlatega();
+    loadCryptoBot();
   }
 
   boot();

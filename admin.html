@@ -358,48 +358,83 @@
         <section class="dash__panel" id="panel-platega" role="tabpanel" aria-labelledby="tab-platega" tabindex="0" hidden>
           <div class="page-head">
             <div>
-              <h1>Платёжная система Platega</h1>
-              <p>Настройка приёма онлайн-платежей (СБП, Криптовалюта, Карты) через my.platega.io</p>
+              <h1>Платёжные системы</h1>
+              <p>Настройка приёма платежей: СБП (Platega) и Криптовалюта (Telegram CryptoBot)</p>
             </div>
           </div>
 
-          <article class="card">
-            <div class="panel-head">
-              <h3>Параметры интеграции</h3>
-              <span class="eyebrow" data-platega-status>Проверка...</span>
-            </div>
-
-            <form data-platega-form style="display:flex;flex-direction:column;gap:16px;max-width:600px;margin-top:16px">
-              <div class="field" style="width:100%">
-                <label class="field__label" for="plategaMerchantId">Merchant ID (ID мерчанта в Platega)</label>
-                <input class="input" id="plategaMerchantId" type="text" placeholder="Например: 12345" autocomplete="off">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(360px, 1fr));gap:24px;align-items:start">
+            <!-- Platega Card -->
+            <article class="card">
+              <div class="panel-head">
+                <h3>Platega (СБП)</h3>
+                <span class="eyebrow" data-platega-status>Проверка...</span>
               </div>
 
-              <div class="field" style="width:100%">
-                <label class="field__label" for="plategaApiKey">Secret Key (Секретный API-ключ)</label>
-                <input class="input" id="plategaApiKey" type="password" placeholder="Вставьте Secret Key из my.platega.io" autocomplete="off">
-              </div>
-
-              <div class="field" style="width:100%">
-                <label class="field__label" for="plategaApiUrl">API URL</label>
-                <input class="input" id="plategaApiUrl" type="text" value="https://app.platega.io" autocomplete="off">
-              </div>
-
-              <div class="field" style="width:100%">
-                <label class="field__label">Webhook URL (укажите этот адрес в кабинете Platega)</label>
-                <div style="display:flex;gap:8px">
-                  <input class="input" id="plategaWebhookUrl" type="text" readonly style="opacity:0.85">
-                  <button type="button" class="btn btn--quiet" id="btnCopyWebhook">Копировать</button>
+              <form data-platega-form style="display:flex;flex-direction:column;gap:16px;margin-top:16px">
+                <div class="field" style="width:100%">
+                  <label class="field__label" for="plategaMerchantId">Merchant ID (ID мерчанта в Platega)</label>
+                  <input class="input" id="plategaMerchantId" type="text" placeholder="Например: 6fd30d9d-..." autocomplete="off">
                 </div>
+
+                <div class="field" style="width:100%">
+                  <label class="field__label" for="plategaApiKey">Secret Key (Секретный API-ключ)</label>
+                  <input class="input" id="plategaApiKey" type="password" placeholder="Вставьте Secret Key из my.platega.io" autocomplete="off">
+                </div>
+
+                <div class="field" style="width:100%">
+                  <label class="field__label" for="plategaApiUrl">API URL</label>
+                  <input class="input" id="plategaApiUrl" type="text" value="https://app.platega.io" autocomplete="off">
+                </div>
+
+                <div class="field" style="width:100%">
+                  <label class="field__label">Webhook URL (укажите в my.platega.io)</label>
+                  <div style="display:flex;gap:8px">
+                    <input class="input" id="plategaWebhookUrl" type="text" readonly style="opacity:0.85">
+                    <button type="button" class="btn btn--quiet" id="btnCopyWebhook">Копировать</button>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:12px;margin-top:8px">
+                  <button class="btn btn--primary" type="submit">
+                    <svg class="i"><use href="#i-check"></use></svg> Сохранить Platega
+                  </button>
+                </div>
+              </form>
+            </article>
+
+            <!-- CryptoBot Card -->
+            <article class="card">
+              <div class="panel-head">
+                <h3>Telegram CryptoBot (Крипта)</h3>
+                <span class="eyebrow" data-cryptobot-status>Проверка...</span>
               </div>
 
-              <div style="display:flex;gap:12px;margin-top:8px">
-                <button class="btn btn--primary" type="submit">
-                  <svg class="i"><use href="#i-check"></use></svg> Сохранить настройки
-                </button>
-              </div>
-            </form>
-          </article>
+              <form data-cryptobot-form style="display:flex;flex-direction:column;gap:16px;margin-top:16px">
+                <div class="field" style="width:100%">
+                  <label class="field__label" for="cryptobotApiToken">Crypto Pay API Token</label>
+                  <input class="input" id="cryptobotApiToken" type="password" placeholder="Токен из @CryptoBot (/pay -> Create App)" autocomplete="off">
+                  <span style="display:block;font-size:12px;color:rgba(255,255,255,0.45);margin-top:6px;line-height:1.4">
+                    Откройте <a href="https://t.me/CryptoBot" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:underline">@CryptoBot</a> в Telegram → выберите <code>Crypto Pay</code> → <code>Create App</code> → скопируйте API Token.
+                  </span>
+                </div>
+
+                <div class="field" style="width:100%">
+                  <label class="field__label">Webhook URL (для уведомлений CryptoBot)</label>
+                  <div style="display:flex;gap:8px">
+                    <input class="input" id="cryptobotWebhookUrl" type="text" readonly style="opacity:0.85">
+                    <button type="button" class="btn btn--quiet" id="btnCopyCryptoWebhook">Копировать</button>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:12px;margin-top:8px">
+                  <button class="btn btn--primary" type="submit">
+                    <svg class="i"><use href="#i-check"></use></svg> Сохранить CryptoBot
+                  </button>
+                </div>
+              </form>
+            </article>
+          </div>
         </section>
 
       </div>

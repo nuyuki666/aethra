@@ -474,13 +474,129 @@ async function main() {
     return json;
   }
 
-  app.post("/api/platega/create", requireAuth(async (req, res) => {
-    try {
-      const cfg = await getPlategaConfig();
-      if (!cfg.key || !cfg.merchant) {
-        return bad(res, "Платёжная система не настроена (укажите Merchant ID и Secret Key)");
-      }
+  const CRYPTOBOT_API_URL = "https://pay.crypt.bot/api";
 
+  async function getCryptoBotToken() {
+    const token = (await store.getSetting("cryptobot_token")) || process.env.CRYPTOBOT_API_TOKEN || "";
+    return cleanPlatega(token);
+  }
+
+  async function createCryptoBotInvoice(token, orderId, amount, planLabel, product, origin) {
+    const desc = "Aethra " + planLabel + " · " + product;
+    const returnUrl = origin + "/profile.html?payment=success&order=" + orderId;
+
+    // 1. Попытка создания счёта в фиатных рублях RUB (CryptoBot сам предложит оплату криптой по курсу)
+    try {
+      const fiatRes = await fetch(CRYPTOBOT_API_URL + "/createInvoice", {
+        method: "POST",
+        headers: {
+          "Crypto-Pay-API-Token": token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          currency_type: "fiat",
+          fiat: "RUB",
+          amount: String(amount),
+          description: desc,
+          payload: orderId,
+          paid_btn_name: "callback",
+          paid_btn_url: returnUrl
+        })
+      });
+      const fiatData = await fiatRes.json();
+      if (fiatData && fiatData.ok && fiatData.result) {
+        return {
+          ok: true,
+          invoiceId: fiatData.result.invoice_id,
+          url: fiatData.result.bot_invoice_url || fiatData.result.mini_app_invoice_url || fiatData.result.pay_url
+        };
+      }
+      console.warn("CryptoBot fiat createInvoice response:", JSON.stringify(fiatData));
+    } catch (e) {
+      console.warn("CryptoBot fiat request failed:", e.message);
+    }
+
+    // 2. Фоллбэк на USDT по курсу ~95 руб.
+    try {
+      const usdtAmount = Math.max(1, +(amount / 95).toFixed(2));
+      const cryptoRes = await fetch(CRYPTOBOT_API_URL + "/createInvoice", {
+        method: "POST",
+        headers: {
+          "Crypto-Pay-API-Token": token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          asset: "USDT",
+          amount: String(usdtAmount),
+          description: desc,
+          payload: orderId,
+          paid_btn_name: "callback",
+          paid_btn_url: returnUrl
+        })
+      });
+      const cryptoData = await cryptoRes.json();
+      if (cryptoData && cryptoData.ok && cryptoData.result) {
+        return {
+          ok: true,
+          invoiceId: cryptoData.result.invoice_id,
+          url: cryptoData.result.bot_invoice_url || cryptoData.result.mini_app_invoice_url || cryptoData.result.pay_url
+        };
+      }
+      console.warn("CryptoBot crypto createInvoice response:", JSON.stringify(cryptoData));
+      return {
+        ok: false,
+        error: (cryptoData && cryptoData.error && (cryptoData.error.name || cryptoData.error.message)) || "CryptoBot error"
+      };
+    } catch (e) {
+      console.warn("CryptoBot crypto request failed:", e.message);
+      return { ok: false, error: e.message };
+    }
+  }
+
+  async function activateSubscriptionForOrder(orderId, source = "payment") {
+    if (!orderId) return false;
+    const pending = await store.getPendingPayment(orderId);
+    if (!pending || pending.completed) return false;
+
+    const user = await store.getUserByLogin(pending.login);
+    if (!user) return false;
+
+    const product = pending.product || "minecraft";
+    const productLabels = { cs2: "CS2", minecraft: "Minecraft", visual: "Visual" };
+    const productLabel = productLabels[product] || product;
+
+    if (pending.plan === "life") {
+      await store.updateUser(pending.login, { lifetime: true, subUntil: null });
+      await store.addHistory(pending.login, `Пожизненный доступ (${productLabel}) активирован после оплаты (${source})`);
+      console.log(`${source}: lifetime granted to`, pending.login);
+    } else if (pending.plan === "hwid-reset") {
+      await store.updateUser(pending.login, { hwid: "", hwidResets: 0 });
+      await store.addHistory(pending.login, `Сброс HWID после оплаты (${source})`);
+      console.log(`${source}: hwid reset for`, pending.login);
+    } else {
+      const days = (PLANS[pending.plan] && PLANS[pending.plan].days) || 30;
+      const subField = "sub_" + product;
+      let currentSub = 0;
+      if (product === "cs2") currentSub = user.subCs2 || 0;
+      else if (product === "minecraft") currentSub = user.subMinecraft || 0;
+      else if (product === "visual") currentSub = user.subVisual || 0;
+
+      const base = Math.max(currentSub, user.subUntil || 0, Date.now());
+      const newSub = base + days * DAY;
+      const updates = { subUntil: newSub };
+      updates[subField] = newSub;
+
+      await store.updateUser(pending.login, updates);
+      await store.addHistory(pending.login, `Подписка продлена на ${days} дн. (${productLabel}) после оплаты (${source})`);
+      console.log(`${source}: +${days}d subscription to`, pending.login);
+    }
+
+    await store.completePendingPayment(orderId);
+    return true;
+  }
+
+  const handlePaymentCreate = async (req, res) => {
+    try {
       const planCode = String((req.body && req.body.plan) || "");
       const product = String((req.body && req.body.product) || "cs2");
       const method = String((req.body && req.body.method) || "sbp");
@@ -518,6 +634,49 @@ async function main() {
       });
 
       const origin = req.headers.origin || ("https://" + (req.headers.host || "aethra-wf3v.onrender.com"));
+      const planLabel = PLANS[planCode] ? PLANS[planCode].label : "Сброс HWID";
+
+      // ----------------- ОПЛАТА КРИПТОЙ (CryptoBot) -----------------
+      if (method === "crypto") {
+        const cryptoToken = await getCryptoBotToken();
+        if (cryptoToken) {
+          const invResult = await createCryptoBotInvoice(cryptoToken, orderId, amount, planLabel, product, origin);
+          if (invResult.ok && invResult.url) {
+            if (invResult.invoiceId) {
+              await store.upsertPendingPayment({
+                orderId,
+                transactionId: String(invResult.invoiceId),
+                login: req.user.login,
+                plan: planCode,
+                product,
+                amount,
+                method,
+                createdAt: Date.now()
+              });
+            }
+            return res.json({ ok: true, payment_url: invResult.url, order_id: orderId });
+          } else {
+            console.error("CryptoBot invoice create failed:", invResult.error);
+            // Фоллбэк: перевод в диалог с поддержкой для оплаты
+            const fallbackUrl = "https://t.me/aethra_helper?text=" + encodeURIComponent(
+              "Здравствуйте! Хочу оплатить тариф " + planLabel + " (" + product + ") за " + amount + " ₽ через CryptoBot. Номер заказа: " + orderId
+            );
+            return res.json({ ok: true, payment_url: fallbackUrl, order_id: orderId });
+          }
+        } else {
+          // Токен CryptoBot ещё не настроен в админке: перенаправляем в поддержку Telegram, а не на СБП!
+          const fallbackUrl = "https://t.me/aethra_helper?text=" + encodeURIComponent(
+            "Здравствуйте! Хочу оплатить тариф " + planLabel + " (" + product + ") за " + amount + " ₽ через криптовалюту / CryptoBot. Номер заказа: " + orderId
+          );
+          return res.json({ ok: true, payment_url: fallbackUrl, order_id: orderId });
+        }
+      }
+
+      // ----------------- ОПЛАТА СБП (Platega) -----------------
+      const cfg = await getPlategaConfig();
+      if (!cfg.key || !cfg.merchant) {
+        return bad(res, "Платёжная система СБП не настроена (укажите Merchant ID и Secret Key)");
+      }
 
       const payData = await plategaRequest("/transaction/process", {
         paymentMethod: 2,
@@ -525,7 +684,7 @@ async function main() {
           amount: amount,
           currency: "RUB"
         },
-        description: "Aethra " + (PLANS[planCode] ? PLANS[planCode].label : "Сброс HWID") + " · " + product,
+        description: "Aethra " + planLabel + " · " + product,
         return: origin + "/profile.html?payment=success&order=" + orderId,
         failedUrl: origin + "/profile.html?payment=fail&order=" + orderId,
         payload: orderId,
@@ -559,14 +718,17 @@ async function main() {
         res.json({ ok: true, payment_url: paymentUrl, order_id: orderId });
       } else {
         console.error("platega create error:", payData);
-        const errMsg = payData.message || (payData.data && payData.data[0] && payData.data[0].message) || "Ошибка создания платежа";
+        const errMsg = payData.message || (payData.data && payData.data[0] && payData.data[0].message) || "Ошибка создания платежа СБП";
         bad(res, errMsg);
       }
     } catch (e) {
-      console.error("platega create:", e);
+      console.error("payment create error:", e);
       res.status(500).json({ ok: false, error: "Ошибка сервера" });
     }
-  }));
+  };
+
+  app.post("/api/platega/create", requireAuth(handlePaymentCreate));
+  app.post("/api/payment/create", requireAuth(handlePaymentCreate));
 
   app.post("/api/platega/webhook", express.json(), async (req, res) => {
     try {
@@ -603,48 +765,54 @@ async function main() {
         data.status === "1";
 
       if (orderId && isSuccess) {
-        const pending = await store.getPendingPayment(orderId);
-        if (pending && !pending.completed) {
-          const user = await store.getUserByLogin(pending.login);
-          if (user) {
-            const product = pending.product || "minecraft";
-            const productLabels = { cs2: "CS2", minecraft: "Minecraft", visual: "Visual" };
-            const productLabel = productLabels[product] || product;
-
-            if (pending.plan === "life") {
-              await store.updateUser(pending.login, { lifetime: true, subUntil: null });
-              await store.addHistory(pending.login, `Пожизненный доступ (${productLabel}) активирован после оплаты`);
-              console.log("platega: lifetime granted to", pending.login);
-            } else if (pending.plan === "hwid-reset") {
-              await store.updateUser(pending.login, { hwid: "", hwidResets: 0 });
-              await store.addHistory(pending.login, "Сброс HWID после оплаты");
-              console.log("platega: hwid reset for", pending.login);
-            } else {
-              const days = (PLANS[pending.plan] && PLANS[pending.plan].days) || 30;
-              const subField = "sub_" + product;
-              let currentSub = 0;
-              if (product === "cs2") currentSub = user.subCs2 || 0;
-              else if (product === "minecraft") currentSub = user.subMinecraft || 0;
-              else if (product === "visual") currentSub = user.subVisual || 0;
-
-              const base = Math.max(currentSub, user.subUntil || 0, Date.now());
-              const newSub = base + days * DAY;
-              const updates = { subUntil: newSub };
-              updates[subField] = newSub;
-
-              await store.updateUser(pending.login, updates);
-              await store.addHistory(pending.login, `Подписка продлена на ${days} дн. (${productLabel}) после оплаты`);
-              console.log("platega: +" + days + "d subscription to", pending.login);
-            }
-          }
-
-          await store.completePendingPayment(orderId);
-        }
+        await activateSubscriptionForOrder(orderId, "platega");
       }
 
       res.status(200).json({ ok: true });
     } catch (e) {
       console.error("platega webhook error:", e);
+      res.status(200).json({ ok: true });
+    }
+  });
+
+  app.post("/api/cryptobot/webhook", express.json(), async (req, res) => {
+    try {
+      const data = req.body || {};
+      console.log("cryptobot webhook received:", JSON.stringify(data));
+
+      if (data.update_type === "invoice_paid" && data.payload) {
+        const inv = data.payload;
+        const orderId = String(inv.payload || "").trim();
+        const invoiceId = inv.invoice_id;
+
+        const token = await getCryptoBotToken();
+        let verified = false;
+
+        if (token && invoiceId) {
+          try {
+            const checkRes = await fetch(CRYPTOBOT_API_URL + "/getInvoices?invoice_ids=" + invoiceId, {
+              headers: { "Crypto-Pay-API-Token": token }
+            });
+            const checkData = await checkRes.json();
+            if (checkData && checkData.ok && checkData.result && checkData.result.items) {
+              const item = checkData.result.items.find(x => x.invoice_id === invoiceId);
+              if (item && item.status === "paid") {
+                verified = true;
+              }
+            }
+          } catch (err) {
+            console.error("cryptobot verification request error:", err);
+          }
+        }
+
+        if (orderId && (verified || !token)) {
+          await activateSubscriptionForOrder(orderId, "cryptobot");
+        }
+      }
+
+      res.status(200).json({ ok: true });
+    } catch (e) {
+      console.error("cryptobot webhook error:", e);
       res.status(200).json({ ok: true });
     }
   });
@@ -1075,6 +1243,65 @@ async function main() {
       if (key) await store.setSetting("platega_key", key);
       if (url) await store.setSetting("platega_url", url);
 
+      res.json({ ok: true });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  }));
+
+  app.get("/api/admin/cryptobot", requireAdmin(async (req, res) => {
+    try {
+      const token = await getCryptoBotToken();
+      let appInfo = null;
+      let valid = false;
+
+      if (token) {
+        try {
+          const r = await fetch(CRYPTOBOT_API_URL + "/getMe", {
+            headers: { "Crypto-Pay-API-Token": token }
+          });
+          const d = await r.json();
+          if (d && d.ok && d.result) {
+            appInfo = d.result;
+            valid = true;
+          }
+        } catch (e) {
+          console.warn("cryptobot getMe error:", e.message);
+        }
+      }
+
+      res.json({
+        ok: true,
+        hasToken: Boolean(token),
+        valid,
+        app: appInfo
+      });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  }));
+
+  app.post("/api/admin/cryptobot", requireAdmin(async (req, res) => {
+    try {
+      const token = cleanPlatega(req.body && req.body.token);
+      if (token) {
+        try {
+          const r = await fetch(CRYPTOBOT_API_URL + "/getMe", {
+            headers: { "Crypto-Pay-API-Token": token }
+          });
+          const d = await r.json();
+          if (!d || !d.ok) {
+            return bad(res, "Неверный токен CryptoBot (проверьте в @CryptoBot)");
+          }
+        } catch (e) {
+          // При временной ошибке сети разрешаем сохранить
+        }
+        await store.setSetting("cryptobot_token", token);
+      } else {
+        await store.setSetting("cryptobot_token", "");
+      }
       res.json({ ok: true });
     } catch (e) {
       console.error(e);

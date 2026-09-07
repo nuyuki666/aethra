@@ -1145,6 +1145,21 @@
     initRegisterForm();
     initKeyForm();
     initPasswordForm();
+
+    try {
+      var urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("payment") === "success") {
+        if (window.toast) toast("Оплата успешно принята! Подписка активирована.", "ok");
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      } else if (urlParams.get("payment") === "fail") {
+        if (window.toast) toast("Оплата отменена или не удалась.", "bad");
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }
+    } catch (_) {}
   }
 
   boot();
