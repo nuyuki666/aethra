@@ -54,16 +54,15 @@
     telegram:
       '<path d="M21.6 4.1 3.4 11.2c-1 .4-1 1.7.1 2l4.5 1.4 1.7 5.2c.3.8 1.2 1 1.8.4l2.4-2.4 4.6 3.4c.7.5 1.6.1 1.8-.7l3-14.2c.2-.9-.7-1.5-1.7-1.2z" fill="none"/><path d="M8 14.6 19.5 6.2" fill="none"/>',
     crypto:
-      '<circle cx="12" cy="12" r="9"/><path d="M9 8h4a2.5 2.5 0 0 1 0 5H9V8z"/><path d="M9 13h5a2.5 2.5 0 0 1 0 5H9v-5z"/><path d="M14 7v2M14 15v2"/>',
+      '<circle cx="12" cy="12" r="10" fill="#24A1DE"/><path d="M16.8 8.1L5.4 12.5c-.8.3-.8 1.3.1 1.6l2.9.9 1.1 3.4c.2.5.8.6 1.1.3l1.5-1.5 3 2.2c.4.3 1 .1 1.1-.4l2-9.2c.2-.7-.5-1.1-1.3-.7z" fill="#FFFFFF"/>',
     sbp:
-      '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 12h10"/><path d="M12 8v8"/>',
+      '<path d="M12 2.5L3.8 17h6.6L12 2.5z" fill="#FFB300"/><path d="M12 2.5l8.2 14.5h-6.6L12 2.5z" fill="#E53935"/><path d="M3.8 17L12 22l8.2-5H3.8z" fill="#1E88E5"/>',
+    support:
+      '<path d="M3 18v-6a9 9 0 0 1 18 0v6" stroke="#38BDF8" stroke-width="2" stroke-linecap="round" fill="none"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" fill="#38BDF8"/>',
     tether:
       '<circle cx="12" cy="12" r="10" fill="#26A17B"/><path d="M14.5 7h-5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5H12v3h-3.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h5a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5H11v-3h3.5a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5z" fill="#fff"/><path d="M12 6.5v-1M12 18.5v-1" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>',
     sbp_icon:
-      '<path d="M6 6h5v5H6zM13 6h5v5h-5zM6 13h5v5H6zM13 13h5v5h-5z" fill="none" stroke="currentColor" stroke-width="0"/>' +
-      '<path d="M7.5 7.5L10 10M16.5 7.5L14 10M7.5 16.5L10 14M16.5 16.5L14 14" stroke="#E53935" stroke-width="1.8" stroke-linecap="round"/>' +
-      '<path d="M10 10L14 14M14 10L10 14" stroke="#FFC107" stroke-width="1.8" stroke-linecap="round"/>' +
-      '<path d="M12 4v16M4 12h16" stroke="#1565C0" stroke-width="0" fill="none"/>'
+      '<path d="M12 2.5L3.8 17h6.6L12 2.5z" fill="#FFB300"/><path d="M12 2.5l8.2 14.5h-6.6L12 2.5z" fill="#E53935"/><path d="M3.8 17L12 22l8.2-5H3.8z" fill="#1E88E5"/>'
   };
 
   var solid = {};
