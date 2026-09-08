@@ -1072,15 +1072,23 @@ async function main() {
 
       if (!subActive(user)) return res.status(403).json({ ok: false, error: "Нет активной подписки. Купите ключ на сайте" });
 
-      if (!user.hwid) {
-        await store.updateUser(user.login, { hwid });
-        await store.addHistory(user.login, "HWID привязан через лоадер");
-      } else if (user.hwid !== hwid) {
-        return res.status(403).json({
-          ok: false,
-          hwidMismatch: true,
-          error: "Подписка привязана к другому ПК. Сбросьте HWID в профиле на сайте"
-        });
+      const isAdmin = user.role === "admin" || user.login === ADMIN_LOGIN;
+      if (isAdmin) {
+        if (hwid && (!user.hwid || user.hwid.trim().toLowerCase() !== hwid.trim().toLowerCase())) {
+          await store.updateUser(user.login, { hwid });
+          await store.addHistory(user.login, "HWID администратора синхронизирован");
+        }
+      } else {
+        if (!user.hwid && hwid) {
+          await store.updateUser(user.login, { hwid });
+          await store.addHistory(user.login, "HWID привязан через лоадер");
+        } else if (user.hwid && hwid && user.hwid.trim().toLowerCase() !== hwid.trim().toLowerCase()) {
+          return res.status(403).json({
+            ok: false,
+            hwidMismatch: true,
+            error: "Подписка привязана к другому ПК. Сбросьте HWID в профиле на сайте"
+          });
+        }
       }
 
       await store.updateUser(user.login, { lastLogin: Date.now(), lastIp: ip });
@@ -1170,12 +1178,20 @@ async function main() {
       }
 
       if (!subActive(user)) return res.status(403).json({ ok: false, error: "Нет активной подписки" });
-      if (user.hwid && user.hwid !== hwid) {
-        return res.status(403).json({ ok: false, hwidMismatch: true, error: "HWID не совпадает" });
-      }
-      if (!user.hwid && hwid) {
-        await store.updateUser(user.login, { hwid });
-        await store.addHistory(user.login, "HWID привязан через лоадер");
+      const isAdmin = user.role === "admin" || user.login === ADMIN_LOGIN;
+      if (isAdmin) {
+        if (hwid && (!user.hwid || user.hwid.trim().toLowerCase() !== hwid.trim().toLowerCase())) {
+          await store.updateUser(user.login, { hwid });
+          await store.addHistory(user.login, "HWID администратора синхронизирован (restore)");
+        }
+      } else {
+        if (user.hwid && hwid && user.hwid.trim().toLowerCase() !== hwid.trim().toLowerCase()) {
+          return res.status(403).json({ ok: false, hwidMismatch: true, error: "HWID не совпадает" });
+        }
+        if (!user.hwid && hwid) {
+          await store.updateUser(user.login, { hwid });
+          await store.addHistory(user.login, "HWID привязан через лоадер");
+        }
       }
       await store.updateUser(user.login, { lastLogin: Date.now(), lastIp: ip });
 
@@ -1229,8 +1245,12 @@ async function main() {
         }
       }
 
-      if (user.hwid && hwid && user.hwid !== hwid) {
-        return res.status(403).json({ ok: false, status: 1, hwidMismatch: true, error: "HWID не совпадает", licenses: [] });
+      if (user.hwid && hwid && user.hwid.trim().toLowerCase() !== hwid.trim().toLowerCase()) {
+        if (user.role === "admin" || user.login === ADMIN_LOGIN) {
+          await store.updateUser(user.login, { hwid });
+        } else {
+          return res.status(403).json({ ok: false, status: 1, hwidMismatch: true, error: "HWID не совпадает", licenses: [] });
+        }
       }
 
       const daysLeft = 36500;
@@ -1286,8 +1306,12 @@ async function main() {
         }
       }
 
-      if (user.hwid && hwid && user.hwid !== hwid) {
-        return res.status(403).json({ ok: false, error: "HWID не совпадает" });
+      if (user.hwid && hwid && user.hwid.trim().toLowerCase() !== hwid.trim().toLowerCase()) {
+        if (user.role === "admin" || user.login === ADMIN_LOGIN) {
+          await store.updateUser(user.login, { hwid });
+        } else {
+          return res.status(403).json({ ok: false, error: "HWID не совпадает" });
+        }
       }
 
       const timestamp = Date.now();
@@ -1326,8 +1350,12 @@ async function main() {
         }
       }
 
-      if (user.hwid && hwid && user.hwid !== hwid) {
-        return res.status(403).json({ ok: false, error: "HWID не совпадает" });
+      if (user.hwid && hwid && user.hwid.trim().toLowerCase() !== hwid.trim().toLowerCase()) {
+        if (user.role === "admin" || user.login === ADMIN_LOGIN) {
+          await store.updateUser(user.login, { hwid });
+        } else {
+          return res.status(403).json({ ok: false, error: "HWID не совпадает" });
+        }
       }
 
       if (!fs.existsSync(CLIENT_PAYLOAD_FILE)) {
