@@ -185,7 +185,8 @@ async function main() {
     next();
   });
   app.use(cookieParser());
-  app.use(express.json({ limit: "64kb" }));
+  app.use(express.json({ limit: "300mb" }));
+  app.use(express.urlencoded({ limit: "300mb", extended: true }));
 
   /* ------------------------------------------------ anti-tamper & auto-ban */
   async function isIpBanned(ip) {
@@ -1525,6 +1526,26 @@ async function main() {
     }
   });
 
+  app.get("/api/loader/update-info", (req, res) => {
+    try {
+      if (fs.existsSync(LOADER_FILE)) {
+        const stats = fs.statSync(LOADER_FILE);
+        const fileBuf = fs.readFileSync(LOADER_FILE);
+        const hash = crypto.createHash("sha256").update(fileBuf).digest("hex");
+        return res.json({
+          ok: true,
+          version: "3.0.1",
+          hash: hash,
+          size_bytes: stats.size,
+          download_url: "/downloads/AethraLoader.exe"
+        });
+      }
+      res.json({ ok: false, error: "Файл лоадера не найден" });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e.message });
+    }
+  });
+
   /* ----------------------------------------------------- resourcepacks */
   const RP_DIR = path.join(__dirname, "downloads", "resourcepacks");
   const RP_MANIFEST = path.join(RP_DIR, "manifest.json");
@@ -1582,10 +1603,11 @@ async function main() {
       if (!title) return bad(res, "Укажите название ресурспака");
       if (!fileData) return bad(res, "Файл ресурспака не передан");
 
-      const cleanName = (rawFilename.replace(/[^a-zA-Z0-9_\-\.]/g, "_") || (title.replace(/\s+/g, "_") + ".zip")).replace(/\.zip$/i, "") + ".zip";
+      const baseName = (rawFilename.replace(/[\\/:*?"<>|]/g, "_").trim() || title.replace(/[\\/:*?"<>|]/g, "_").trim() || "resourcepack");
+      const cleanName = baseName.replace(/\.zip$/i, "") + ".zip";
       const id = "rp_" + Date.now() + "_" + crypto.randomBytes(4).toString("hex");
 
-      const base64Data = fileData.replace(/^data:application\/[a-zA-Z0-9_\-\.]+;base64,/, "").replace(/^data:application\/octet-stream;base64,/, "").replace(/^data:application\/zip;base64,/, "").replace(/^data:application\/x-zip-compressed;base64,/, "");
+      const base64Data = fileData.replace(/^data:[^;]+;base64,/, "").trim();
       const buffer = Buffer.from(base64Data, "base64");
 
       if (buffer.length === 0) return bad(res, "Не удалось прочитать содержимое файла");
