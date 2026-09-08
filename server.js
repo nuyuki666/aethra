@@ -1492,9 +1492,6 @@ async function main() {
       }
 
       if (!subActive(user)) return res.status(403).json({ ok: false, error: "Нужна активная подписка" });
-      if (fs.existsSync(LOADER_ZIP_FILE)) {
-        return res.download(LOADER_ZIP_FILE, "AethraLoader.zip");
-      }
       if (!fs.existsSync(LOADER_FILE)) {
         return res.status(404).json({ ok: false, error: "Файл лоадера пока не загружен администратором" });
       }
