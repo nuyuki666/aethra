@@ -196,6 +196,9 @@
     deleteUser: function (login) {
       return api("/admin/users/delete", { login: login });
     },
+    resetHwidAdmin: function (login) {
+      return api("/admin/users/reset-hwid", { login: login });
+    },
 
     makeKeys: async function (plan, count, maxUses, days) {
       var r = await api("/admin/keys", {

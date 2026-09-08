@@ -137,6 +137,7 @@
         actions.push('<button class="btn btn--ghost btn--xs" data-act="grant" data-login="' + esc(u.login) + '" data-days="7">+7д</button>');
         actions.push('<button class="btn btn--ghost btn--xs" data-act="grant" data-login="' + esc(u.login) + '" data-days="30">+30д</button>');
         actions.push('<button class="btn btn--ghost btn--xs" data-act="custom" data-login="' + esc(u.login) + '">Дни…</button>');
+        actions.push('<button class="btn btn--quiet btn--xs" data-act="resethwid" data-login="' + esc(u.login) + '" title="Сбросить привязку железа (HWID)">Сброс HWID</button>');
         actions.push('<button class="btn btn--quiet btn--xs" data-act="revoke" data-login="' + esc(u.login) + '">Снять</button>');
         actions.push(u.banned
           ? '<button class="btn btn--ghost btn--xs" data-act="unban" data-login="' + esc(u.login) + '">Разбан</button>'
@@ -184,6 +185,9 @@
         if (act === "grant") {
           res = await S.grant(login, parseInt(btn.dataset.days, 10));
           msg = login + ": подписка продлена";
+        } else if (act === "resethwid") {
+          res = await S.resetHwidAdmin(login);
+          msg = login + ": привязка железа (HWID) сброшена";
         } else if (act === "revoke") {
           res = await S.revoke(login);
           msg = login + ": подписка отозвана";

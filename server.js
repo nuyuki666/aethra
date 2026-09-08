@@ -1260,16 +1260,9 @@ async function main() {
       const licenses = [
         {
           id: 1,
-          name: "Minecraft Client (Stable)",
+          name: "Aethra Client (Release 1.0.0)",
           days: daysLeft,
           license_type_id: 1,
-          expires_at: expiresAt
-        },
-        {
-          id: 2,
-          name: "Minecraft Client (3.0 Beta Access)",
-          days: daysLeft,
-          license_type_id: 2,
           expires_at: expiresAt
         }
       ];
@@ -1394,30 +1387,30 @@ async function main() {
   app.get("/api/stats", async (req, res) => {
     try {
       const all = await store.getAllUsers();
-      const active = all.filter(u => subActive(u) && !u.banned).length;
+      const active = all.filter(u => u.role !== "admin" && u.login !== ADMIN_LOGIN && subActive(u) && !u.banned).length;
       res.json({
         ok: true,
-        activeUsers: Math.max(active, 1),
-        totalUsers: all.length,
-        positiveFeedback: 98
+        activeUsers: active,
+        totalUsers: all.filter(u => u.role !== "admin" && u.login !== ADMIN_LOGIN).length,
+        positiveFeedback: 100
       });
     } catch (e) {
-      res.json({ ok: true, activeUsers: 1, totalUsers: 1, positiveFeedback: 98 });
+      res.json({ ok: true, activeUsers: 0, totalUsers: 0, positiveFeedback: 100 });
     }
   });
 
   app.get("/api/loader/stats", async (req, res) => {
     try {
       const all = await store.getAllUsers();
-      const active = all.filter(u => subActive(u) && !u.banned).length;
+      const active = all.filter(u => u.role !== "admin" && u.login !== ADMIN_LOGIN && subActive(u) && !u.banned).length;
       res.json({
         ok: true,
-        activeUsers: Math.max(active, 1),
-        totalUsers: all.length,
-        positiveFeedback: 98
+        activeUsers: active,
+        totalUsers: all.filter(u => u.role !== "admin" && u.login !== ADMIN_LOGIN).length,
+        positiveFeedback: 100
       });
     } catch (e) {
-      res.json({ ok: true, activeUsers: 1, totalUsers: 1, positiveFeedback: 98 });
+      res.json({ ok: true, activeUsers: 0, totalUsers: 0, positiveFeedback: 100 });
     }
   });
 
@@ -1615,6 +1608,22 @@ async function main() {
       res.json({ ok: true });
     } catch (e) {
       console.error("delete user error:", e);
+      res.status(500).json({ ok: false, error: "Ошибка сервера" });
+    }
+  }));
+
+  app.post("/api/admin/users/reset-hwid", requireAdmin(async (req, res) => {
+    try {
+      const login = String((req.body && req.body.login) || "").trim();
+      if (!login) return bad(res, "Укажите логин пользователя");
+      const user = await store.getUserByLogin(login);
+      if (!user) return bad(res, "Пользователь не найден");
+
+      await store.updateUser(login, { hwid: null, hwidResetAt: Date.now() });
+      await store.addHistory(login, `HWID сброшен администратором ${req.user.login}`);
+      res.json({ ok: true });
+    } catch (e) {
+      console.error("admin reset hwid error:", e);
       res.status(500).json({ ok: false, error: "Ошибка сервера" });
     }
   }));
