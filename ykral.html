@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<!-- saved from url=(0024)https://rainvisuals.pro/ -->
+<html lang="en" style="--header-height: 65px;"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <link rel="icon" type="image/svg+xml" href="https://rainvisuals.pro/logo.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rain Visuals</title>
+    <script type="module" crossorigin="" src="./ykral_files/index-BBYX1YYs.js.Без названия"></script>
+    <link rel="stylesheet" crossorigin="" href="./ykral_files/index-CMP8pSMC.css">
+  <style>:root {
+  --toastify-color-light: #fff;
+  --toastify-color-dark: #121212;
+  --toastify-color-info: #3498db;
+  --toastify-color-success: #07bc0c;
+  --toastify-color-warning: #f1c40f;
+  --toastify-color-error: hsl(6, 78%, 57%);
+  --toastify-color-transparent: rgba(255, 255, 255, 0.7);
+
+  --toastify-icon-color-info: var(--toastify-color-info);
+  --toastify-icon-color-success: var(--toastify-color-success);
+  --toastify-icon-color-warning: var(--toastify-color-warning);
+  --toastify-icon-color-error: var(--toastify-color-error);
+
+  --toastify-container-width: fit-content;
+  --toastify-toast-width: 320px;
+  --toastify-toast-offset: 16px;
+  --toastify-toast-top: max(var(--toastify-toast-offset), env(safe-area-inset-top));
+  --toastify-toast-right: max(var(--toastify-toast-offset), env(safe-area-inset-right));
+  --toastify-toast-left: max(var(--toastify-toast-offset), env(safe-area-inset-left));
+  --toastify-toast-bottom: max(var(--toastify-toast-offset), env(safe-area-inset-bottom));
+  --toastify-toast-background: #fff;
+  --toastify-toast-padding: 14px;
+  --toastify-toast-min-height: 64px;
+  --toastify-toast-max-height: 800px;
+  --toastify-toast-bd-radius: 6px;
+  --toastify-toast-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  --toastify-font-family: sans-serif;
+  --toastify-z-index: 9999;
+  --toastify-text-color-light: #757575;
+  --toastify-text-color-dark: #fff;
+
+  /* Used only for colored theme */
+  --toastify-text-color-info: #fff;
+  --toastify-text-color-success: #fff;
+  --toastify-text-color-warning: #fff;
+  --toastify-text-color-error: #fff;
+
+  --toastify-spinner-color: #616161;
+  --toastify-spinner-color-empty-area: #e0e0e0;
+  --toastify-color-progress-light: linear-gradient(to right, #4cd964, #5ac8fa, #007aff, #34aadc, #5856d6, #ff2d55);
+  --toastify-color-progress-dark: #bb86fc;
+  --toastify-color-progress-info: var(--toastify-color-info);
+  --toastify-color-progress-success: var(--toastify-color-success);
+  --toastify-color-progress-warning: var(--toastify-color-warning);
+  --toastify-color-progress-error: var(--toastify-color-error);
+  /* used to control the opacity of the progress trail */
+  --toastify-color-progress-bgo: 0.2;
+}
+
+.Toastify__toast-container {
+  z-index: var(--toastify-z-index);
+  -webkit-transform: translate3d(0, 0, var(--toastify-z-index));
+  position: fixed;
+  width: var(--toastify-container-width);
+  box-sizing: border-box;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.Toastify__toast-container--top-left {
+  top: var(--toastify-toast-top);
+  left: var(--toastify-toast-left);
+}
+.Toastify__toast-container--top-center {
+  top: var(--toastify-toast-top);
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+}
+.Toastify__toast-container--top-right {
+  top: var(--toastify-toast-top);
+  right: var(--toastify-toast-right);
+  align-items: end;
+}
+.Toastify__toast-container--bottom-left {
+  bottom: var(--toastify-toast-bottom);
+  left: var(--toastify-toast-left);
+}
+.Toastify__toast-container--bottom-center {
+  bottom: var(--toastify-toast-bottom);
+  left: 50%;
+  transform: translateX(-50%);
+  align-items: center;
+}
+.Toastify__toast-container--bottom-right {
+  bottom: var(--toastify-toast-bottom);
+  right: var(--toastify-toast-right);
+  align-items: end;
+}
+
+.Toastify__toast {
+  --y: 0px;
+  position: relative;
+  touch-action: none;
+  width: var(--toastify-toast-width);
+  min-height: var(--toastify-toast-min-height);
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+  padding: var(--toastify-toast-padding);
+  border-radius: var(--toastify-toast-bd-radius);
+  box-shadow: var(--toastify-toast-shadow);
+  max-height: var(--toastify-toast-max-height);
+  font-family: var(--toastify-font-family);
+  /* webkit only issue #791 */
+  z-index: 0;
+  /* inner swag */
+  display: flex;
+  flex: 1 auto;
+  align-items: center;
+  word-break: break-word;
+}
+
+@media only screen and (max-width: 480px) {
+  .Toastify__toast-container {
+    width: 100vw;
+    left: env(safe-area-inset-left);
+    margin: 0;
+  }
+  .Toastify__toast-container--top-left,
+  .Toastify__toast-container--top-center,
+  .Toastify__toast-container--top-right {
+    top: env(safe-area-inset-top);
+    transform: translateX(0);
+  }
+  .Toastify__toast-container--bottom-left,
+  .Toastify__toast-container--bottom-center,
+  .Toastify__toast-container--bottom-right {
+    bottom: env(safe-area-inset-bottom);
+    transform: translateX(0);
+  }
+  .Toastify__toast-container--rtl {
+    right: env(safe-area-inset-right);
+    left: initial;
+  }
+  .Toastify__toast {
+    --toastify-toast-width: 100%;
+    margin-bottom: 0;
+    border-radius: 0;
+  }
+}
+
+.Toastify__toast-container[data-stacked='true'] {
+  width: var(--toastify-toast-width);
+}
+
+@media only screen and (max-width: 480px) {
+  .Toastify__toast-container[data-stacked='true'] {
+    width: 100vw;
+  }
+}
+
+.Toastify__toast--stacked {
+  position: absolute;
+  width: 100%;
+  transform: translate3d(0, var(--y), 0) scale(var(--s));
+  transition: transform 0.3s;
+}
+
+.Toastify__toast--stacked[data-collapsed] .Toastify__toast-body,
+.Toastify__toast--stacked[data-collapsed] .Toastify__close-button {
+  transition: opacity 0.1s;
+}
+
+.Toastify__toast--stacked[data-collapsed='false'] {
+  overflow: visible;
+}
+
+.Toastify__toast--stacked[data-collapsed='true']:not(:last-child) > * {
+  opacity: 0;
+}
+
+.Toastify__toast--stacked:after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: calc(var(--g) * 1px);
+  bottom: 100%;
+}
+
+.Toastify__toast--stacked[data-pos='top'] {
+  top: 0;
+}
+
+.Toastify__toast--stacked[data-pos='bot'] {
+  bottom: 0;
+}
+
+.Toastify__toast--stacked[data-pos='bot'].Toastify__toast--stacked:before {
+  transform-origin: top;
+}
+
+.Toastify__toast--stacked[data-pos='top'].Toastify__toast--stacked:before {
+  transform-origin: bottom;
+}
+
+.Toastify__toast--stacked:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100%;
+  transform: scaleY(3);
+  z-index: -1;
+}
+
+.Toastify__toast--rtl {
+  direction: rtl;
+}
+
+.Toastify__toast--close-on-click {
+  cursor: pointer;
+}
+
+.Toastify__toast-icon {
+  margin-inline-end: 10px;
+  width: 22px;
+  flex-shrink: 0;
+  display: flex;
+}
+
+.Toastify--animate {
+  animation-fill-mode: both;
+  animation-duration: 0.5s;
+}
+
+.Toastify--animate-icon {
+  animation-fill-mode: both;
+  animation-duration: 0.3s;
+}
+
+.Toastify__toast-theme--dark {
+  background: var(--toastify-color-dark);
+  color: var(--toastify-text-color-dark);
+}
+
+.Toastify__toast-theme--light {
+  background: var(--toastify-color-light);
+  color: var(--toastify-text-color-light);
+}
+
+.Toastify__toast-theme--colored.Toastify__toast--default {
+  background: var(--toastify-color-light);
+  color: var(--toastify-text-color-light);
+}
+
+.Toastify__toast-theme--colored.Toastify__toast--info {
+  color: var(--toastify-text-color-info);
+  background: var(--toastify-color-info);
+}
+
+.Toastify__toast-theme--colored.Toastify__toast--success {
+  color: var(--toastify-text-color-success);
+  background: var(--toastify-color-success);
+}
+
+.Toastify__toast-theme--colored.Toastify__toast--warning {
+  color: var(--toastify-text-color-warning);
+  background: var(--toastify-color-warning);
+}
+
+.Toastify__toast-theme--colored.Toastify__toast--error {
+  color: var(--toastify-text-color-error);
+  background: var(--toastify-color-error);
+}
+
+.Toastify__progress-bar-theme--light {
+  background: var(--toastify-color-progress-light);
+}
+
+.Toastify__progress-bar-theme--dark {
+  background: var(--toastify-color-progress-dark);
+}
+
+.Toastify__progress-bar--info {
+  background: var(--toastify-color-progress-info);
+}
+
+.Toastify__progress-bar--success {
+  background: var(--toastify-color-progress-success);
+}
+
+.Toastify__progress-bar--warning {
+  background: var(--toastify-color-progress-warning);
+}
+
+.Toastify__progress-bar--error {
+  background: var(--toastify-color-progress-error);
+}
+
+.Toastify__progress-bar-theme--colored.Toastify__progress-bar--info,
+.Toastify__progress-bar-theme--colored.Toastify__progress-bar--success,
+.Toastify__progress-bar-theme--colored.Toastify__progress-bar--warning,
+.Toastify__progress-bar-theme--colored.Toastify__progress-bar--error {
+  background: var(--toastify-color-transparent);
+}
+
+.Toastify__close-button {
+  color: #fff;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: transparent;
+  outline: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: 0.3s ease;
+  z-index: 1;
+}
+
+.Toastify__toast--rtl .Toastify__close-button {
+  left: 6px;
+  right: unset;
+}
+
+.Toastify__close-button--light {
+  color: #000;
+  opacity: 0.3;
+}
+
+.Toastify__close-button > svg {
+  fill: currentColor;
+  height: 16px;
+  width: 14px;
+}
+
+.Toastify__close-button:hover,
+.Toastify__close-button:focus {
+  opacity: 1;
+}
+
+@keyframes Toastify__trackProgress {
+  0% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(0);
+  }
+}
+
+.Toastify__progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  opacity: 0.7;
+  transform-origin: left;
+}
+
+.Toastify__progress-bar--animated {
+  animation: Toastify__trackProgress linear 1 forwards;
+}
+
+.Toastify__progress-bar--controlled {
+  transition: transform 0.2s;
+}
+
+.Toastify__progress-bar--rtl {
+  right: 0;
+  left: initial;
+  transform-origin: right;
+  border-bottom-left-radius: initial;
+}
+
+.Toastify__progress-bar--wrp {
+  position: absolute;
+  overflow: hidden;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  border-bottom-left-radius: var(--toastify-toast-bd-radius);
+  border-bottom-right-radius: var(--toastify-toast-bd-radius);
+}
+
+.Toastify__progress-bar--wrp[data-hidden='true'] {
+  opacity: 0;
+}
+
+.Toastify__progress-bar--bg {
+  opacity: var(--toastify-color-progress-bgo);
+  width: 100%;
+  height: 100%;
+}
+
+.Toastify__spinner {
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  border: 2px solid;
+  border-radius: 100%;
+  border-color: var(--toastify-spinner-color-empty-area);
+  border-right-color: var(--toastify-spinner-color);
+  animation: Toastify__spin 0.65s linear infinite;
+}
+
+@keyframes Toastify__bounceInRight {
+  from,
+  60%,
+  75%,
+  90%,
+  to {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  from {
+    opacity: 0;
+    transform: translate3d(3000px, 0, 0);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(-25px, 0, 0);
+  }
+  75% {
+    transform: translate3d(10px, 0, 0);
+  }
+  90% {
+    transform: translate3d(-5px, 0, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes Toastify__bounceOutRight {
+  20% {
+    opacity: 1;
+    transform: translate3d(-20px, var(--y), 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(2000px, var(--y), 0);
+  }
+}
+
+@keyframes Toastify__bounceInLeft {
+  from,
+  60%,
+  75%,
+  90%,
+  to {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  0% {
+    opacity: 0;
+    transform: translate3d(-3000px, 0, 0);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(25px, 0, 0);
+  }
+  75% {
+    transform: translate3d(-10px, 0, 0);
+  }
+  90% {
+    transform: translate3d(5px, 0, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes Toastify__bounceOutLeft {
+  20% {
+    opacity: 1;
+    transform: translate3d(20px, var(--y), 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(-2000px, var(--y), 0);
+  }
+}
+
+@keyframes Toastify__bounceInUp {
+  from,
+  60%,
+  75%,
+  90%,
+  to {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  from {
+    opacity: 0;
+    transform: translate3d(0, 3000px, 0);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(0, -20px, 0);
+  }
+  75% {
+    transform: translate3d(0, 10px, 0);
+  }
+  90% {
+    transform: translate3d(0, -5px, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes Toastify__bounceOutUp {
+  20% {
+    transform: translate3d(0, calc(var(--y) - 10px), 0);
+  }
+  40%,
+  45% {
+    opacity: 1;
+    transform: translate3d(0, calc(var(--y) + 20px), 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -2000px, 0);
+  }
+}
+
+@keyframes Toastify__bounceInDown {
+  from,
+  60%,
+  75%,
+  90%,
+  to {
+    animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+  }
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -3000px, 0);
+  }
+  60% {
+    opacity: 1;
+    transform: translate3d(0, 25px, 0);
+  }
+  75% {
+    transform: translate3d(0, -10px, 0);
+  }
+  90% {
+    transform: translate3d(0, 5px, 0);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes Toastify__bounceOutDown {
+  20% {
+    transform: translate3d(0, calc(var(--y) - 10px), 0);
+  }
+  40%,
+  45% {
+    opacity: 1;
+    transform: translate3d(0, calc(var(--y) + 20px), 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, 2000px, 0);
+  }
+}
+
+.Toastify__bounce-enter--top-left,
+.Toastify__bounce-enter--bottom-left {
+  animation-name: Toastify__bounceInLeft;
+}
+
+.Toastify__bounce-enter--top-right,
+.Toastify__bounce-enter--bottom-right {
+  animation-name: Toastify__bounceInRight;
+}
+
+.Toastify__bounce-enter--top-center {
+  animation-name: Toastify__bounceInDown;
+}
+
+.Toastify__bounce-enter--bottom-center {
+  animation-name: Toastify__bounceInUp;
+}
+
+.Toastify__bounce-exit--top-left,
+.Toastify__bounce-exit--bottom-left {
+  animation-name: Toastify__bounceOutLeft;
+}
+
+.Toastify__bounce-exit--top-right,
+.Toastify__bounce-exit--bottom-right {
+  animation-name: Toastify__bounceOutRight;
+}
+
+.Toastify__bounce-exit--top-center {
+  animation-name: Toastify__bounceOutUp;
+}
+
+.Toastify__bounce-exit--bottom-center {
+  animation-name: Toastify__bounceOutDown;
+}
+
+@keyframes Toastify__zoomIn {
+  from {
+    opacity: 0;
+    transform: scale3d(0.3, 0.3, 0.3);
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes Toastify__zoomOut {
+  from {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+    transform: translate3d(0, var(--y), 0) scale3d(0.3, 0.3, 0.3);
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.Toastify__zoom-enter {
+  animation-name: Toastify__zoomIn;
+}
+
+.Toastify__zoom-exit {
+  animation-name: Toastify__zoomOut;
+}
+
+@keyframes Toastify__flipIn {
+  from {
+    transform: perspective(400px) rotate3d(1, 0, 0, 90deg);
+    animation-timing-function: ease-in;
+    opacity: 0;
+  }
+  40% {
+    transform: perspective(400px) rotate3d(1, 0, 0, -20deg);
+    animation-timing-function: ease-in;
+  }
+  60% {
+    transform: perspective(400px) rotate3d(1, 0, 0, 10deg);
+    opacity: 1;
+  }
+  80% {
+    transform: perspective(400px) rotate3d(1, 0, 0, -5deg);
+  }
+  to {
+    transform: perspective(400px);
+  }
+}
+
+@keyframes Toastify__flipOut {
+  from {
+    transform: translate3d(0, var(--y), 0) perspective(400px);
+  }
+  30% {
+    transform: translate3d(0, var(--y), 0) perspective(400px) rotate3d(1, 0, 0, -20deg);
+    opacity: 1;
+  }
+  to {
+    transform: translate3d(0, var(--y), 0) perspective(400px) rotate3d(1, 0, 0, 90deg);
+    opacity: 0;
+  }
+}
+
+.Toastify__flip-enter {
+  animation-name: Toastify__flipIn;
+}
+
+.Toastify__flip-exit {
+  animation-name: Toastify__flipOut;
+}
+
+@keyframes Toastify__slideInRight {
+  from {
+    transform: translate3d(110%, 0, 0);
+    visibility: visible;
+  }
+  to {
+    transform: translate3d(0, var(--y), 0);
+  }
+}
+
+@keyframes Toastify__slideInLeft {
+  from {
+    transform: translate3d(-110%, 0, 0);
+    visibility: visible;
+  }
+  to {
+    transform: translate3d(0, var(--y), 0);
+  }
+}
+
+@keyframes Toastify__slideInUp {
+  from {
+    transform: translate3d(0, 110%, 0);
+    visibility: visible;
+  }
+  to {
+    transform: translate3d(0, var(--y), 0);
+  }
+}
+
+@keyframes Toastify__slideInDown {
+  from {
+    transform: translate3d(0, -110%, 0);
+    visibility: visible;
+  }
+  to {
+    transform: translate3d(0, var(--y), 0);
+  }
+}
+
+@keyframes Toastify__slideOutRight {
+  from {
+    transform: translate3d(0, var(--y), 0);
+  }
+  to {
+    visibility: hidden;
+    transform: translate3d(110%, var(--y), 0);
+  }
+}
+
+@keyframes Toastify__slideOutLeft {
+  from {
+    transform: translate3d(0, var(--y), 0);
+  }
+  to {
+    visibility: hidden;
+    transform: translate3d(-110%, var(--y), 0);
+  }
+}
+
+@keyframes Toastify__slideOutDown {
+  from {
+    transform: translate3d(0, var(--y), 0);
+  }
+  to {
+    visibility: hidden;
+    transform: translate3d(0, 500px, 0);
+  }
+}
+
+@keyframes Toastify__slideOutUp {
+  from {
+    transform: translate3d(0, var(--y), 0);
+  }
+  to {
+    visibility: hidden;
+    transform: translate3d(0, -500px, 0);
+  }
+}
+
+.Toastify__slide-enter--top-left,
+.Toastify__slide-enter--bottom-left {
+  animation-name: Toastify__slideInLeft;
+}
+
+.Toastify__slide-enter--top-right,
+.Toastify__slide-enter--bottom-right {
+  animation-name: Toastify__slideInRight;
+}
+
+.Toastify__slide-enter--top-center {
+  animation-name: Toastify__slideInDown;
+}
+
+.Toastify__slide-enter--bottom-center {
+  animation-name: Toastify__slideInUp;
+}
+
+.Toastify__slide-exit--top-left,
+.Toastify__slide-exit--bottom-left {
+  animation-name: Toastify__slideOutLeft;
+  animation-timing-function: ease-in;
+  animation-duration: 0.3s;
+}
+
+.Toastify__slide-exit--top-right,
+.Toastify__slide-exit--bottom-right {
+  animation-name: Toastify__slideOutRight;
+  animation-timing-function: ease-in;
+  animation-duration: 0.3s;
+}
+
+.Toastify__slide-exit--top-center {
+  animation-name: Toastify__slideOutUp;
+  animation-timing-function: ease-in;
+  animation-duration: 0.3s;
+}
+
+.Toastify__slide-exit--bottom-center {
+  animation-name: Toastify__slideOutDown;
+  animation-timing-function: ease-in;
+  animation-duration: 0.3s;
+}
+
+@keyframes Toastify__spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+</style></head>
+  <body>
+    <div id="root"><div class="relative"><header class="fixed block justify-center w-full bg-[#00000069] border-b border-border-primary z-1233 backdrop-blur-xl" style="opacity: 1;"><div class="flex w-full items-center mx-auto justify-between max-w-400 p-3.5 lg:px-15 px-7"><div class="flex items-center justify-center text-accent gap-3 font-medium"><p class="font-icons text-lg">a</p><p class="font-manrope text-white">Rain <span class="text-text-sub">Visuals</span></p></div><div class="hidden lg:flex gap-7 text-accent"><a class="flex gap-2 text-accent cursor-pointer font-medium" href="https://rainvisuals.pro/" data-discover="true"><p class="font-icons ">b</p><p>Главная</p></a><a class="flex gap-2 text-text-sub hover:opacity-75 duration-300 transition-opacity cursor-pointer font-medium" href="https://rainvisuals.pro/#pricing" data-discover="true"><p class="font-icons text-icons">c</p><p>Цены</p></a><a class="flex gap-2 text-text-sub hover:opacity-75 duration-300 transition-opacity cursor-pointer font-medium" href="https://rainvisuals.pro/#modules" data-discover="true"><p class="font-icons text-icons">d</p><p>Модули</p></a><a class="flex gap-2 text-text-sub hover:opacity-75 duration-300 transition-opacity cursor-pointer font-medium" href="https://rainvisuals.pro/#features" data-discover="true"><p class="font-icons text-icons">e</p><p>Функции</p></a><a class="flex gap-2 text-text-sub hover:opacity-75 duration-300 transition-opacity cursor-pointer font-medium" href="https://discord.gg/4Z6HyTVyJQ"><p class="font-icons text-icons">f</p><p>Поддержка</p></a></div><div class="flex gap-3 items-center"><div class="w-full hidden lg:flex"><div class=" flex gap-3"><button class="inline-flex items-center justify-center cursor-pointer p-1 rounded-[11px] font-bold bg-accent text-black hover:opacity-70 duration-300 transition-opacity px-5 gap-3 w-full lg:w-auto"><span>Профиль</span></button><button class="group inline-flex h-9 appearance-none items-center justify-center rounded-full border-none bg-transparent p-0 outline-none ring-0 shadow-none duration-300 hover:drop-shadow-[0_0_16px_rgba(255,255,255,0.9)] focus:outline-none focus:ring-0" aria-label="Logout"><img alt="logout" class="size-5 object-contain brightness-125 opacity-95 duration-300 group-hover:brightness-150 group-hover:opacity-100" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAA6lJREFUeJztm82LFEcYxn/vzCpIsh5C0CAab7oe3ED8Qjyph+gpsH4cEi/iMYnxmJv4BygoHoQEvJhLBGUDe5IgShLxA1FENxpFFDQr5qJ7MOvqPh5qBsdNzW73dFd1rbM/mENXd9fzvs9UdVX1h9FAUj/wA7AJ+AiYQ3yeAH8Dg8CPZvYsiqqkrySNKS2eStoRI/l+pZd8kwlJe0PmX8M1+7khRQpgwCFJG4MJSBoBFoYSKInrwOdmNlF2xSZpAud02YwAx4BbGY+vAyuBvcCHnv0bzOzPkmJ7S+A+/ErSYUm1HPGslTTuqWt/6cnjrgEhqeP+0UNZTzCzS8Alz65PywqqldAGNPlWUl+O4x95ynrLCqaVWAbUgYFIWrmIZQDA8ohamYlpwLyIWpmJaUCS9FQdQFEkGbAL2ArcBQ7mWUTNeAOA/Y1fk+2SNpnZSJaT34cu8M2k7RXAWUmfZDk5VQP+8ZT55gYAH3vK+oBzkhZNJ5SqASeA8ZbtceDnnHUsw7WEKU1I8hpgZpclrQd2AwKOm9nVDqpqmrDRzB57jwi8GGrll84taU9G7dtq0xJS7QJl07Y7dIsB0MaEbjIAPCZ0mwEwyYSkDJC0VdJNuTtJmehQahnwm6QFyQyDkhYCJ4EPIkn2AUdTagGriJd8ky9SMuBBBZr3kjHAzG4CRyJKjgH7krkGAJjZ95KO4VZ09YyndTLDHAO2mdn5pAwAMLNhYDjr8R0MBC+BnWY2BIkNgxF4Cewws1+bBd1kwP+Sh+4xwJs8JHo/AEBSD7CusXnRzF51WFXb5CHRFiCpF7gA/N74/dEoy8uUyUOiBuAeqK5u2V4LfJezjmmTh3QNWJmxDOCFp2wMGJgueUjXAF9c7SZGZyZtNyc5Q50KzTT2AKeAUeAGsCVr8pDwKJAVM/sX2Nbp+e9DCyjErAFVB1A1swZUHUDVzBpQdQBVk6oBiz1lz0MIJWeApHXAGs+uhyH0Ys4El2jqDyDqQD9u1eeLa/KcvxSswOOlmFwDVoV4XT65LuDhNbAvRPLgDPCtp1NBuOTPhRKoAXdCVV6Qp7g7OkdDivTgnqx8FlIkB0+A27jP5n4ysyBD3ztI6pX0V9bn8QUI8pJUUWpmNgpsBi5XHUwV1ADM7BHuHvwArvn9F0BrJgy3DknzJX0taVDSi5K6QMxH3+XRMGNXCWZ8WXUuhSlgxhXl+HRuRpDDjDuSllYdb1BazDgt6X7DkGFJByTNrzq+qXgDJBzU1AqyCh0AAAAASUVORK5CYII="></button></div></div><button class="flex flex-col gap-1.5 lg:hidden cursor-pointer"><span class="block w-6 h-0.5 bg-accent transition-all duration-300 rounded-full "></span><span class="block w-6 h-0.5 bg-accent transition-all duration-300 rounded-full "></span><span class="block w-6 h-0.5 bg-accent transition-all duration-300 rounded-full "></span></button></div></div></header><div class="absolute w-1/3 h-119 bg-background-shine left-1/2 -translate-x-1/2 blur-[500px]"></div><div class="relative w-full min-h-screen bg-[url(&#39;../assets/grid.svg&#39;)] bg-contain bg-no-repeat gap-35 block"><div class="flex min-h-screen flex-col items-center justify-center lg:pt-0"><section class="flex flex-col lg:flex-row items-center lg:justify-center w-full min-h-screen text-accent gap-40 lg:gap-13 py-35 lg:py-0 relative"><canvas class="absolute inset-0" style="display: block; width: 100%; height: 100%;" width="1918" height="945"></canvas><div class="lg:items-end lg:text-right flex flex-col text-center justify-center items-center gap-3" style="opacity: 1; filter: blur(0px); transform: none;"><h1 class="font-bold leading-none text-[90px] font-outfit">RAIN</h1><p class="text-text-sub max-w-75">Minecraft клиент для визуальной точности и минимального дизайна.</p></div><div class="relative flex flex-col gap-10 items-center justify-center size-64" style="opacity: 1; filter: blur(0px); transform: none;"><div class="flex items-center justify-center w-full"><div class="absolute rounded-full animate-ping border border-accent/8 size-52" style="animation-duration: 2s;"></div><div class="absolute rounded-full animate-ping border border-accent/8 size-52" style="animation-duration: 2s; animation-delay: 0.6s;"></div><div class="absolute rounded-full bg-accent/10 blur-[60px] size-52"></div><div class="absolute rounded-full size-52 border border-border-primary"></div><div class="absolute rounded-full size-65 border border-border-primary"></div><img alt="reverseLogo" class="absolute size-42 object-contain opacity-30" src="data:image/svg+xml,%3csvg%20width=&#39;134&#39;%20height=&#39;191&#39;%20viewBox=&#39;0%200%20134%20191&#39;%20fill=&#39;none&#39;%20xmlns=&#39;http://www.w3.org/2000/svg&#39;%3e%3cpath%20d=&#39;M67.2354%20190.245C78.3025%20178.115%2094.6829%20159.795%20108.353%20139.181C122.178%20118.332%20133.179%2095.2131%20133.179%2073.8275C133.179%2039.1287%20119.853%2022.6768%20112.978%2018.5082L101.716%2036.0092C103.668%2037.1365%20106.194%2040.0978%20108.297%2045.5629C110.602%2051.5553%20112.431%2060.6307%20112.431%2073.8275C112.431%2087.1331%20104.914%20103.419%2095.6006%20118.31C86.273%20133.224%2075.0826%20146.833%2067.6182%20154.812L67.3428%20155.106L66.9971%20154.9C66.2043%20154.428%2065.2004%20153.505%2064.0498%20152.269C62.8894%20151.022%2061.5478%20149.42%2060.0781%20147.556C57.1383%20143.827%2053.6676%20139.025%2050.0791%20133.852C42.9011%20123.505%2035.2346%20111.654%2030.3662%20103.898L29.8857%20103.131H67.2529C69.6076%20103.131%2077.6311%20102.168%2085.0479%2098.0033C92.4356%2093.8549%2099.1973%2086.5512%2099.1973%2073.8275C99.1971%2053.4077%2084.9659%2045.3868%2077.9072%2043.9213L77.1826%2043.7709L77.5928%2043.1547L100.339%208.97498C98.6576%207.56653%2095.0636%205.5346%2089.373%203.81189C83.3076%201.9757%2074.8908%200.500366%2063.9434%200.500366C36.7242%200.500484%200.500158%2023.7547%200.5%2073.8275C0.5%2093.8188%2011.6368%20117.435%2025.6387%20138.887C39.4741%20160.085%2056.0496%20179.084%2067.2354%20190.245ZM23.5615%2083.6381C19.0221%2059.6896%2024.9992%2044.4742%2034.418%2035.2172C43.8098%2025.9867%2056.5455%2022.7584%2065.4121%2022.6088L66.377%2022.5922L65.834%2023.39L42.1357%2058.2181H67.2529C70.2294%2058.2182%2073.0586%2058.995%2075.1455%2060.9613C77.2385%2062.9336%2078.5088%2066.0312%2078.5088%2070.5101C78.5087%2077.1433%2076.364%2080.5175%2073.5479%2082.225C70.7974%2083.8925%2067.4973%2083.8908%2065.458%2084.0443L65.4395%2084.0453H23.6387L23.5615%2083.6381Z&#39;%20stroke=&#39;url(%23paint0_radial_6_2999)&#39;%20stroke-opacity=&#39;0.42&#39;/%3e%3cdefs%3e%3cradialGradient%20id=&#39;paint0_radial_6_2999&#39;%20cx=&#39;0&#39;%20cy=&#39;0&#39;%20r=&#39;1&#39;%20gradientUnits=&#39;userSpaceOnUse&#39;%20gradientTransform=&#39;translate(66.8392%2095.4846)%20rotate(90)%20scale(95.4846%2072.0116)&#39;%3e%3cstop%20offset=&#39;0.846154&#39;%20stop-color=&#39;%23A2D0FF&#39;%20stop-opacity=&#39;0&#39;/%3e%3cstop%20offset=&#39;1&#39;%20stop-color=&#39;%23A2D0FF&#39;/%3e%3c/radialGradient%3e%3c/defs%3e%3c/svg%3e"><p class="text-[168px] font-icons absolute">a</p><div class="flex bg-background-non-active border border-border-primary items-center justify-center rounded-[11px] px-5 p-1.5 mt-70 backdrop-blur-[5px] gap-3"><div class="aspect-square w-2 bg-icons rounded-full"></div><p class="text-text-sub">6831 онлайн сейчас</p></div></div><div class="flex flex-col gap-3 w-full px-5"><button class="inline-flex items-center justify-center cursor-pointer rounded-[11px] font-bold bg-accent text-black hover:opacity-70 duration-300 transition-opacity gap-3 p-3.5"><span>Получить доступ</span></button><button class="inline-flex items-center justify-center cursor-pointer rounded-[11px] font-bold border border-border-primary hover:border-text-accent/25 duration-300 gap-3 text-text-sub p-3.5"><span>Смотреть трейлер</span></button></div></div><div class="lg:items-start lg:text-left flex flex-col text-center justify-center items-center gap-3" style="opacity: 1; filter: blur(0px); transform: none;"><h1 class="font-bold leading-none text-[90px] font-outfit">VISUALS</h1><p class="text-text-sub max-w-75">70+ модулей. Чистый HUD редактор. Всегда обновляется. Для 1.21.11.</p></div></section></div><div class="flex flex-col items-center justify-center gap-30"><section id="pricing" class="flex flex-col gap-15 items-start justify-center w-full text-accent z-123 px-5 2xl:px-15"><div class="flex flex-col items-start justify-center text-section font-medium gap-3" style="opacity: 1; filter: blur(0px); transform: none;"><p>002 - ЦЕНЫ</p><h1 class="text-5xl text-accent font-black font-manrope">Доступные цены.</h1></div><div class="flex flex-col w-full gap-5"><div class="grid w-full grid-cols-1 items-stretch gap-3 md:grid-cols-2 xl:grid-cols-3"><div class="flex "><div class="flex flex-col items-start justify-start gap-6 rounded-2xl w-full border border-border-primary p-7 relative text-text-sub bg-background-non-active" style="opacity: 1; filter: blur(0px); transform: none;"><p class="font-medium">Рэйн месяц</p><div class="flex flex-col items-start justify-center gap-1"><div class="flex flex-col gap-2 relative text-accent font-black"><h1 class="text-6xl flex items-start"><span class="text-xl mt-0.5">₽</span>179</h1></div><p>Премиум-доступ на 30 дней</p></div><div class="flex flex-col gap-2 w-full items-center justify-center"><div class="w-full flex flex-col items-center justify-center gap-2 text-text-sub"><div class="flex gap-3 items-center justify-start w-full shrink-0"><p class="font-icons text-accent">o</p><p class="text-[17px] ">Полный доступ на 30 дней</p></div><hr class="w-full border border-border-primary"></div><div class="w-full flex flex-col items-center justify-center gap-2 text-text-sub"><div class="flex gap-3 items-center justify-start w-full shrink-0"><p class="font-icons text-accent">o</p><p class="text-[17px] ">Доступ ко всем функциям</p></div><hr class="w-full border border-border-primary"></div><div class="w-full flex flex-col items-center justify-center gap-2 text-text-sub"><div class="flex gap-3 items-center justify-start w-full shrink-0"><p class="font-icons text-accent">o</p><p class="text-[17px] ">Все будущие обновления</p></div><hr class="w-full border border-border-primary"></div><div class="w-full flex flex-col items-center justify-center gap-2 text-text-sub/45"><div class="flex gap-3 items-center justify-start w-full shrink-0"><p class="font-icons text-accent/45">g</p><p class="text-[17px] opacity-70">Самый популярный выбор</p></div></div></div><button class="inline-flex items-center justify-center cursor-pointer rounded-[11px] font-bold border border-border-primary hover:border-text-accent/25 duration-300 text-accent gap-3 p-3 w-full"><span>Оплатить</span></button></div></div><div class="flex "><div class="flex flex-col items-start justify-start gap-6 rounded-2xl w-full border border-border-primary p-7 relative text-text-sub bg-background-active" style="opacity: 1; filter: blur(0px); transform: none;"><div class="absolute top-0 right-0 md:right-1/2 md:translate-x-1/2 px-8 py-1.5 border border-border-primary bg-background-active rounded-bl-[calc(16px-1px)] rounded-tr-[calc(16px-1px)] md:rounded-t-none md:rounded-b-2xl text-[15px] font-medium text-center"><p>ПОПУЛЯРНОЕ</p></div><p class="font-medium">Рэйн 6 месяцев</p><div class="flex flex-col items-start justify-center gap-1"><div class="flex flex-col gap-2 relative text-accent font-black"><h1 class="text-6xl flex items-start"><span class="text-xl mt-0.5">₽</span>329</h1></div><p>Премиум-доступ на 180 дней</p></div><div class="flex flex-col gap-2 w-full items-center justify-center"><div class="w-full flex flex-col items-center justify-center gap-2 text-text-sub"><div class="flex gap-3 items-center justify-start w-full shrink-0"><p class="font-icons text-accent">o</p><p class="text-[17px] ">Полный доступ на 6 месяцев</p></div><hr class="w-full border border-border-primary"></div><div class="w-full flex flex-col items-center justify-center gap-2 text-text-sub"><div class="flex gap-3 items-center justify-start w-full shrink-0"><p class="font-icons text-accent">o</p><p class="text-[17px] ">Самый популярный выбор</p></div><hr class="w-full border border-border-primary"></div><div class="w-full flex flex-col items-center justify-center gap-2 text-text-sub"><div class="flex gap-3 items-center justify-start w-full shrink-0"><p class="font-icons text-accent">o</p><p class="text-[17px] ">Доступ ко всем функциям</p></div><hr class="w-full border border-border-primary"></div><div class="w-full flex flex-col items-center justify-center gap-2 text-text-sub"><div class="flex gap-3 items-center justify-start w-full shrink-0"><p class="font-icons text-accent">o</p><p class="text-[17px] ">Все будущие обновления</p></div></div></div><button class="inline-flex items-center justify-center cursor-pointer rounded-[11px] font-bold bg-accent text-black hover:opacity-70 duration-300 transition-opacity gap-3 p-3 w-full"><span>Оплатить</span></button></div></div><div class="flex "><div class="flex flex-col items-start justify-start gap-6 rounded-2xl w-full border border-border-primary p-7 relative text-text-sub bg-background-non-active" style="opacity: 1; filter: blur(0px); transform: none;"><p class="font-medium">Рэйн навсегда</p><div class="flex flex-col items-start justify-center gap-1"><div class="flex flex-col gap-2 relative text-accent font-black"><h1 class="text-6xl flex items-start"><span class="text-xl mt-0.5">₽</span>549</h1></div><p>Премиум-доступ навсегда</p></div><div class="flex flex-col gap-2 w-full items-center justify-center"><div class="w-full flex flex-col items-center justify-center gap-2 text-text-sub"><div class="flex gap-3 items-center justify-start w-full shrink-0"><p class="font-icons text-accent">o</p><p class="text-[17px] ">Полный доступ навсегда</p></div><hr class="w-full border border-border-primary"></div><div class="w-full flex flex-col items-center justify-center gap-2 text-text-sub"><div class="flex gap-3 items-center justify-start w-full shrink-0"><p class="font-icons text-accent">o</p><p class="text-[17px] ">Выгоднее всего</p></div><hr class="w-full border border-border-primary"></div><div class="w-full flex flex-col items-center justify-center gap-2 text-text-sub"><div class="flex gap-3 items-center justify-start w-full shrink-0"><p class="font-icons text-accent">o</p><p class="text-[17px] ">Доступ ко всем функциям</p></div><hr class="w-full border border-border-primary"></div><div class="w-full flex flex-col items-center justify-center gap-2 text-text-sub"><div class="flex gap-3 items-center justify-start w-full shrink-0"><p class="font-icons text-accent">o</p><p class="text-[17px] ">Все будущие обновления</p></div></div></div><button class="inline-flex items-center justify-center cursor-pointer rounded-[11px] font-bold border border-border-primary hover:border-text-accent/25 duration-300 text-accent gap-3 p-3 w-full"><span>Оплатить</span></button></div></div><div class="flex xl:col-start-2"><div class="flex flex-col items-start justify-start gap-6 rounded-2xl w-full border border-border-primary p-7 relative text-text-sub bg-background-non-active" style="opacity: 1; filter: blur(0px); transform: none;"><p class="font-medium">Сброс HWID</p><div class="flex flex-col items-start justify-center gap-1"><div class="flex flex-col gap-2 relative text-accent font-black"><h1 class="text-6xl flex items-start"><span class="text-xl mt-0.5">₽</span>179</h1></div><p>Сброс привязки аккаунта к устройству.</p></div><div class="flex flex-col gap-2 w-full items-center justify-center"></div><button class="inline-flex items-center justify-center cursor-pointer rounded-[11px] font-bold border border-border-primary hover:border-text-accent/25 duration-300 text-accent gap-3 p-3 w-full"><span>Оплатить</span></button></div></div></div><div class="flex w-full flex-col items-center justify-center"><hr class="w-full border border-border-primary"><div class="flex flex-col items-center justify-center w-full"><article class="w-full flex flex-col" style="opacity: 1; filter: blur(0px); transform: none;"><div class="flex items-center justify-between cursor-pointer hover:opacity-70 transition-opacity duration-300 py-4"><h2 class="font-semibold leading-none">Какие версии поддерживаются?</h2><p class="font-icons text-text-sub transition-transform duration-300 rotate-135">g</p></div><div class="grid duration-300 grid-rows-[0fr]"><div class="overflow-hidden"><p class="text-text-sub pb-4 leading-none">На данный момент доступны версии 1.16.5 / 1.21.8. В будущем возможны добавления других версий.</p></div></div><hr class="w-full border border-border-primary"></article><article class="w-full flex flex-col" style="opacity: 1; filter: blur(0px); transform: none;"><div class="flex items-center justify-between cursor-pointer hover:opacity-70 transition-opacity duration-300 py-4"><h2 class="font-semibold leading-none">Разрешен ли он на различных серверах?</h2><p class="font-icons text-text-sub transition-transform duration-300 rotate-135">g</p></div><div class="grid duration-300 grid-rows-[0fr]"><div class="overflow-hidden"><p class="text-text-sub pb-4 leading-none">Мод полностью разрешен на таких популярных серверах как FunTime и HolyWorld. Также адаптирован к тому что бы был разрешен на других серверах.</p></div></div><hr class="w-full border border-border-primary"></article><article class="w-full flex flex-col" style="opacity: 1; filter: blur(0px); transform: none;"><div class="flex items-center justify-between cursor-pointer hover:opacity-70 transition-opacity duration-300 py-4"><h2 class="font-semibold leading-none">Будут ли доступны будущие обновления?</h2><p class="font-icons text-text-sub transition-transform duration-300 rotate-135">g</p></div><div class="grid duration-300 grid-rows-[0fr]"><div class="overflow-hidden"><p class="text-text-sub pb-4 leading-none">Да, при активной подписке вы всегда сможете скачать обновленную версию.</p></div></div><hr class="w-full border border-border-primary"></article><article class="w-full flex flex-col" style="opacity: 1; filter: blur(0px); transform: none;"><div class="flex items-center justify-between cursor-pointer hover:opacity-70 transition-opacity duration-300 py-4"><h2 class="font-semibold leading-none">Как получить помощь при возникновении проблем?</h2><p class="font-icons text-text-sub transition-transform duration-300 rotate-135">g</p></div><div class="grid duration-300 grid-rows-[0fr]"><div class="overflow-hidden"><p class="text-text-sub pb-4 leading-none">Получить помощь при возникновении проблем можно в нашем дискорд канале создав тикет в категории &lt;Поддержка&gt;.</p></div></div><hr class="w-full border border-border-primary"></article></div></div></div></section><section id="modules" class="flex flex-col 2xl:flex-row items-center justify-between w-full text-accent z-123 gap-19 px-0 2xl:pr-15"><div class="flex flex-col items-start gap-15 justify-center px-15 bg-linear-90 from-[#0D1117] to-[#0B0E13] min-h-screen w-full border-r border-border-primary py-5" style="opacity: 0; filter: blur(20px); transform: translateX(-40px);"><div class="flex flex-col items-start justify-center text-section font-medium gap-3"><p>003 - МОДУЛИ</p><h1 class="text-5xl text-accent font-black font-manrope max-w-97">70+ модулей. Все категории.</h1></div><div class="flex flex-col items-start justify-center gap-11 w-full"><p class="text-text-sub max-w-140">Включайте, настраивайте и привязывайте каждый модуль прямо в интерактивном ClickGUI. Редактирование конфиг-файлов не требуется.</p><div class="bg-white/2 flex w-full items-center justify-start p-4 px-7 rounded-xl gap-4"><p class="font-icons text-2xl cursor-pointer">a</p><div class="h-6 bg-white/6 w-0.5 rounded-full"></div><div class="flex items-center justify-center w-full font-icons text-white/48 gap-11 overflow-auto [&amp;::-webkit-scrollbar]:hidden"><article class="hover:text-text-accent cursor-pointer duration-300">h</article><article class="hover:text-text-accent cursor-pointer duration-300">i</article><article class="hover:text-text-accent cursor-pointer duration-300">j</article><article class="bg-accent text-black leading-0 p-3 aspect-square rounded-lg flex items-center justify-center cursor-pointer duration-300">m</article><article class="hover:text-text-accent cursor-pointer duration-300">k</article><article class="hover:text-text-accent cursor-pointer duration-300">l</article></div></div></div></div><img alt="gui" class="aspect-video px-5 lg:px-0" src="./ykral_files/gui-BrqLlhpq.webp" style="opacity: 0; filter: blur(20px); transform: translateX(40px);"></section><section id="gallery" class="flex flex-col gap-15 items-start justify-center w-full text-accent z-123 px-5 2xl:px-15"><div class="flex flex-col items-start justify-center text-section font-medium gap-3" style="opacity: 0; filter: blur(20px); transform: translateX(40px);"><p>004 - В ИГРЕ</p><h1 class="text-5xl text-accent font-black font-manrope max-w-105">Как это выглядит изнутри.</h1></div><div class="flex w-full overflow-x-auto gap-5 [&amp;::-webkit-scrollbar]:hidden [-webkit-overflow-scrolling:touch]"><div class="aspect-video bg-background-non-active p-3 rounded-3xl shrink-0 overflow-hidden" style="opacity: 0; filter: blur(20px); transform: translateY(30px);"><img alt="image__r_0_" class="h-full w-full rounded-2xl object-cover" src="./ykral_files/hud-iEMax7D1.webp"></div><div class="aspect-video bg-background-non-active p-3 rounded-3xl shrink-0 overflow-hidden" style="opacity: 0; filter: blur(20px); transform: translateY(30px);"><img alt="image__r_1_" class="h-full w-full rounded-2xl object-cover" src="./ykral_files/gui11-C4bQorwQ.webp"></div></div></section><section id="features" class="flex flex-col gap-15 items-start justify-center w-full text-accent z-123 px-5 2xl:px-15"><div class="flex flex-col items-start justify-center text-section font-medium gap-3" style="opacity: 0; filter: blur(20px); transform: translateX(40px);"><p>005 - ПОЧЕМУ RAIN</p><h1 class="text-5xl text-accent font-black font-manrope max-w-150">Всё продумано. Ничего лишнего.</h1></div><div class="w-full grid grid-cols-[1fr_2fr_auto]"><article class="col-span-3 md:grid flex flex-col grid-cols-subgrid hover:bg-background-non-active hover:border-l-[#6B7A91] border-l-2 border-l-transparent duration-300 cursor-pointer items-start md:items-center justify-center py-6 px-10 gap-5"><div class="flex flex-col items-start justify-center" style="opacity: 0; filter: blur(20px); transform: translateX(40px);"><p class="text-section">01</p><h2 class="text-accent text-lg font-bold">Минимальный дизайн</h2></div><p class="text-text-sub" style="opacity: 0; filter: blur(20px); transform: translateX(40px);">Минималистичный стиль, чистый HUD и удобное управление в гуи без лишних элементов.</p><div class="flex justify-end" style="opacity: 0; filter: blur(20px); transform: translateX(40px);"><div class="p-1.5 px-4 text-section border border-border-primary rounded-lg font-semibold text-[15px] hover:border-text-accent/25 duration-300">Дизайн</div></div></article><hr class="col-span-3 w-full border border-border-primary" style="opacity: 0; filter: blur(20px); transform: translateX(40px);"><article class="col-span-3 md:grid flex flex-col grid-cols-subgrid hover:bg-background-non-active hover:border-l-[#6B7A91] border-l-2 border-l-transparent duration-300 cursor-pointer items-start md:items-center justify-center py-6 px-10 gap-5"><div class="flex flex-col items-start justify-center" style="opacity: 0; filter: blur(20px); transform: translateX(40px);"><p class="text-section">02</p><h2 class="text-accent text-lg font-bold">Комфорт</h2></div><p class="text-text-sub" style="opacity: 0; filter: blur(20px); transform: translateX(40px);">Продуманный визуал, удобный HUD и полезные утилиты для комфортной игры.</p><div class="flex justify-end" style="opacity: 0; filter: blur(20px); transform: translateX(40px);"><div class="p-1.5 px-4 text-section border border-border-primary rounded-lg font-semibold text-[15px] hover:border-text-accent/25 duration-300">Удобство</div></div></article><hr class="col-span-3 w-full border border-border-primary" style="opacity: 0; filter: blur(20px); transform: translateX(40px);"><article class="col-span-3 md:grid flex flex-col grid-cols-subgrid hover:bg-background-non-active hover:border-l-[#6B7A91] border-l-2 border-l-transparent duration-300 cursor-pointer items-start md:items-center justify-center py-6 px-10 gap-5"><div class="flex flex-col items-start justify-center" style="opacity: 0; filter: blur(20px); transform: translateX(40px);"><p class="text-section">03</p><h2 class="text-accent text-lg font-bold">40+ модулей</h2></div><p class="text-text-sub" style="opacity: 0; filter: blur(20px); transform: translateX(40px);">Более 40 модулей для визуального оформления, удобного HUD и полезных утилит.</p><div class="flex justify-end" style="opacity: 0; filter: blur(20px); transform: translateX(40px);"><div class="p-1.5 px-4 text-section border border-border-primary rounded-lg font-semibold text-[15px] hover:border-text-accent/25 duration-300">Модули</div></div></article><hr class="col-span-3 w-full border border-border-primary" style="opacity: 0; filter: blur(20px); transform: translateX(40px);"><article class="col-span-3 md:grid flex flex-col grid-cols-subgrid hover:bg-background-non-active hover:border-l-[#6B7A91] border-l-2 border-l-transparent duration-300 cursor-pointer items-start md:items-center justify-center py-6 px-10 gap-5"><div class="flex flex-col items-start justify-center" style="opacity: 0; filter: blur(20px); transform: translateX(40px);"><p class="text-section">04</p><h2 class="text-accent text-lg font-bold">Без нагрузки</h2></div><p class="text-text-sub" style="opacity: 0; filter: blur(20px); transform: translateX(40px);">Оптимизирован для комфортной и стабильной работы без ощутимой нагрузки на игру.</p><div class="flex justify-end" style="opacity: 0; filter: blur(20px); transform: translateX(40px);"><div class="p-1.5 px-4 text-section border border-border-primary rounded-lg font-semibold text-[15px] hover:border-text-accent/25 duration-300">Производительность</div></div></article><hr class="col-span-3 w-full border border-border-primary" style="opacity: 0; filter: blur(20px); transform: translateX(40px);"><article class="col-span-3 md:grid flex flex-col grid-cols-subgrid hover:bg-background-non-active hover:border-l-[#6B7A91] border-l-2 border-l-transparent duration-300 cursor-pointer items-start md:items-center justify-center py-6 px-10 gap-5"><div class="flex flex-col items-start justify-center" style="opacity: 0; filter: blur(20px); transform: translateX(40px);"><p class="text-section">05</p><h2 class="text-accent text-lg font-bold">Автообновления</h2></div><p class="text-text-sub" style="opacity: 0; filter: blur(20px); transform: translateX(40px);">Обновления приходят автоматически через лаунчер — без переустановок, лишних действий и простоев.</p><div class="flex justify-end" style="opacity: 0; filter: blur(20px); transform: translateX(40px);"><div class="p-1.5 px-4 text-section border border-border-primary rounded-lg font-semibold text-[15px] hover:border-text-accent/25 duration-300">Апдейты</div></div></article></div></section><section id="overview" class="flex flex-col gap-15 justify-center w-full text-accent z-123 px-5 2xl:px-15 items-center"><div class="flex flex-col justify-center text-section font-medium gap-3 items-center" style="opacity: 0; filter: blur(20px); transform: translateY(30px);"><p>006 - ТРЕЙЛЕР</p><h1 class="text-5xl text-accent font-black font-manrope">Узнайте больше о Rain.</h1></div><div class="text-accent rounded-xl px-0.5 pb-0.5 pt-1 w-full max-w-250 bg-linear-to-b from-text-accent/25 to-text-accent/1" style="opacity: 0; filter: blur(20px); transform: translateY(30px);"><div class="bg-linear-167 rounded-[calc(12px-2px)] w-full group flex items-center justify-center relative overflow-hidden aspect-video"><div class=" min-w-0 flex aspect-video pointer-events-none absolute flex-col w-full items-start justify-end p-5 h-full duration-300 z-123"><div class="hidden sm:flex justify-between w-full items-end"><div class="flex flex-col items-start justify-center w-full max-w-max"><h1 class="text-xl font-black truncate">Rain Visuals — Официальный обзор</h1><p class="text-sub text-[1.15rem] truncate">Полный обзор Rain Visuals - Майнкрафт Фантайм</p></div><div class="flex items-center justify-center w-full max-w-max bg-black/34 border border-border p-1.5 px-4 rounded-lg min-w-0 backdrop-blur-3xl opacity-100 transition-[backdrop-filter,opacity] duration-300"><p class="text-sub font-medium text-[.95rem] truncate">0:00</p></div></div></div><img alt="preview" class="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-50 -z-1" src="./ykral_files/maxresdefault.jpg"><button type="button" aria-label="Open trailer video" class="flex items-center justify-center rounded-full bg-accent absolute aspect-square w-23 duration-500 cursor-pointer shadow-[0_0_54px_10px_rgba(255,255,255,0.25)] border-0"><div class="absolute rounded-full animate-ping border border-accent/8 size-25" style="animation-duration: 2s;"></div><div class="absolute rounded-full animate-ping border border-accent/8 size-25" style="animation-duration: 2s; animation-delay: 0.6s;"></div><div class="absolute rounded-full size-30 border border-accent/16"></div><div class="absolute rounded-full size-35 border border-accent/5"></div><p class="font-icons leading-0 text-black text-xl">n</p></button></div></div></section><section id="joinus" class="flex flex-col items-center justify-center w-full max-w-100 gap-10 px-5 md:px-0" style="opacity: 0; filter: blur(20px); transform: translateY(30px);"><h1 class="text-7xl font-black text-accent flex flex-col items-center justify-center font-sans">Готов <span class="text-outline">доминировать?</span></h1><div class="flex flex-col gap-7 w-full text-center"><p class="text-text-sub">Присоединяйся к многим игрокам, уже использующим Rain Visuals.</p><button class="inline-flex items-center justify-center cursor-pointer rounded-[11px] font-bold bg-accent text-black hover:opacity-70 duration-300 transition-opacity gap-3 w-full p-3"><span>Получить доступ — от 179₽</span></button></div></section><footer class="flex flex-col gap-10 w-full text-section px-5 2xl:px-15 pb-5" style="opacity: 0;"><hr class="w-full border border-border-primary"><div class="flex flex-col md:flex-row justify-between w-full items-start lg:items-center gap-10"><div class="flex flex-col items-start gap-2 max-w-135 w-full"><div class="flex items-center justify-center text-accent gap-3 font-medium"><p class="font-icons text-lg">a</p><p class="font-manrope text-white">Rain <span class="text-text-sub">Visuals</span></p></div><p class="text-text-sub font-medium">Minecraft клиент, созданный вокруг чистой эстетики и точности. Доступен для 1.21.11</p></div><div class="flex flex-1 justify-between flex-col sm:flex-row gap-5 items-start max-w-200"><div class="flex flex-col gap-3 items-start justify-center"><p class="text-section font-semibold text-[14px]">ПРОДУКТ</p><div class="flex flex-col items-start justify-center text-white/40"><a class="hover:opacity-70 duration-300 font-medium" href="https://rainvisuals.pro/#features" data-discover="true">Функции</a><a class="hover:opacity-70 duration-300 font-medium" href="https://rainvisuals.pro/#modules" data-discover="true">Модули</a><a class="hover:opacity-70 duration-300 font-medium" href="https://rainvisuals.pro/#pricing" data-discover="true">Тарифы</a></div></div><div class="flex flex-col gap-3 items-start justify-center"><p class="text-section font-semibold text-[14px]">СООБЩЕСТВО</p><div class="flex flex-col items-start justify-center text-white/40"><a href="https://t.me/rainvisuals" target="_blank" rel="noopener noreferrer" class="hover:opacity-70 duration-300 font-medium">Telegram</a><a href="https://discord.gg/bQ5REz6ceT" target="_blank" rel="noopener noreferrer" class="hover:opacity-70 duration-300 font-medium">Discord</a><a href="https://www.youtube.com/@ra1ndery" target="_blank" rel="noopener noreferrer" class="hover:opacity-70 duration-300 font-medium">YouTube</a></div></div><div class="flex flex-col gap-3 items-start justify-center"><p class="text-section font-semibold text-[14px]">ПОДДЕРЖКА</p><div class="flex flex-col items-start justify-center text-white/40"><a class="hover:opacity-70 duration-300 font-medium" href="https://rainvisuals.pro/" data-discover="true">Помощь</a><a class="hover:opacity-70 duration-300 font-medium" href="https://rainvisuals.pro/" data-discover="true">Соглашение</a><a class="hover:opacity-70 duration-300 font-medium" href="https://rainvisuals.pro/" data-discover="true">Политика</a></div></div></div></div><div class="block space-y-4"><hr class="w-full border border-border-primary"><div class="flex w-full justify-between"><p>© 2026 Rain Visuals</p><a>t.me/rainvisuals</a></div></div></footer></div><div class="fixed right-4 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-123"><div class="size-2 rounded-full bg-accent h-7 duration-300 cursor-pointer"></div><div class="size-2 rounded-full bg-[#2E3A4E] hover:opacity-50 duration-300 cursor-pointer"></div><div class="size-2 rounded-full bg-[#2E3A4E] hover:opacity-50 duration-300 cursor-pointer"></div><div class="size-2 rounded-full bg-[#2E3A4E] hover:opacity-50 duration-300 cursor-pointer"></div><div class="size-2 rounded-full bg-[#2E3A4E] hover:opacity-50 duration-300 cursor-pointer"></div><div class="size-2 rounded-full bg-[#2E3A4E] hover:opacity-50 duration-300 cursor-pointer"></div><div class="size-2 rounded-full bg-[#2E3A4E] hover:opacity-50 duration-300 cursor-pointer"></div></div></div><div class="fixed bottom-5 right-5 flex items-center gap-2 px-0.5 rounded-full bg-black/30 border border-border-primary cursor-pointer hover:opacity-60 duration-200 aspect-square max-w-10 z-12312" style="opacity: 1; filter: blur(0px);"><img alt="flag" class="w-full object-cover rounded-full aspect-square" src="./ykral_files/ru-DzCIrZ8s.webp"></div></div><section class="Toastify" aria-live="polite" aria-atomic="false" aria-relevant="additions text" aria-label="Notifications Alt+T"></section></div>
+
+  
+
+<div class="fixed inset-0 z-1233 text-accent"><div class="bg-background-main/70 backdrop-blur-xl w-full h-screen" style="opacity: 1;"></div><div class="fixed inset-0 flex flex-col items-center justify-center gap-5 w-full max-w-130 mx-auto" style="opacity: 1; filter: blur(0px);"><div class="flex relative flex-col items-start justify-center gap-3 border border-border-profile bg-background-category overflow-hidden p-5 rounded-xl w-full"><div class="w-20 absolute top-0 left-0 bg-profile-blue-glow-primary rounded-full aspect-square blur-[70px]"></div><div class="w-30 absolute top-0 left-0 bg-profile-blue-glow-secondary rounded-full aspect-square blur-[75px]"></div><div class="w-20 absolute bottom-0 right-0 bg-profile-blue-glow-primary rounded-full aspect-square blur-[70px]"></div><div class="w-30 absolute bottom-0 right-0 bg-profile-blue-glow-secondary rounded-full aspect-square blur-[75px]"></div><h1 class="text-accent text-xl font-black z-123">Рэйн 6 месяцев</h1><div class="flex flex-col sm:flex-row w-full justify-between items-start sm:items-center p-3 rounded-lg border border-border-billing bg-background-billing overflow-hidden relative gap-3 sm:gap-10"><div class="flex flex-col items-start justify-center"><h3 class="font-semibold text-accent text-[1.1rem]">Рэйн 6 месяцев Plan</h3><p class="text-[.9rem] text-text-sub font-medium">Сбалансированный вариант для постоянных игроков</p></div><div class="flex flex-col items-start sm:items-end justify-center"><h2 class="text-[1.2rem] font-bold">329₽</h2><p class="text-text-sub text-[.9rem] font-semibold">РАЗОВЫЙ ПЛАТЕЖ</p></div></div></div><div class="flex relative flex-col items-start justify-center gap-3 border bg-text-accent/3 border-border-primary overflow-hidden p-5 rounded-2xl w-full"><div class="flex flex-col items-start justify-center w-full gap-2"><p class="font-semibold text-[.85rem] text-text-sub">СПОСОБ ОПЛАТЫ</p><div class="flex flex-col p-1.5 rounded-xl border border-border-billing bg-background-billing w-full"><div class="flex w-full gap-3 items-center justify-start cursor-pointer hover:bg-background-active/30 duration-300 p-1.5 rounded-lg"><div class="relative w-10 aspect-square"><div class="absolute inset-0 rounded-lg bg-text-accent/53 border border-text-accent z-[-1]"></div><img alt="method-img" class="w-full h-full rounded-lg p-1 relative z-10" src="./ykral_files/images-4dadbd03.png"></div><p class="text-accent font-semibold duration-300">Система быстрых платежей</p></div><div class="flex w-full gap-3 items-center justify-start cursor-pointer hover:bg-background-active/30 duration-300 p-1.5 rounded-lg"><div class="relative w-10 aspect-square"><img alt="method-img" class="w-full h-full rounded-lg p-1 relative z-10" src="./ykral_files/photo_2026-05-06_00-25-06-58dc665d.jpg"></div><p class="text-text-sub font-semibold duration-300">Российские карты</p></div><div class="flex w-full gap-3 items-center justify-start cursor-pointer hover:bg-background-active/30 duration-300 p-1.5 rounded-lg"><div class="relative w-10 aspect-square"><img alt="method-img" class="w-full h-full rounded-lg p-1 relative z-10" src="./ykral_files/images-2--55f2a15f.jpg"></div><p class="text-text-sub font-semibold duration-300">Европейские карты</p></div><div class="flex w-full gap-3 items-center justify-start cursor-pointer hover:bg-background-active/30 duration-300 p-1.5 rounded-lg"><div class="relative w-10 aspect-square"><img alt="method-img" class="w-full h-full rounded-lg p-1 relative z-10" src="./ykral_files/photo_2026-05-06_00-25-28-c74907b6.jpg"></div><p class="text-text-sub font-semibold duration-300">Криптовалюта</p></div><div class="flex w-full gap-3 items-center justify-start cursor-pointer hover:bg-background-active/30 duration-300 p-1.5 rounded-lg"><div class="relative w-10 aspect-square"><img alt="method-img" class="w-full h-full rounded-lg p-1 relative z-10" src="./ykral_files/photo_2026-06-12_17-22-06-b54cef28.jpg"></div><p class="text-text-sub font-semibold duration-300">ФанПей</p></div></div></div><div class="flex flex-col items-start justify-center w-full gap-2"><p class="font-semibold text-[.85rem] text-text-sub">ПРОМОКОД</p><div class="relative w-full"><div class="w-full rounded-xl transition-shadow "><div class="flex w-full items-center justify-center p-3.5 bg-background-input border border-text-accent/10 text-text-accent rounded-xl px-4 font-semibold text-[.95rem] cursor-pointer gap-2"><input placeholder="Введите код, например RAIN20" class="placeholder:text-section outline-0 w-full duration-300" value=""></div></div></div></div><button class="inline-flex items-center justify-center cursor-pointer rounded-[11px] font-bold bg-accent text-black hover:opacity-70 duration-300 transition-opacity gap-3 p-3 w-full"><span>Оплатить 329₽</span></button></div></div></div></body></html>

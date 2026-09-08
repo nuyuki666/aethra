@@ -1525,6 +1525,125 @@ async function main() {
     }
   });
 
+  /* ----------------------------------------------------- resourcepacks */
+  const RP_DIR = path.join(__dirname, "downloads", "resourcepacks");
+  const RP_MANIFEST = path.join(RP_DIR, "manifest.json");
+
+  function getResourcepacksManifest() {
+    try {
+      if (fs.existsSync(RP_MANIFEST)) {
+        return JSON.parse(fs.readFileSync(RP_MANIFEST, "utf8"));
+      }
+    } catch (e) {
+      console.error("read rp manifest error:", e);
+    }
+    return [];
+  }
+
+  function saveResourcepacksManifest(list) {
+    try {
+      if (!fs.existsSync(RP_DIR)) fs.mkdirSync(RP_DIR, { recursive: true });
+      fs.writeFileSync(RP_MANIFEST, JSON.stringify(list, null, 2), "utf8");
+    } catch (e) {
+      console.error("save rp manifest error:", e);
+    }
+  }
+
+  app.get("/api/resourcepacks", (req, res) => {
+    try {
+      const items = getResourcepacksManifest();
+      res.json({ ok: true, items });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e.message });
+    }
+  });
+
+  app.get("/api/resourcepacks/download/:filename", (req, res) => {
+    try {
+      const filename = path.basename(req.params.filename || "");
+      const target = path.join(RP_DIR, filename);
+      if (!fs.existsSync(target)) {
+        return res.status(404).json({ ok: false, error: "Ресурспак не найден" });
+      }
+      res.download(target, filename);
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e.message });
+    }
+  });
+
+  app.post("/api/admin/resourcepacks/upload", requireAdmin(async (req, res) => {
+    try {
+      const title = String((req.body && req.body.title) || "").trim();
+      const desc = String((req.body && req.body.description) || "").trim();
+      const rawFilename = String((req.body && req.body.filename) || "").trim();
+      const fileData = String((req.body && req.body.fileData) || "").trim();
+      const icon = String((req.body && req.body.icon) || "").trim();
+
+      if (!title) return bad(res, "Укажите название ресурспака");
+      if (!fileData) return bad(res, "Файл ресурспака не передан");
+
+      const cleanName = (rawFilename.replace(/[^a-zA-Z0-9_\-\.]/g, "_") || (title.replace(/\s+/g, "_") + ".zip")).replace(/\.zip$/i, "") + ".zip";
+      const id = "rp_" + Date.now() + "_" + crypto.randomBytes(4).toString("hex");
+
+      const base64Data = fileData.replace(/^data:application\/[a-zA-Z0-9_\-\.]+;base64,/, "").replace(/^data:application\/octet-stream;base64,/, "").replace(/^data:application\/zip;base64,/, "").replace(/^data:application\/x-zip-compressed;base64,/, "");
+      const buffer = Buffer.from(base64Data, "base64");
+
+      if (buffer.length === 0) return bad(res, "Не удалось прочитать содержимое файла");
+
+      if (!fs.existsSync(RP_DIR)) fs.mkdirSync(RP_DIR, { recursive: true });
+      const filePath = path.join(RP_DIR, cleanName);
+      fs.writeFileSync(filePath, buffer);
+
+      const items = getResourcepacksManifest();
+      const newPack = {
+        id,
+        slug: id,
+        title,
+        description: desc,
+        filename: cleanName,
+        size_bytes: buffer.length,
+        icon_url: icon || null,
+        downloads: 0,
+        createdAt: Date.now(),
+        author: req.user.login
+      };
+
+      items.unshift(newPack);
+      saveResourcepacksManifest(items);
+
+      res.json({ ok: true, item: newPack });
+    } catch (e) {
+      console.error("upload resourcepack error:", e);
+      res.status(500).json({ ok: false, error: e.message || "Ошибка сервера" });
+    }
+  }));
+
+  app.post("/api/admin/resourcepacks/delete", requireAdmin(async (req, res) => {
+    try {
+      const id = String((req.body && req.body.id) || "").trim();
+      if (!id) return bad(res, "ID ресурспака не указан");
+
+      const items = getResourcepacksManifest();
+      const target = items.find(x => x.id === id || x.slug === id || x.filename === id);
+      if (!target) return bad(res, "Ресурспак не найден");
+
+      const updated = items.filter(x => x.id !== id && x.slug !== id && x.filename !== id);
+      saveResourcepacksManifest(updated);
+
+      if (target.filename) {
+        const filePath = path.join(RP_DIR, target.filename);
+        if (fs.existsSync(filePath)) {
+          try { fs.unlinkSync(filePath); } catch (ignored) {}
+        }
+      }
+
+      res.json({ ok: true });
+    } catch (e) {
+      console.error("delete resourcepack error:", e);
+      res.status(500).json({ ok: false, error: e.message || "Ошибка сервера" });
+    }
+  }));
+
   app.get("/api/avatars", async (req, res) => {
     try {
       const logins = String(req.query.logins || "")

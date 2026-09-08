@@ -90,6 +90,9 @@
         <button class="dash__tab" role="tab" id="tab-platega" aria-controls="panel-platega" aria-selected="false" tabindex="-1">
           <svg class="i"><use href="#i-card"></use></svg> Платёжка
         </button>
+        <button class="dash__tab" role="tab" id="tab-resourcepacks" aria-controls="panel-resourcepacks" aria-selected="false" tabindex="-1">
+          <svg class="i"><use href="#i-spark"></use></svg> Ресурспаки
+        </button>
       </nav>
 
       <div>
@@ -434,6 +437,62 @@
                 </div>
               </form>
             </article>
+          </div>
+        </section>
+
+        <!-- ======================================= panel: resourcepacks -->
+        <section class="dash__panel" id="panel-resourcepacks" role="tabpanel" aria-labelledby="tab-resourcepacks" tabindex="0" hidden>
+          <div class="page-head">
+            <div>
+              <h2>Управление ресурспаками</h2>
+              <p>Загружайте ресурспаки для автоматического отображения и установки в лоадере</p>
+            </div>
+            <span class="badge" data-rp-count>0</span>
+          </div>
+
+          <article class="card" style="margin-bottom:var(--sp-4)">
+            <div class="panel-head">
+              <h3>Загрузить новый ресурспак (.ZIP)</h3>
+            </div>
+            <form data-rp-upload-form style="display:flex;flex-direction:column;gap:16px;margin-top:16px">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div class="field">
+                  <label class="field__label" for="rpTitle">Название ресурспака *</label>
+                  <input class="input" id="rpTitle" type="text" placeholder="например, FunTime PvP 32x" required>
+                </div>
+                <div class="field">
+                  <label class="field__label" for="rpFile">Файл ресурспака (.ZIP) *</label>
+                  <input class="input" id="rpFile" type="file" accept=".zip" required>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field__label" for="rpDesc">Описание (необязательно)</label>
+                <input class="input" id="rpDesc" type="text" placeholder="Оптимизированный пак для PvP боев">
+              </div>
+              <div>
+                <button class="btn btn--primary" type="submit" id="btnUploadRp">
+                  <svg class="i"><use href="#i-upload"></use></svg> Загрузить в лоадер
+                </button>
+              </div>
+            </form>
+          </article>
+
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Название</th>
+                  <th>Описание</th>
+                  <th>Размер</th>
+                  <th>Дата загрузки</th>
+                  <th>Файл</th>
+                  <th>Действия</th>
+                </tr>
+              </thead>
+              <tbody data-rp-body>
+                <tr><td colspan="6" class="text-dim">Загрузка...</td></tr>
+              </tbody>
+            </table>
           </div>
         </section>
 

@@ -181,6 +181,17 @@
       return !!(r && r.ok);
     },
 
+    resourcepacksList: async function () {
+      var r = await api("/resourcepacks");
+      return r && r.ok ? r.items : [];
+    },
+    uploadResourcepack: async function (data) {
+      return api("/admin/resourcepacks/upload", data);
+    },
+    deleteResourcepack: async function (id) {
+      return api("/admin/resourcepacks/delete", { id: id });
+    },
+
     grant: async function (login, days) {
       return api("/admin/grant", { login: login, days: days == null ? null : parseInt(days, 10) });
     },
@@ -237,6 +248,16 @@
     },
     createPayment: function (data) {
       return api("/platega/create", data);
+    },
+    resourcepacksList: async function () {
+      var r = await api("/resourcepacks");
+      return r && r.ok ? r.items : [];
+    },
+    uploadResourcepack: async function (data) {
+      return api("/admin/resourcepacks/upload", data);
+    },
+    deleteResourcepack: async function (id) {
+      return api("/admin/resourcepacks/delete", { id: id });
     }
   };
 })();

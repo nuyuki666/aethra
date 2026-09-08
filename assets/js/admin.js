@@ -52,7 +52,7 @@
   }
 
   async function renderAll() {
-    await Promise.all([renderStats(), renderUsers(), renderKeys(), renderPromos()]);
+    await Promise.all([renderStats(), renderUsers(), renderKeys(), renderPromos(), renderResourcepacks()]);
   }
 
   /* -------------------------------------------------------------- overview */
@@ -608,6 +608,117 @@
     }
   }
 
+  /* -------------------------------------------------------- resourcepacks */
+  function formatBytes(bytes) {
+    if (!bytes || bytes === 0) return "0 B";
+    var k = 1024;
+    var sizes = ["B", "KB", "MB", "GB"];
+    var i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  }
+
+  async function renderResourcepacks() {
+    var body = $("[data-rp-body]");
+    var count = $("[data-rp-count]");
+    if (!body) return;
+
+    var rps = await S.resourcepacksList();
+    if (count) count.textContent = rps.length;
+
+    if (!rps.length) {
+      body.innerHTML =
+        '<tr><td colspan="6"><div class="empty" style="padding:var(--sp-5) 0">' +
+        '<svg class="i"><use href="#i-inbox"></use></svg><p>Пока нет добавленных ресурспаков.</p></div></td></tr>';
+      return;
+    }
+
+    body.innerHTML = rps.map(function (rp) {
+      return (
+        "<tr>" +
+        "<td><b>" + esc(rp.title) + "</b></td>" +
+        "<td>" + (rp.description ? esc(rp.description) : '<span class="text-dim">—</span>') + "</td>" +
+        '<td class="mono">' + formatBytes(rp.size_bytes) + "</td>" +
+        '<td class="mono">' + S.fmtDateTime(rp.createdAt) + "</td>" +
+        '<td class="mono"><a href="/api/resourcepacks/download/' + encodeURIComponent(rp.filename) + '" target="_blank" style="color:var(--accent)">' + esc(rp.filename) + "</a></td>" +
+        '<td><button class="btn btn--danger btn--xs" data-rp-del="' + esc(rp.id) + '" title="Удалить"><svg class="i" style="width:12px;height:12px"><use href="#i-trash"></use></svg> Удалить</button></td>' +
+        "</tr>"
+      );
+    }).join("");
+  }
+
+  function bindResourcepacks() {
+    var form = $("form[data-rp-upload-form]");
+    if (form) {
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        var title = ($("#rpTitle").value || "").trim();
+        var desc = ($("#rpDesc").value || "").trim();
+        var fileInp = $("#rpFile");
+        var file = fileInp && fileInp.files && fileInp.files[0];
+
+        if (!title) { toast("Введите название ресурспака", "bad"); return; }
+        if (!file) { toast("Выберите .ZIP файл ресурспака", "bad"); return; }
+        if (!file.name.toLowerCase().endsWith(".zip")) {
+          toast("Файл должен быть в формате .ZIP", "bad");
+          return;
+        }
+
+        var btn = $("#btnUploadRp");
+        if (btn) { btn.disabled = true; btn.textContent = "Загрузка..."; }
+
+        var reader = new FileReader();
+        reader.onload = async function () {
+          var fileData = reader.result;
+          var r = await S.uploadResourcepack({
+            title: title,
+            description: desc,
+            filename: file.name,
+            fileData: fileData
+          });
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<svg class="i"><use href="#i-upload"></use></svg> Загрузить в лоадер';
+          }
+          if (r && r.ok) {
+            toast("Ресурспак успешно загружен!");
+            form.reset();
+            await renderResourcepacks();
+          } else {
+            toast((r && r.error) || "Ошибка загрузки ресурспака", "bad");
+          }
+        };
+        reader.onerror = function () {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<svg class="i"><use href="#i-upload"></use></svg> Загрузить в лоадер';
+          }
+          toast("Ошибка чтения файла", "bad");
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    var body = $("[data-rp-body]");
+    if (body) {
+      body.addEventListener("click", async function (e) {
+        var delBtn = e.target.closest("button[data-rp-del]");
+        if (delBtn) {
+          var id = delBtn.dataset.rpDel;
+          if (!confirm("Удалить этот ресурспак?")) return;
+          delBtn.disabled = true;
+          var r = await S.deleteResourcepack(id);
+          if (r && r.ok) {
+            toast("Ресурспак удален");
+            await renderResourcepacks();
+          } else {
+            toast((r && r.error) || "Не удалось удалить ресурспак", "bad");
+            delBtn.disabled = false;
+          }
+        }
+      });
+    }
+  }
+
   async function boot() {
     if (!S) return;
     var me = await guard();
@@ -618,6 +729,7 @@
     bindPromos();
     bindPlatega();
     bindCryptoBot();
+    bindResourcepacks();
     bindLogout();
     loadLogs();
     loadPlatega();
