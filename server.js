@@ -1560,7 +1560,7 @@ async function main() {
 
   app.get("/api/resourcepacks/download/:filename", (req, res) => {
     try {
-      const filename = path.basename(req.params.filename || "");
+      const filename = path.basename(decodeURIComponent(req.params.filename || ""));
       const target = path.join(RP_DIR, filename);
       if (!fs.existsSync(target)) {
         return res.status(404).json({ ok: false, error: "Ресурспак не найден" });
