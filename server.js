@@ -1391,6 +1391,36 @@ async function main() {
     }
   });
 
+  app.get("/api/stats", async (req, res) => {
+    try {
+      const all = await store.getAllUsers();
+      const active = all.filter(u => subActive(u) && !u.banned).length;
+      res.json({
+        ok: true,
+        activeUsers: Math.max(active, 1),
+        totalUsers: all.length,
+        positiveFeedback: 98
+      });
+    } catch (e) {
+      res.json({ ok: true, activeUsers: 1, totalUsers: 1, positiveFeedback: 98 });
+    }
+  });
+
+  app.get("/api/loader/stats", async (req, res) => {
+    try {
+      const all = await store.getAllUsers();
+      const active = all.filter(u => subActive(u) && !u.banned).length;
+      res.json({
+        ok: true,
+        activeUsers: Math.max(active, 1),
+        totalUsers: all.length,
+        positiveFeedback: 98
+      });
+    } catch (e) {
+      res.json({ ok: true, activeUsers: 1, totalUsers: 1, positiveFeedback: 98 });
+    }
+  });
+
   /* ------------------------------------------------ security alert from loader */
   app.post("/api/loader/security-alert", async (req, res) => {
     try {
