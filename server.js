@@ -1022,6 +1022,7 @@ async function main() {
   /* ------------------------------------------------------ лоадер и HWID */
   const HWID_RESET_LIMIT = 2;
   const LOADER_FILE = path.join(__dirname, "downloads", "AethraLoader.exe");
+  const LOADER_ZIP_FILE = path.join(__dirname, "downloads", "AethraLoader.zip");
   const CLIENT_PAYLOAD_FILE = path.join(__dirname, "downloads", "aethra-client.dat");
 
   function maskHwid(h) {
@@ -1491,6 +1492,9 @@ async function main() {
       }
 
       if (!subActive(user)) return res.status(403).json({ ok: false, error: "Нужна активная подписка" });
+      if (fs.existsSync(LOADER_ZIP_FILE)) {
+        return res.download(LOADER_ZIP_FILE, "AethraLoader.zip");
+      }
       if (!fs.existsSync(LOADER_FILE)) {
         return res.status(404).json({ ok: false, error: "Файл лоадера пока не загружен администратором" });
       }
