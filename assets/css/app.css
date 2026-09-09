@@ -62,16 +62,23 @@
    Icons
    -------------------------------------------------------------------------- */
 .i {
-  width: 1em;
-  height: 1em;
+  width: 1.15em;
+  height: 1.15em;
   flex: none;
   stroke: currentColor;
   fill: none;
-  stroke-width: 1.6;
+  stroke-width: 1.75;
   stroke-linecap: round;
   stroke-linejoin: round;
+  shape-rendering: geometricPrecision;
+  text-rendering: geometricPrecision;
+  vector-effect: non-scaling-stroke;
+  display: inline-block;
+  vertical-align: -0.15em;
 }
-.i--lg { width: 1.25em; height: 1.25em; }
+.i--lg { width: 1.35em; height: 1.35em; }
+.i--xl { width: 1.6em; height: 1.6em; }
+.i--sm { width: 0.9em; height: 0.9em; }
 /* brand marks are solid shapes, not strokes */
 .i--solid { fill: currentColor; stroke: none; }
 
@@ -1891,14 +1898,13 @@ body.auth-ready .nav__actions { visibility: visible; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
 }
 .pay-pill__icon .i {
-  width: 20px;
-  height: 20px;
-  stroke: none;
-  fill: none;
+  width: 22px;
+  height: 22px;
 }
 
 /* Plan / Tariff Pills */
