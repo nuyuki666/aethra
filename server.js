@@ -1284,6 +1284,7 @@ async function main() {
       const user = token ? await store.getUserByToken(token) : null;
       if (!user) return res.status(401).json({ ok: false, error: "Сессия истекла" });
       if (user.banned) return res.status(403).json({ ok: false, banned: true, error: "Аккаунт заблокирован" });
+      if (!subActive(user)) return res.status(403).json({ ok: false, error: "Нет активной подписки. Купите ключ на сайте" });
 
       const ip = clientIp(req);
       if (user.role !== "admin") {
@@ -1328,6 +1329,7 @@ async function main() {
       const user = token ? await store.getUserByToken(token) : null;
       if (!user) return res.status(401).json({ ok: false, error: "Сессия истекла" });
       if (user.banned) return res.status(403).json({ ok: false, banned: true, error: "Аккаунт заблокирован" });
+      if (!subActive(user)) return res.status(403).json({ ok: false, error: "Нет активной подписки" });
 
       const ip = clientIp(req);
       if (user.role !== "admin") {
