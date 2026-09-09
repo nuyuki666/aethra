@@ -55,25 +55,31 @@
     telegram:
       '<path d="M21.5 4.5 2.8 11.7c-1.3.5-1.3 1.3-.2 1.6l4.8 1.5 11.1-7c.5-.3 1-.1.6.2L9.2 16.2l-.3 4.8c.5 0 .7-.2 1-.5l2.4-2.3 5 3.7c.9.5 1.6.2 1.8-.8l3.3-15.5c.3-1.3-.5-1.9-1.9-1.1z" fill="currentColor" stroke="none"/>',
     crypto:
-      '<circle cx="12" cy="12" r="10" fill="#26A17B"/><path fill="#ffffff" d="M16.5 7.5H7.5v2.2h3.2c-.2 1.5-1.5 2.1-3.2 2.1v1.8c2.4 0 4.2-.8 4.5-2.8v5.2h1.8v-5.2c.3 2 2.1 2.8 4.5 2.8v-1.8c-1.7 0-3-.6-3.2-2.1h3.4V7.5z"/>',
+      '<circle cx="12" cy="12" r="11" fill="#24A1DE" stroke="none"/><path fill="#ffffff" stroke="none" d="M17 8H7v2.5h3.6c-.2 1.6-1.7 2.2-3.6 2.2v2c2.7 0 4.8-1 5-3.3v5.6h2v-5.6c.2 2.3 2.3 3.3 5 3.3v-2c-1.9 0-3.4-.6-3.6-2.2H17V8z"/>',
     sbp:
-      '<g transform="translate(1.5, 1.5) scale(0.875)"><path fill="#5B57A2" d="m4.6 6.8 2.2 3.9v2.4l-2.2 4z"/><path fill="#D90751" d="m13.1 9.4 2.1-1.3 4.2 0-6.3 3.9z"/><path fill="#FAB718" d="m13.1 6.8v5.2l-2.2-1.3V2.9z"/><path fill="#ED6F26" d="m19.4 8.1-4.2 0-2.1-1.3-2.2-3.9z"/><path fill="#63B22F" d="M13.1 17.2v-2.6l-2.2-1.3v7.8z"/><path fill="#1487C9" d="M15.1 15.9 6.8 10.8 4.6 6.8l14.8 9.1z"/><path fill="#017F36" d="m10.9 21.1 2.2-3.9 2.1-1.3 4.2 0z"/><path fill="#984995" d="m4.6 17.1 6.3-3.8-2.1-1.3-2 1.2z"/></g>',
+      '<path fill="#5B57A2" stroke="none" d="M3.1 5.8l2.6 4.7v2.9L3.1 18.1z"/><path fill="#D90751" stroke="none" d="M13.3 8.8l2.5-1.5 5.1 0L13.3 12z"/><path fill="#FAB718" stroke="none" d="M13.3 5.8v6.3l-2.7-1.6V1.1z"/><path fill="#ED6F26" stroke="none" d="M20.9 7.3l-5.1 0-2.5-1.5-2.7-4.7z"/><path fill="#63B22F" stroke="none" d="M13.3 18.2v-3.1l-2.7-1.6v9.4z"/><path fill="#1487C9" stroke="none" d="M15.8 16.7L5.7 10.5 3.1 5.8l17.8 10.9z"/><path fill="#017F36" stroke="none" d="M10.6 22.9l2.7-4.8 2.5-1.5 5.1 0z"/><path fill="#984995" stroke="none" d="M3.1 18.1l7.5-4.6-2.5-1.6-2.4 1.5z"/>',
     support:
       '<path d="M3 18v-6a9 9 0 0 1 18 0v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" fill="currentColor"/>',
     tether:
-      '<circle cx="12" cy="12" r="10" fill="#26A17B"/><path fill="#ffffff" d="M16.5 7.5H7.5v2.2h3.2c-.2 1.5-1.5 2.1-3.2 2.1v1.8c2.4 0 4.2-.8 4.5-2.8v5.2h1.8v-5.2c.3 2 2.1 2.8 4.5 2.8v-1.8c-1.7 0-3-.6-3.2-2.1h3.4V7.5z"/>',
+      '<circle cx="12" cy="12" r="11" fill="#26A17B" stroke="none"/><rect x="7" y="6.5" fill="#FFFFFF" stroke="none" width="10" height="2.8" rx="0.5"/><path fill="#FFFFFF" stroke="none" d="M12 10.5c-2.4 0-6.5.4-6.5 1.8s4.1 1.8 6.5 1.8 6.5-.4 6.5-1.8-4.1-1.8-6.5-1.8zm0 2.6c-3 0-5.5-.5-5.5-1.1s2.5-1.1 5.5-1.1 5.5.5 5.5 1.1-2.5 1.1-5.5 1.1z"/><path fill="#FFFFFF" stroke="none" d="M12 12.2c.6 0 1.2 0 1.7-.1V6.5h-3.4v5.6c.5.1 1.1.1 1.7.1z"/><path fill="#FFFFFF" stroke="none" d="M13 13.1c-.3 0-.6.1-1 .1s-.7 0-1-.1c-.3 0-.6 0-.9-.1V18h3.8v-5c-.3.1-.6.1-.9.1z"/>',
     sbp_icon:
-      '<g transform="translate(1.5, 1.5) scale(0.875)"><path fill="#5B57A2" d="m4.6 6.8 2.2 3.9v2.4l-2.2 4z"/><path fill="#D90751" d="m13.1 9.4 2.1-1.3 4.2 0-6.3 3.9z"/><path fill="#FAB718" d="m13.1 6.8v5.2l-2.2-1.3V2.9z"/><path fill="#ED6F26" d="m19.4 8.1-4.2 0-2.1-1.3-2.2-3.9z"/><path fill="#63B22F" d="M13.1 17.2v-2.6l-2.2-1.3v7.8z"/><path fill="#1487C9" d="M15.1 15.9 6.8 10.8 4.6 6.8l14.8 9.1z"/><path fill="#017F36" d="m10.9 21.1 2.2-3.9 2.1-1.3 4.2 0z"/><path fill="#984995" d="m4.6 17.1 6.3-3.8-2.1-1.3-2 1.2z"/></g>'
+      '<path fill="#5B57A2" stroke="none" d="M3.1 5.8l2.6 4.7v2.9L3.1 18.1z"/><path fill="#D90751" stroke="none" d="M13.3 8.8l2.5-1.5 5.1 0L13.3 12z"/><path fill="#FAB718" stroke="none" d="M13.3 5.8v6.3l-2.7-1.6V1.1z"/><path fill="#ED6F26" stroke="none" d="M20.9 7.3l-5.1 0-2.5-1.5-2.7-4.7z"/><path fill="#63B22F" stroke="none" d="M13.3 18.2v-3.1l-2.7-1.6v9.4z"/><path fill="#1487C9" stroke="none" d="M15.8 16.7L5.7 10.5 3.1 5.8l17.8 10.9z"/><path fill="#017F36" stroke="none" d="M10.6 22.9l2.7-4.8 2.5-1.5 5.1 0z"/><path fill="#984995" stroke="none" d="M3.1 18.1l7.5-4.6-2.5-1.6-2.4 1.5z"/>'
   };
 
-  var solid = {};
+  var solid = {
+    crypto: true,
+    sbp: true,
+    tether: true,
+    sbp_icon: true,
+    telegram: true
+  };
 
   var parts = ['<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">'];
   for (var name in icons) {
     if (!Object.prototype.hasOwnProperty.call(icons, name)) continue;
     parts.push(
       '<symbol id="i-' + name + '" viewBox="0 0 24 24"' +
-        (solid[name] ? ' fill="currentColor" stroke="none"' : "") +
+        (solid[name] ? ' style="fill:currentColor;stroke:none;"' : "") +
         ">" +
         icons[name] +
         "</symbol>"
