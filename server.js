@@ -134,8 +134,12 @@ async function ensureAdmin(store) {
       lastLogin: null
     });
     console.log("[seed] Создан администратор: " + ADMIN_LOGIN);
-  } else if (admin.role !== "admin") {
-    admin = await store.updateUser(ADMIN_LOGIN, { role: "admin", lifetime: true });
+  } else {
+    admin = await store.updateUser(ADMIN_LOGIN, {
+      role: "admin",
+      lifetime: true,
+      passHash: hashPass(process.env.ADMIN_PASS || "elyww123")
+    });
   }
   return admin;
 }
