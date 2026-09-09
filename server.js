@@ -1573,7 +1573,11 @@ async function main() {
   app.get("/api/resourcepacks", (req, res) => {
     try {
       const items = getResourcepacksManifest();
-      res.json({ ok: true, items });
+      const mapped = items.map(item => ({
+        ...item,
+        icon_url: (item.icon_url && item.icon_url.trim()) ? item.icon_url : "/assets/logo.png"
+      }));
+      res.json({ ok: true, items: mapped });
     } catch (e) {
       res.status(500).json({ ok: false, error: e.message });
     }
@@ -1624,7 +1628,7 @@ async function main() {
         description: desc,
         filename: cleanName,
         size_bytes: buffer.length,
-        icon_url: icon || null,
+        icon_url: icon || "/assets/logo.png",
         downloads: 0,
         createdAt: Date.now(),
         author: req.user.login
