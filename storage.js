@@ -489,7 +489,8 @@ class PgStore {
       lastIp: "last_ip", email: "email", passHash: "pass_hash",
       avatar: "avatar", totpSecret: "totp_secret", totpEnabled: "totp_enabled",
       hwid: "hwid", hwidResets: "hwid_resets",
-      sub_cs2: "sub_cs2", sub_minecraft: "sub_minecraft", sub_visual: "sub_visual"
+      sub_cs2: "sub_cs2", sub_minecraft: "sub_minecraft", sub_visual: "sub_visual",
+      subCs2: "sub_cs2", subMinecraft: "sub_minecraft", subVisual: "sub_visual"
     };
     const sets = [];
     const params = [];

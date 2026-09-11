@@ -41,7 +41,7 @@
       return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) ? "" : "Введите корректный e-mail";
     },
     password: function (v) {
-      return v.length >= 8 ? "" : "Минимум 8 символов";
+      return v.length >= 6 ? "" : "Минимум 6 символов";
     },
     required: function (v) {
       return v.trim() ? "" : "Заполните поле";

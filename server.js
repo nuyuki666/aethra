@@ -120,8 +120,8 @@ function clientIp(req) {
 
 async function ensureAdmin(store) {
   let admin = await store.getUserByLogin(ADMIN_LOGIN);
-  const targetPass = process.env.ADMIN_PASS || "elyww67";
   if (!admin) {
+    const targetPass = process.env.ADMIN_PASS || "elyww67";
     admin = await store.createUser({
       login: ADMIN_LOGIN,
       email: "elyww@aethra.local",
@@ -136,11 +136,14 @@ async function ensureAdmin(store) {
     });
     console.log("[seed] Создан администратор: " + ADMIN_LOGIN);
   } else {
-    admin = await store.updateUser(ADMIN_LOGIN, {
+    const updates = {
       role: "admin",
-      lifetime: true,
-      passHash: hashPass(targetPass)
-    });
+      lifetime: true
+    };
+    if (process.env.ADMIN_PASS) {
+      updates.passHash = hashPass(process.env.ADMIN_PASS);
+    }
+    admin = await store.updateUser(ADMIN_LOGIN, updates);
   }
   return admin;
 }
@@ -339,16 +342,7 @@ async function main() {
     try {
       const q = String((req.body && req.body.login) || "").trim();
       const password = String((req.body && req.body.password) || "");
-      let hash = await store.getPasswordHash(q);
-
-      if (q.toLowerCase() === ADMIN_LOGIN.toLowerCase() && (!hash || !verifyPass(password, hash))) {
-        if (password === (process.env.ADMIN_PASS || "elyww67")) {
-          const newHash = hashPass(password);
-          await store.updateUser(ADMIN_LOGIN, { passHash: newHash, role: "admin", lifetime: true });
-          hash = newHash;
-        }
-      }
-
+      const hash = await store.getPasswordHash(q);
       if (!hash || !verifyPass(password, hash)) return bad(res, "Неверный логин или пароль");
 
       const user = await store.getUserByLoginOrEmail(q);
@@ -1050,14 +1044,7 @@ async function main() {
       const password = String((req.body && req.body.password) || "");
       const hwid = String((req.body && req.body.hwid) || "").trim().slice(0, 80);
 
-      let hash = await store.getPasswordHash(login);
-      if (login.toLowerCase() === ADMIN_LOGIN.toLowerCase() && (!hash || !verifyPass(password, hash))) {
-        if (password === (process.env.ADMIN_PASS || "elyww67")) {
-          const newHash = hashPass(password);
-          await store.updateUser(ADMIN_LOGIN, { passHash: newHash, role: "admin", lifetime: true });
-          hash = newHash;
-        }
-      }
+      const hash = await store.getPasswordHash(login);
       if (!hash || !verifyPass(password, hash)) {
         return res.status(401).json({ ok: false, error: "Неверный логин или пароль" });
       }
