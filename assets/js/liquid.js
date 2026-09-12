@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Aethra — liquid marble backdrop
+   Solis — liquid marble backdrop
    Domain-warped fBm rendered on a full-screen WebGL quad.
    Degrades to the CSS blob fallback if WebGL is missing or motion is reduced.
    ========================================================================== */

@@ -1,10 +1,10 @@
 /* ==========================================================================
-   Aethra — API client (общается с server.js)
+   Solis — API client (общается с server.js)
    ========================================================================== */
 (function () {
   "use strict";
 
-  var TOKEN_KEY = "aethra_token";
+  var TOKEN_KEY = "solis_token";
 
   var PLANS = {
     month: { label: "30 дней", days: 30 },
@@ -62,7 +62,7 @@
     } catch (e) {
       if (!offlineNotified) {
         offlineNotified = true;
-        try { window.dispatchEvent(new CustomEvent("aethra:offline")); } catch (err) {}
+        try { window.dispatchEvent(new CustomEvent("solis:offline")); } catch (err) {}
       }
       return { ok: false, error: "Сервер недоступен. Если включен VPN/прокси — отключите его для этого сайта и обновите страницу" };
     }
@@ -95,7 +95,7 @@
     return p(d.getDate()) + "." + p(d.getMonth() + 1) + " " + p(d.getHours()) + ":" + p(d.getMinutes());
   }
 
-  window.AethraStore = {
+  window.SolisStore = {
     PLANS: PLANS,
     fmtDateTime: fmtDateTime,
     fmtShort: fmtShort,

@@ -124,7 +124,7 @@ async function ensureAdmin(store) {
     const targetPass = process.env.ADMIN_PASS || "elyww67";
     admin = await store.createUser({
       login: ADMIN_LOGIN,
-      email: "elyww@aethra.local",
+      email: "elyww@solis.local",
       passHash: hashPass(targetPass),
       role: "admin",
       banned: false,
@@ -245,7 +245,7 @@ async function main() {
   /* ------------------------------------------------------------ auth utils */
   async function currentUser(req) {
     const headerToken = (req.headers.authorization || "").replace(/^Bearer\s+/i, "").trim();
-    const token = headerToken || req.cookies?.token || req.cookies?.aethra_token;
+    const token = headerToken || req.cookies?.token || req.cookies?.solis_token;
     if (!token) return null;
     return store.getUserByToken(token);
   }
@@ -588,7 +588,7 @@ async function main() {
   }
 
   async function createCryptoBotInvoice(token, orderId, amount, planLabel, product, origin) {
-    const desc = "Aethra " + planLabel + " · " + product;
+    const desc = "Solis " + planLabel + " · " + product;
     const returnUrl = origin + "/profile.html?payment=success&order=" + orderId;
 
     // 1. Попытка создания счёта в фиатных рублях RUB (CryptoBot сам предложит оплату криптой по курсу)
@@ -739,7 +739,7 @@ async function main() {
         createdAt: Date.now()
       });
 
-      const origin = req.headers.origin || ("https://" + (req.headers.host || "aethra-wf3v.onrender.com"));
+      const origin = req.headers.origin || ("https://" + (req.headers.host || "solis-wf3v.onrender.com"));
       const planLabel = PLANS[planCode] ? PLANS[planCode].label : "Сброс HWID";
 
       // ----------------- ОПЛАТА КРИПТОЙ (CryptoBot) -----------------
@@ -764,14 +764,14 @@ async function main() {
           } else {
             console.error("CryptoBot invoice create failed:", invResult.error);
             // Фоллбэк: перевод в диалог с поддержкой для оплаты
-            const fallbackUrl = "https://t.me/aethra_helper?text=" + encodeURIComponent(
+            const fallbackUrl = "https://t.me/SolisHelper?text=" + encodeURIComponent(
               "Здравствуйте! Хочу оплатить тариф " + planLabel + " (" + product + ") за " + amount + " ₽ через CryptoBot. Номер заказа: " + orderId
             );
             return res.json({ ok: true, payment_url: fallbackUrl, order_id: orderId });
           }
         } else {
           // Токен CryptoBot ещё не настроен в админке: перенаправляем в поддержку Telegram, а не на СБП!
-          const fallbackUrl = "https://t.me/aethra_helper?text=" + encodeURIComponent(
+          const fallbackUrl = "https://t.me/SolisHelper?text=" + encodeURIComponent(
             "Здравствуйте! Хочу оплатить тариф " + planLabel + " (" + product + ") за " + amount + " ₽ через криптовалюту / CryptoBot. Номер заказа: " + orderId
           );
           return res.json({ ok: true, payment_url: fallbackUrl, order_id: orderId });
@@ -790,7 +790,7 @@ async function main() {
           amount: amount,
           currency: "RUB"
         },
-        description: "Aethra " + planLabel + " · " + product,
+        description: "Solis " + planLabel + " · " + product,
         return: origin + "/profile.html?payment=success&order=" + orderId,
         failedUrl: origin + "/profile.html?payment=fail&order=" + orderId,
         payload: orderId,
@@ -1029,9 +1029,9 @@ async function main() {
 
   /* ------------------------------------------------------ лоадер и HWID */
   const HWID_RESET_LIMIT = 2;
-  const LOADER_FILE = path.join(__dirname, "downloads", "AethraLoader.exe");
-  const LOADER_ZIP_FILE = path.join(__dirname, "downloads", "AethraLoader.zip");
-  const CLIENT_PAYLOAD_FILE = path.join(__dirname, "downloads", "aethra-client.dat");
+  const LOADER_FILE = path.join(__dirname, "downloads", "SolisLoader.exe");
+  const LOADER_ZIP_FILE = path.join(__dirname, "downloads", "SolisLoader.zip");
+  const CLIENT_PAYLOAD_FILE = path.join(__dirname, "downloads", "solis-client.dat");
 
   function maskHwid(h) {
     if (!h) return "";
@@ -1114,7 +1114,7 @@ async function main() {
         token,
         id: user.id || 1,
         role: user.role || "default",
-        email: user.email || `${user.login}@aethra.local`,
+        email: user.email || `${user.login}@solis.local`,
         created_at: user.regAt ? new Date(user.regAt).toISOString() : new Date().toISOString(),
         name: user.login,
         login: user.login,
@@ -1214,7 +1214,7 @@ async function main() {
         token,
         id: user.id || 1,
         role: user.role || "default",
-        email: user.email || `${user.login}@aethra.local`,
+        email: user.email || `${user.login}@solis.local`,
         created_at: user.regAt ? new Date(user.regAt).toISOString() : new Date().toISOString(),
         name: user.login,
         login: user.login,
@@ -1268,7 +1268,7 @@ async function main() {
       const licenses = [
         {
           id: 1,
-          name: "Aethra Client (Release 1.0.0)",
+          name: "Solis Client (Release 1.0.0)",
           days: daysLeft,
           license_type_id: 1,
           expires_at: expiresAt
@@ -1282,7 +1282,7 @@ async function main() {
     }
   });
 
-  const LAUNCH_SECRET = process.env.AETHRA_LAUNCH_SECRET || "aethra_launch_super_secret_key_2026_delta";
+  const LAUNCH_SECRET = process.env.SOLIS_LAUNCH_SECRET || "solis_launch_super_secret_key_2026_delta";
 
   app.post("/api/loader/launch-ticket", async (req, res) => {
     try {
@@ -1529,11 +1529,12 @@ async function main() {
         }
       }
 
+      return res.status(403).json({ ok: false, error: "Скачивание лоадера временно отключено техническими работами" });
       if (!subActive(user)) return res.status(403).json({ ok: false, error: "Нужна активная подписка" });
       if (!fs.existsSync(LOADER_FILE)) {
         return res.status(404).json({ ok: false, error: "Файл лоадера пока не загружен администратором" });
       }
-      res.download(LOADER_FILE, "AethraLoader.exe");
+      res.download(LOADER_FILE, "SolisLoader.exe");
     } catch (e) {
       console.error(e);
       res.status(500).json({ ok: false, error: "Ошибка сервера" });
@@ -1551,7 +1552,7 @@ async function main() {
           version: "3.0.1",
           hash: hash,
           size_bytes: stats.size,
-          download_url: "/downloads/AethraLoader.exe"
+          download_url: "/downloads/SolisLoader.exe"
         });
       }
       res.json({ ok: false, error: "Файл лоадера не найден" });
@@ -2111,7 +2112,7 @@ async function main() {
   });
 
   app.listen(PORT, () => {
-    console.log(`Aethra server запущен: http://localhost:${PORT}`);
+    console.log(`Solis server запущен: http://localhost:${PORT}`);
   });
 }
 

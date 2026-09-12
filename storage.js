@@ -6,7 +6,7 @@ const path = require("path");
 const HISTORY_LIMIT = 30;
 
 /* ==========================================================================
-   FileStore — локальное хранилище (data/aethra.json), работает без БД.
+   FileStore — локальное хранилище (data/solis.json), работает без БД.
    Используется, когда не задана переменная окружения DATABASE_URL.
    ========================================================================== */
 class FileStore {
@@ -747,7 +747,7 @@ class PgStore {
 async function createStore() {
   const url = process.env.DATABASE_URL;
   if (!url) {
-    const file = process.env.DATA_FILE || path.join(__dirname, "data", "aethra.json");
+    const file = process.env.DATA_FILE || path.join(__dirname, "data", "solis.json");
     console.log("[storage] DATABASE_URL не задан — использую локальный файл: " + file);
     return new FileStore(file).init();
   }

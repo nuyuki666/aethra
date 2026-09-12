@@ -1,10 +1,10 @@
 /* ==========================================================================
-   Aethra — admin panel behaviour
+   Solis — admin panel behaviour
    ========================================================================== */
 (function () {
   "use strict";
 
-  var S = window.AethraStore;
+  var S = window.SolisStore;
   var $ = function (sel, root) { return (root || document).querySelector(sel); };
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
 
@@ -739,6 +739,6 @@
   boot();
 
   window.addEventListener("storage", function (e) {
-    if (e.key === "aethra_token") boot();
+    if (e.key === "solis_token") boot();
   });
 })();

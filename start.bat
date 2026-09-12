@@ -1,11 +1,11 @@
 @echo off
 chcp 65001 >nul
 cd /d "%~dp0"
-title Aethra - сервер
+title Solis - сервер
 set "PORT=8091"
 
 echo ==========================================
-echo    Aethra - локальный сервер
+echo    Solis - локальный сервер
 echo ==========================================
 echo.
 

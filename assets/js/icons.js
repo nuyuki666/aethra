@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Aethra — SVG icon sprite
+   Solis — SVG icon sprite
    Injected inline so <use href="#i-name"> resolves under file:// as well as http.
    Stroke icons inherit .i styling; brand marks opt into .i--solid.
    ========================================================================== */

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Aethra — UI behaviour
+   Solis — UI behaviour
    Every module is guarded by the presence of its own markup, so one bundle
    serves every page.
    ========================================================================== */

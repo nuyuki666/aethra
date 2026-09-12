@@ -1,6 +1,6 @@
-# Aethra — сайт
+# Solis — сайт
 
-Сайт Aethra на Express: HTML + CSS + ванильный JS, личный кабинет, подписки,
+Сайт Solis на Express: HTML + CSS + ванильный JS, личный кабинет, подписки,
 защищённое скачивание лоадера и регистрация с CAPTCHA.
 
 ## Запуск
@@ -28,7 +28,7 @@ storage.js      локальное JSON- или PostgreSQL-хранилище
 assets/css/*    дизайн-токены и компоненты
 assets/js/*     UI, API-клиент, иконки и фон
 loader/         собранный веб-интерфейс лоадера
-downloads/      файл AethraLoader.exe для скачивания
+downloads/      файл SolisLoader.exe для скачивания
 ```
 
 ## Дизайн-система

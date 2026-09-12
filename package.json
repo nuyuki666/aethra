@@ -1,8 +1,8 @@
 {
-  "name": "aethra-site",
+  "name": "solis-site",
   "version": "1.0.0",
   "private": true,
-  "description": "Aethra site with auth, subscriptions and admin panel",
+  "description": "Solis site with auth, subscriptions and admin panel",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"

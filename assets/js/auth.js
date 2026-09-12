@@ -1,18 +1,18 @@
 /* ==========================================================================
-   Aethra — auth & account behaviour (login / register / profile pages)
+   Solis — auth & account behaviour (login / register / profile pages)
    v1.0.4 - Updated payment methods and footer icons
    ========================================================================== */
 (function () {
   "use strict";
 
-  var S = window.AethraStore;
+  var S = window.SolisStore;
   var $ = function (sel, root) { return (root || document).querySelector(sel); };
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
 
   var PAY = {
-    tg: "https://t.me/aethra_helper",
-    channel: "https://t.me/aethra_dlc",
-    support: "https://t.me/aethra_helper",
+    tg: "https://t.me/SolisHelper",
+    channel: "https://t.me/SolisClient",
+    support: "https://t.me/SolisHelper",
     platega: "https://my.platega.io/"
   };
   var PLAN_INFO = {
@@ -22,9 +22,9 @@
     "hwid-reset": { name: "Сброс HWID", price: "349 ₽", term: "разовая услуга" }
   };
   var PRODUCTS = {
-    cs2: { name: "Aethra CS2", desc: "DLC для Counter-Strike 2", img: "/images.jpg" },
-    minecraft: { name: "Aethra DLC", desc: "DLC для Minecraft", img: "/images.jpg" },
-    visual: { name: "Aethra Visual", desc: "Визуальное DLC для PvP", img: "/images.jpg" }
+    cs2: { name: "Solis CS2", desc: "DLC для Counter-Strike 2", img: "/images.jpg" },
+    minecraft: { name: "Solis DLC", desc: "DLC для Minecraft", img: "/images.jpg" },
+    visual: { name: "Solis Visual", desc: "Визуальное DLC для PvP", img: "/images.jpg" }
   };
   var PAYMENT_METHODS = [
     { id: "sbp", name: "Система быстрых платежей", icon: "/assets/images/spb.png", svg: "sbp" },
@@ -1151,7 +1151,7 @@
 
   async function boot() {
     if (!S) return;
-    window.addEventListener("aethra:offline", showOfflineBanner);
+    window.addEventListener("solis:offline", showOfflineBanner);
     var page = document.body.dataset.authPage;
     var me;
 
