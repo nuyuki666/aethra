@@ -22,9 +22,9 @@
     "hwid-reset": { name: "Сброс HWID", price: "349 ₽", term: "разовая услуга" }
   };
   var PRODUCTS = {
-    cs2: { name: "Solis CS2", desc: "DLC для Counter-Strike 2", img: "/images.jpg" },
-    minecraft: { name: "Solis DLC", desc: "DLC для Minecraft", img: "/images.jpg" },
-    visual: { name: "Solis Visual", desc: "Визуальное DLC для PvP", img: "/images.jpg" }
+    cs2: { name: "Solis CS2", desc: "Client для Counter-Strike 2", img: "/images.jpg" },
+    minecraft: { name: "Solis Client", desc: "Client для Minecraft", img: "/images.jpg" },
+    visual: { name: "Solis Visual", desc: "Визуальный Client для PvP", img: "/images.jpg" }
   };
   var PAYMENT_METHODS = [
     { id: "sbp", name: "Система быстрых платежей", icon: "/assets/images/spb.png", svg: "sbp" },
