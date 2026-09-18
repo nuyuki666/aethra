@@ -22,7 +22,6 @@
     "hwid-reset": { name: "Сброс HWID", price: "349 ₽", term: "разовая услуга" }
   };
   var PRODUCTS = {
-    cs2: { name: "Solis CS2", desc: "Client для Counter-Strike 2", img: "/images.jpg" },
     minecraft: { name: "Solis Client", desc: "Client для Minecraft", img: "/images.jpg" },
     visual: { name: "Solis Visual", desc: "Визуальный Client для PvP", img: "/images.jpg" }
   };
@@ -33,7 +32,7 @@
 
   var RULES = {
     login: function (v) {
-      if (v.length < 3) return "Минимум 3 символа";
+      if (v.length < 5) return "Минимум 5 символов";
       if (!/^[a-zA-Z0-9_.-]+$/.test(v)) return "Только латиница, цифры и _ . -";
       return "";
     },
@@ -121,10 +120,20 @@
 
   /* --------------------------------------------------------------- profile */
   function subState(u) {
+    if (!u) return { code: "none", label: "Неактивна" };
     if (u.banned) return { code: "banned", label: "Заблокирован" };
-    if (u.lifetime) return { code: "life", label: "Активна · навсегда" };
-    if (u.subUntil > Date.now()) return { code: "ok", label: "Активна" };
-    if (u.subUntil) return { code: "expired", label: "Истекла" };
+    if (u.lifetime || u.role === "admin") return { code: "life", label: "Активна · навсегда" };
+    var effectiveSub = Math.max(
+      Number(u.subUntil) || 0,
+      Number(u.subMinecraft) || 0,
+      Number(u.sub_until) || 0,
+      Number(u.sub_minecraft) || 0,
+      Number(u.subCs2) || 0,
+      Number(u.sub_cs2) || 0,
+      0
+    );
+    if (effectiveSub > Date.now()) return { code: "ok", label: "Активна" };
+    if (effectiveSub > 0) return { code: "expired", label: "Истекла" };
     return { code: "none", label: "Неактивна" };
   }
 
@@ -146,16 +155,32 @@
       id: String(me.id),
       role: role,
       login: me.login,
-      email: me.email,
+      email: me.email || "—",
       reg: S.fmtDateTime(me.regAt),
-      last: me.lastLogin ? S.fmtDateTime(me.lastLogin) : "—"
+      last: me.lastLogin ? S.fmtDateTime(me.lastLogin) : "—",
+      hwid: me.hwid ? "Привязан." : "Не привязан."
     };
     Object.keys(kv).forEach(function (k) {
-      $$('[data-kv="' + k + '"]').forEach(function (el) { el.textContent = kv[k]; });
+      $$('[data-kv="' + k + '"]').forEach(function (el) { 
+        el.textContent = kv[k]; 
+        if (k === 'hwid') {
+          if (me.hwid) el.className = "info-cell-val val-green";
+          else el.className = "info-cell-val";
+        }
+      });
     });
 
     var st = subState(me);
-    var until = me.lifetime ? "бессрочно" : (me.subUntil ? S.fmtDateTime(me.subUntil) : null);
+    var effectiveSub = Math.max(
+      Number(me.subUntil) || 0,
+      Number(me.subMinecraft) || 0,
+      Number(me.sub_until) || 0,
+      Number(me.sub_minecraft) || 0,
+      Number(me.subCs2) || 0,
+      Number(me.sub_cs2) || 0,
+      0
+    );
+    var until = (me.lifetime || me.role === "admin") ? "бессрочно" : (effectiveSub > 0 ? S.fmtDateTime(effectiveSub) : null);
 
     $$("[data-sub-badge]").forEach(function (el) {
       el.className = "badge" + (
@@ -285,18 +310,28 @@
         '<a class="btn btn--ghost btn--sm" href="profile.html">Профиль</a>' +
         '<button class="btn btn--primary btn--sm" type="button" data-nav-logout>Выйти</button>';
     }
-    $$("[data-nav-logout]").forEach(function (btn) {
-      btn.addEventListener("click", async function () {
-        await S.logout();
-        location.replace("login.html");
-      });
-    });
   }
+
+  // Global delegated handler for 1-click logout everywhere across pages
+  document.addEventListener("click", async function (e) {
+    var btn = e.target && e.target.closest && e.target.closest("[data-nav-logout], [data-admin-logout], [data-logout], button[data-act='logout'], a[data-logout]");
+    if (btn) {
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        if (window.SolisStore && typeof window.SolisStore.logout === "function") {
+          await window.SolisStore.logout();
+        }
+      } catch (_) {}
+      location.replace("login.html");
+    }
+  });
 
   /* ------------------------------------------------------- деавторизация */
   function bindDeauth() {
     $$("[data-deauth]").forEach(function (btn) {
-      btn.addEventListener("click", async function () {
+      btn.addEventListener("click", async function (e) {
+        e.preventDefault();
         btn.disabled = true;
         await S.logout();
         location.replace("login.html?msg=deauth");
@@ -394,6 +429,14 @@
     async function load() {
       var r = await S.chatGet(0);
       if (!r.ok) return;
+
+      var statusEl = $("[data-chat-presence]", chat) || $(".chat-card__status span:not(.pulse)", chat);
+      if (statusEl && r.online) {
+        var siteCount = Math.max(1, parseInt(r.online.site, 10) || 1);
+        var gameCount = parseInt(r.online.game, 10) || 0;
+        statusEl.textContent = siteCount + " на сайте · " + gameCount + " в игре";
+      }
+
       var msgs = r.messages || [];
       if (!cleared) {
         cleared = true;
@@ -435,6 +478,23 @@
       refreshAvatars();
     }
 
+    function pingPresence() {
+      fetch("/api/presence/heartbeat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ login: me ? me.login : "" })
+      }).then(function(res) { return res.json(); }).then(function(d) {
+        if (d && d.ok) {
+          var statusEl = $("[data-chat-presence]", chat) || $(".chat-card__status span:not(.pulse)", chat);
+          if (statusEl) {
+            var sc = Math.max(1, parseInt(d.site, 10) || 1);
+            var gc = parseInt(d.game, 10) || 0;
+            statusEl.textContent = sc + " на сайте · " + gc + " в игре";
+          }
+        }
+      }).catch(function () {});
+    }
+
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
       var text = input.value.trim();
@@ -450,14 +510,36 @@
     });
 
     load();
-    setInterval(load, 4000);
+    pingPresence();
+    setInterval(load, 3500);
+    setInterval(pingPresence, 20000);
   }
 
   /* ------------------------------------------------------- живой счётчик */
   function initLivePlayers() {
     var el = $("[data-live-players]");
     var purchasesEl = $("[data-monthly-purchases]");
-    if (!el && !purchasesEl) return;
+    var daysEl = $("[data-release-days]");
+
+    function updateReleaseDays() {
+      if (!daysEl) return;
+      var releaseDate = new Date("2026-09-17T00:00:00+03:00");
+      var now = new Date();
+      var diffMs = Math.max(0, now - releaseDate);
+      var days = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
+
+      var abs = Math.abs(days) % 100;
+      var n1 = abs % 10;
+      var unit = "дней";
+      if (abs > 10 && abs < 20) unit = "дней";
+      else if (n1 > 1 && n1 < 5) unit = "дня";
+      else if (n1 === 1) unit = "день";
+
+      daysEl.textContent = days + " " + unit;
+    }
+    updateReleaseDays();
+
+    if (!el && !purchasesEl && !daysEl) return;
     async function tick() {
       try {
         var r = await fetch("/api/public-stats");
@@ -468,6 +550,7 @@
     }
     tick();
     setInterval(tick, 60000);
+    setInterval(updateReleaseDays, 60000);
   }
 
   /* ------------------------------------------------------ модалка покупки */
@@ -908,7 +991,13 @@
     var r = await S.loaderInfo();
     if (!r.ok) return;
     $$('[data-kv="hwid"]').forEach(function (kv) {
-      kv.textContent = r.hwid ? r.hwidMasked : "Не привязан";
+      if (r.hwid) {
+        kv.textContent = "Привязан.";
+        kv.className = "info-cell-val val-green";
+      } else {
+        kv.textContent = "Не привязан.";
+        kv.className = "info-cell-val";
+      }
     });
     $$("[data-hwid-badge]").forEach(function (badge) {
       badge.className = "badge" + (r.hwid ? " badge--ok" : "");
@@ -1009,30 +1098,245 @@
     });
   }
 
-  function initLoginForm() {
-    var form = $('form[data-auth="login"]');
-    if (!form) return;
-    var inputs = $$("input[data-rule]", form);
-    bindLiveValidation(inputs);
+  /* ------------------------------------------- Email Code Modal & Reset Password */
+  function showEmailCodeModal(data, onVerified) {
+    var existing = $("#emailCodeModal");
+    if (existing) existing.remove();
 
-    form.addEventListener("submit", async function (e) {
+    var modal = document.createElement("div");
+    modal.id = "emailCodeModal";
+    modal.className = "modal is-open";
+    modal.innerHTML = 
+      '<div class="modal__backdrop" data-close-modal></div>' +
+      '<div class="modal__dialog" style="max-width:440px;text-align:center;padding:32px 28px">' +
+        '<div style="width:52px;height:52px;border-radius:50%;background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.3);display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;color:#c084fc">' +
+          '<svg class="i i--lg" style="width:28px;height:28px"><use href="#i-message"></use></svg>' +
+        '</div>' +
+        '<h2 style="font-size:22px;font-weight:700;margin-bottom:8px">Проверьте e-mail</h2>' +
+        '<p style="font-size:14px;color:var(--c-text-muted);margin-bottom:24px;line-height:1.5">' +
+          'Мы отправили 6-значный код на<br><b style="color:var(--c-text);font-family:monospace;font-size:15px">' + data.email + '</b>' +
+        '</p>' +
+        '<form id="emailCodeForm">' +
+          '<div class="field" style="margin-bottom:20px">' +
+            '<input class="input" id="verificationCode" type="text" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="••••••" style="font-family:monospace;font-size:26px;letter-spacing:10px;text-align:center;font-weight:700;padding-left:18px" required autofocus>' +
+            '<p class="field__error" id="codeError" role="alert" style="text-align:center"></p>' +
+          '</div>' +
+          '<button class="btn btn--primary btn--block" type="submit" id="codeSubmitBtn" style="margin-bottom:14px">Подтвердить</button>' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">' +
+            '<button type="button" class="btn btn--quiet btn--sm" id="resendCodeBtn" disabled>Отправить повторно (<span id="resendTimer">60</span>с)</button>' +
+            '<button type="button" class="btn btn--quiet btn--sm" data-close-modal>Изменить e-mail</button>' +
+          '</div>' +
+        '</form>' +
+      '</div>';
+    document.body.appendChild(modal);
+
+    var codeInput = $("#verificationCode", modal);
+    var codeForm = $("#emailCodeForm", modal);
+    var codeSubmit = $("#codeSubmitBtn", modal);
+    var errEl = $("#codeError", modal);
+    var resendBtn = $("#resendCodeBtn", modal);
+    var timerEl = $("#resendTimer", modal);
+
+    var timeLeft = 60;
+    var interval = setInterval(function () {
+      timeLeft--;
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        resendBtn.disabled = false;
+        resendBtn.textContent = "Отправить повторно";
+      } else {
+        timerEl.textContent = timeLeft;
+      }
+    }, 1000);
+
+    $$("[data-close-modal]", modal).forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        clearInterval(interval);
+        modal.remove();
+      });
+    });
+
+    resendBtn.addEventListener("click", async function () {
+      resendBtn.disabled = true;
+      resendBtn.textContent = "Отправка…";
+      var res = await S.sendAuthCode(data.email, data.login, data.type || "register");
+      if (res.ok) {
+        toast("Код повторно отправлен на " + data.email);
+        timeLeft = 60;
+        resendBtn.disabled = true;
+        resendBtn.innerHTML = 'Отправить повторно (<span id="resendTimer">60</span>с)';
+        timerEl = $("#resendTimer", modal);
+        interval = setInterval(function () {
+          timeLeft--;
+          if (timeLeft <= 0) {
+            clearInterval(interval);
+            resendBtn.disabled = false;
+            resendBtn.textContent = "Отправить повторно";
+          } else {
+            timerEl.textContent = timeLeft;
+          }
+        }, 1000);
+      } else {
+        toast(res.error || "Ошибка отправки", "bad");
+        resendBtn.disabled = false;
+        resendBtn.textContent = "Отправить повторно";
+      }
+    });
+
+    codeForm.addEventListener("submit", async function (e) {
       e.preventDefault();
-      if (!inputs.map(validate).every(Boolean)) return;
-
-      busy(form, true);
-      var remember = !!$('input[name="remember"]', form).checked;
-      var res = await S.authenticate($("#loginName").value.trim(), $("#loginPw").value, remember);
-      busy(form, false);
-
-      if (!res.ok) {
-        if (res.banned) toast(res.error, "bad");
-        else fieldError($("#loginPw"), res.error || "Ошибка входа");
+      var code = codeInput.value.trim();
+      if (!code || code.length < 6) {
+        errEl.textContent = "Введите 6 цифр кода";
         return;
       }
-      toast("Вход выполнен. Привет, " + res.user.login + "!");
-      setTimeout(function () {
-        location.replace(res.user.role === "admin" ? "admin.html" : "profile.html");
-      }, 450);
+      errEl.textContent = "";
+      codeSubmit.disabled = true;
+      codeSubmit.textContent = "Проверка…";
+
+      try {
+        var res = await onVerified(code);
+        if (!res.ok) {
+          errEl.textContent = res.error || "Неверный код";
+          codeSubmit.disabled = false;
+          codeSubmit.textContent = "Подтвердить";
+        } else {
+          clearInterval(interval);
+          modal.remove();
+        }
+      } catch (err) {
+        errEl.textContent = "Ошибка проверки кода";
+        codeSubmit.disabled = false;
+        codeSubmit.textContent = "Подтвердить";
+      }
+    });
+
+    setTimeout(function () { codeInput.focus(); }, 100);
+  }
+
+  function showPasswordResetModal() {
+    var existing = $("#resetPwModal");
+    if (existing) existing.remove();
+
+    var modal = document.createElement("div");
+    modal.id = "resetPwModal";
+    modal.className = "modal is-open";
+    modal.innerHTML = 
+      '<div class="modal__backdrop" data-close-reset></div>' +
+      '<div class="modal__dialog" style="max-width:440px;padding:32px 28px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">' +
+          '<h2 style="font-size:20px;font-weight:700">Сброс пароля</h2>' +
+          '<button class="btn btn--quiet btn--sm" data-close-reset aria-label="Закрыть">✕</button>' +
+        '</div>' +
+        '<p style="font-size:13px;color:var(--c-text-muted);margin-bottom:20px;line-height:1.5">' +
+          'Введите логин или e-mail от вашего аккаунта. Мы отправим 6-значный код для сброса пароля.' +
+        '</p>' +
+        '<div id="resetStep1">' +
+          '<form id="resetSendForm">' +
+            '<div class="field" style="margin-bottom:16px">' +
+              '<label class="field__label" for="resetLoginOrEmail">Логин или E-mail</label>' +
+              '<input class="input" id="resetLoginOrEmail" type="text" placeholder="nickname или you@example.com" required>' +
+              '<p class="field__error" id="resetSendError" role="alert"></p>' +
+            '</div>' +
+            '<button class="btn btn--primary btn--block" type="submit" id="resetSendBtn">Получить код</button>' +
+          '</form>' +
+        '</div>' +
+        '<div id="resetStep2" hidden>' +
+          '<form id="resetConfirmForm">' +
+            '<div class="field" style="margin-bottom:12px">' +
+              '<label class="field__label" for="resetCode">Код из письма</label>' +
+              '<input class="input" id="resetCode" type="text" inputmode="numeric" maxlength="6" placeholder="••••••" style="font-family:monospace;letter-spacing:6px;font-size:20px;text-align:center" required>' +
+            '</div>' +
+            '<div class="field" style="margin-bottom:16px">' +
+              '<label class="field__label" for="resetNewPass">Новый пароль</label>' +
+              '<input class="input" id="resetNewPass" type="password" placeholder="Минимум 8 символов" required>' +
+              '<p class="field__error" id="resetConfirmError" role="alert"></p>' +
+            '</div>' +
+            '<button class="btn btn--primary btn--block" type="submit" id="resetConfirmBtn" style="margin-bottom:12px">Установить новый пароль</button>' +
+            '<button type="button" class="btn btn--quiet btn--sm btn--block" id="resetBackBtn">← Назад к вводу e-mail</button>' +
+          '</form>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(modal);
+
+    $$("[data-close-reset]", modal).forEach(function (btn) {
+      btn.addEventListener("click", function () { modal.remove(); });
+    });
+
+    var step1 = $("#resetStep1", modal);
+    var step2 = $("#resetStep2", modal);
+    var sendForm = $("#resetSendForm", modal);
+    var confirmForm = $("#resetConfirmForm", modal);
+    var sendBtn = $("#resetSendBtn", modal);
+    var confirmBtn = $("#resetConfirmBtn", modal);
+    var sendErr = $("#resetSendError", modal);
+    var confErr = $("#resetConfirmError", modal);
+    var targetAccount = "";
+
+    sendForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      var q = $("#resetLoginOrEmail", modal).value.trim();
+      if (!q) return;
+
+      sendErr.textContent = "";
+      sendBtn.disabled = true;
+      sendBtn.textContent = "Отправка кода…";
+
+      var res = await S.sendAuthCode(q, q, "reset");
+      sendBtn.disabled = false;
+      sendBtn.textContent = "Получить код";
+
+      if (!res.ok) {
+        sendErr.textContent = res.error || "Пользователь не найден";
+        return;
+      }
+
+      targetAccount = q;
+      toast("Код сброса отправлен на вашу почту!");
+      step1.hidden = true;
+      step2.hidden = false;
+      $("#resetCode", modal).focus();
+    });
+
+    $("#resetBackBtn", modal).addEventListener("click", function () {
+      step2.hidden = true;
+      step1.hidden = false;
+    });
+
+    confirmForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      var code = $("#resetCode", modal).value.trim();
+      var newPass = $("#resetNewPass", modal).value;
+
+      if (!code || code.length < 6) {
+        confErr.textContent = "Введите 6-значный код";
+        return;
+      }
+      if (newPass.length < 8) {
+        confErr.textContent = "Пароль должен быть от 8 символов";
+        return;
+      }
+
+      confErr.textContent = "";
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = "Сохранение…";
+
+      var res = await S.resetPassword(targetAccount, code, newPass);
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = "Установить новый пароль";
+
+      if (!res.ok) {
+        confErr.textContent = res.error || "Неверный код";
+        return;
+      }
+
+      toast("Пароль успешно изменён! Выполните вход.");
+      modal.remove();
+      if ($("#loginName")) $("#loginName").value = targetAccount;
+      if ($("#loginPw")) {
+        $("#loginPw").value = newPass;
+        $("#loginPw").focus();
+      }
     });
   }
 
@@ -1041,6 +1345,7 @@
     if (!form) return;
     var inputs = $$("input[data-rule]", form);
     bindLiveValidation(inputs);
+    initTurnstile();
 
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
@@ -1052,24 +1357,23 @@
       }
       if (!ok) return;
 
-      busy(form, true, "Создаём…");
-      var res = await S.register(
-        $("#regLogin").value.trim(),
-        $("#regEmail").value.trim(),
-        $("#regPw").value,
-        tsToken,
-        captchaId,
-        $("#captchaAnswer", form) ? $("#captchaAnswer", form).value : ""
-      );
+      if (!tsToken) {
+        toast("Пожалуйста, пройдите проверку Cloudflare", "bad");
+        return;
+      }
+
+      var login = $("#regLogin").value.trim();
+      var email = $("#regEmail").value.trim();
+      var password = $("#regPw").value;
+
+      busy(form, true, "Создаём аккаунт…");
+      var res = await S.register(login, email, password, tsToken);
       busy(form, false);
 
       if (!res.ok) {
-        if (res.error && res.error.indexOf("Cloudflare") > -1 && tsWidget !== null && window.turnstile) {
+        if (tsWidget !== null && window.turnstile) {
           window.turnstile.reset(tsWidget);
           tsToken = "";
-        }
-        if (res.error && res.error.indexOf("капчи") > -1) {
-          if (captchaReload) captchaReload();
         }
         var isLoginErr = res.error && res.error.indexOf("логин") > -1;
         var isEmailErr = res.error && res.error.indexOf("e-mail") > -1;
@@ -1078,8 +1382,46 @@
         if (!isLoginErr && !isEmailErr) toast(res.error || "Ошибка регистрации", "bad");
         return;
       }
-      toast("Аккаунт создан. Добро пожаловать!");
+
+      toast("Аккаунт успешно создан. Привет, " + res.user.login + "!");
       setTimeout(function () { location.replace("profile.html"); }, 450);
+    });
+  }
+
+  function initLoginForm() {
+    var form = $('form[data-auth="login"]');
+    if (!form) return;
+    var inputs = $$("input[data-rule]", form);
+    bindLiveValidation(inputs);
+
+    // Bind forgot password button
+    var forgotBtn = $("[data-forgot-password]");
+    if (forgotBtn) {
+      forgotBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        showPasswordResetModal();
+      });
+    }
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      if (!inputs.map(validate).every(Boolean)) return;
+
+      busy(form, true);
+      var remEl = $('input[name="remember"]', form);
+      var remember = remEl ? !!remEl.checked : true;
+      var res = await S.authenticate($("#loginName").value.trim(), $("#loginPw").value, remember);
+      busy(form, false);
+
+      if (!res.ok) {
+        if (res.banned) toast(res.error, "bad");
+        else fieldError($("#loginPw"), res.error || "Неверный логин или пароль");
+        return;
+      }
+      toast("Вход выполнен. Привет, " + res.user.login + "!");
+      setTimeout(function () {
+        location.replace(res.user.role === "admin" ? "admin.html" : "profile.html");
+      }, 450);
     });
   }
 
@@ -1176,7 +1518,7 @@
     initLivePlayers();
     initBuyButtons(me);
     initBuyHwidReset();
-    initTurnstile();
+    // initTurnstile removed - using email code verification
     initLoginForm();
     initRegisterForm();
     initKeyForm();
